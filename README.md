@@ -22,7 +22,7 @@
 | Micheal Hua          |                        | michealhuaa      | Scrum Master <br>
 | Robin Rillon         |                        |                  | Front-End Lead <br>
 | Michael Maksoudian   |                        | MMaksoudian      | Back-End Lead <br>
-| Sajan Gurung         |                        |                  | Back-End Lead <br>
+| Sajan Gurung         |                        | gsajan21         | Back-End Lead <br>
 | Matthew Lee          | mlee56@mail.sfsu.edu   | Mattlee0610      | GitHub Master <br>
 </pre>
 
