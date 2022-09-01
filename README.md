@@ -18,10 +18,10 @@
 
 <pre>
 | Student Name         | Student Email          | GitHub Username  | Stundet's role <br>
-| Austin Ocampo        |                        |                  | Team Leader <br>
+| Austin Ocampo        |                        | Potatopapi       | Team Leader <br>
 | Micheal Hua          |                        |                  | Scrum Master <br>
 | Robin Rillon         |                        |                  | Front-End Lead <br>
-| Michael Maksoudian   |                        |                  | Back-End Lead <br>
+| Michael Maksoudian   |                        | MMaksoudian      | Back-End Lead <br>
 | Sajan Gurung         |                        |                  | Back-End Lead <br>
 | Matthew Lee          | mlee56@mail.sfsu.edu   | Mattlee0610      | GitHub Master <br>
 </pre>
