@@ -19,7 +19,7 @@
 <pre>
 | Student Name         | Student Email          | GitHub Username  | Stundet's role <br>
 | Austin Ocampo        |                        | Potatopapi       | Team Leader <br>
-| Micheal Hua          |                        |                  | Scrum Master <br>
+| Micheal Hua          |                        | michealhuaa      | Scrum Master <br>
 | Robin Rillon         |                        |                  | Front-End Lead <br>
 | Michael Maksoudian   |                        | MMaksoudian      | Back-End Lead <br>
 | Sajan Gurung         |                        |                  | Back-End Lead <br>
