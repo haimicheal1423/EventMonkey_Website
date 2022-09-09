@@ -1,5 +1,17 @@
+* {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.bodyPage {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
 .cardGrid {
     display: grid;
+    margin: 40px 0px;
     grid-template-rows: 150px auto;
     grid-template-columns: 150px 600px;
 }
