@@ -1,20 +1,36 @@
-* {
-    background-color: #343a40;
-    color: #fff;
+body {
+    background-color: #343a40 !important;
 }
 
 .bodyPage {
-    margin: auto;
+    margin: 0 auto;
     width: 50%;
     padding: 10px;
 }
 
+.btn {
+    background: maroon;
+    color: white;
+    outline: none !important;
+    box-shadow: none !important;
+}
+.btn:focus {
+    outline: none !important;
+}
+
+.navbar-brand {
+    margin-left: 30px;
+}
+
+/*
 .cardGrid {
+    color: #f8f9fa !important;
     display: grid;
-    margin: 40px 0px;
+    margin: 100px 0px 150px 0px;
     grid-template-rows: 150px auto;
     grid-template-columns: 150px 600px;
 }
+*/
 
 .profileImage {
     border-radius: 50%;
@@ -24,13 +40,19 @@
 
 .mainNotes {
     padding: 10px;
+    font-size: 14px;
 }
 .mainNotes h2 {
+    font-size: 28px;
     margin: 0px 20px;
+    font-weight: bold;
+    font-family: Georgia, serif;
 }
 .mainNotes h3 {
+    font-size: 22px;
     margin: 0px 40px;
     font-style: italic;
+    font-family: serif;
 }
 
 .techKnowledge {
@@ -56,9 +78,9 @@
     border-radius: 50%;
     display: inline-block;
 }
-.circleEmpty {
-    height: 12px;
-    width: 12px;
+.circleE {
+    height: 15px;
+    width: 15px;
     border: 2px solid #bbb;
     border-radius: 50%;
     display: inline-block;
