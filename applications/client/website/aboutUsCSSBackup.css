@@ -1,0 +1,93 @@
+body {
+    background-color: #343a40 !important;
+}
+
+.bodyPage {
+    margin: 0 auto;
+    width: 50%;
+    padding: 10px;
+}
+
+.btn {
+    background: maroon;
+    color: white;
+    outline: none !important;
+    box-shadow: none !important;
+}
+.btn:focus {
+    outline: none !important;
+}
+
+.navbar-brand {
+    margin-left: 30px;
+}
+
+/*
+.cardGrid {
+    color: #f8f9fa !important;
+    display: grid;
+    margin: 100px 0px 150px 0px;
+    grid-template-rows: 150px auto;
+    grid-template-columns: 150px 600px;
+}
+*/
+
+.profileImage {
+    border-radius: 50%;
+    max-width: 145px;
+    max-height: 145px;
+}
+
+.mainNotes {
+    padding: 10px;
+    font-size: 14px;
+}
+.mainNotes h2 {
+    font-size: 28px;
+    margin: 0px 20px;
+    font-weight: bold;
+    font-family: Georgia, serif;
+}
+.mainNotes h3 {
+    font-size: 22px;
+    margin: 0px 40px;
+    font-style: italic;
+    font-family: serif;
+}
+
+.techKnowledge {
+    padding-top: 5px;
+}
+
+.extraKnowledge {
+    float: left;
+    padding-left: 40px;
+}
+
+.listNames, .proficiency {
+    list-style-type: none;
+    margin: 0px;
+    float: left;
+    padding-left: 20px;
+}
+
+.circle {
+    height: 15px;
+    width: 15px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+}
+.circleE {
+    height: 15px;
+    width: 15px;
+    border: 2px solid #bbb;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.extraNotes {
+    padding: 10px;
+    margin: 0px;
+    grid-column: 1/3;
+}
