@@ -8,7 +8,7 @@
 | Student Name         | Student Email          | GitHub Username  | Stundet's role  |
 |----------------------|------------------------|------------------|-----------------|
 | Austin Ocampo        | wocampo@mail.sfsu.edu  | Potatopapi       | Team Leader     |
-| Micheal Hua          | mhua1@sfsu.edu         | michealhuaa      | Scrum Master    |
+| Micheal Hua          | mhua1@mail.sfsu.edu    | michealhuaa      | Scrum Master    |
 | Robin Rillon         | rrillon@mail.sfsu.edu  | rjrillon         | Front-End Lead  |
 | Michael Maksoudian   | Mmaksoudian@gmail.com  | MMaksoudian      | Back-End Lead   |
 | Sajan Gurung         | gsajan21@gmail.com     | gsajan21         | Back-End Lead   |
