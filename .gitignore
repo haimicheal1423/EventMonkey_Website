@@ -1,2 +1,9 @@
+<<<<<<< HEAD
 .DS_Store
 .vscode
+=======
+# intellij files
+/.idea
+*.DS_Store
+*.iml
+>>>>>>> origin
