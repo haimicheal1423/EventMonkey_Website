@@ -44,16 +44,18 @@ Technologies
 Major Features
 </h3>
 
-- Logging In
-- Signing Up
-- Basic Account Customization
-- Adding Events
-- Searching Events
-- Sorting Events
-- Favorites
-- Notifications
-- Calendar
-- Friends and Friends List
+<!-- replace space inside brackets with x in order to mark as checked/completed -->
+  
+- [ ] Logging In
+- [ ] Signing Up
+- [ ] Basic Account Customization
+- [ ] Adding Events
+- [ ] Searching Events
+- [ ] Sorting Events
+- [ ] Favorites
+- [ ] Notifications
+- [ ] Calendar
+- [ ] Friends and Friends List
 
 <h2>
 
