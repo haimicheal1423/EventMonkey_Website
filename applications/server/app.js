@@ -24,8 +24,8 @@ app.get("/", (req, res)=>{
 // });
 const userRouter = require("./routes/user");
 const eventRouter = require("./routes/event")
-app.use("/api", userRouter);
-app.use("/api", eventRouter);
+app.use("/api/users", userRouter);
+app.use("/api/events", eventRouter);
 
 
 app.listen(PORT, () =>  console.log(`Server started on port $PORT`));

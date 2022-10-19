@@ -3,37 +3,30 @@ const router = express.Router();
 const pool = require("../helpers/database");
 const bcrypt = require("bcrypt");
 
-router.get("/users", async function(req,res){
+router.get("/", async function(req,res){
     try{
         const sqlQuery = 'SELECT * FROM User';
-        const rows = await pool.query(sqlQuery, req.params.id);
+        const rows = await pool.query(sqlQuery, req.params);
         res.status(200).json(rows);
     } catch(error){
-        res.status(400).send(error.message)
+        res.status(400).send(error.message);
     }
 })
 router.get('/:id', async function(req,res){
-    try {
-        const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
-        const rows = await pool.query(sqlQuery, req.params.id);
-        res.status(200).json(rows);
-    } catch (error) {
-        res.status(400).send(error.message)
-    }
-
-    res.status(200).json({id:req.params.id})
-});
-
-router.get("/events/:id", async function(req, res){
     try{
-        const sqlQuery = "SELECT event_id, name, dates FROM Event WHERE event_id=?";
-        const rows = await pool.query(sqlQuery, req.params.id);
-        res.status(200).json(rows);
-    } catch (error){
+        const user = await user.findById(req.params.id);
+        res.json(user);
+    } catch (error) {
         res.status(400).send(error.message);
     }
-    res.status(200).json({id:req.params.id});
-})
+    // try {
+    //     const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
+    //     const rows = await pool.query(sqlQuery, req.params.id);
+    //     res.status(200).json(rows);
+    // } catch (error) {
+    //     res.status(400).send(error.message);
+    // }
+});
 
 // router.get("/:id", (req,res)=>{
 //     res.status(200).json({id:req.params.id});
