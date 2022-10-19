@@ -1,9 +1,67 @@
-# CSC648-01-fall22-team02 Repository
+<h1 align='center'>
+CSC648-01-fall22-team02 Repository
 
-## Application URL: 
+Event Monkey
+</h1>
 
+<h3>
+Application Overview
+</h3>
+Event monkey allows you to search and load data for events that are nearby you. The application does so by pulling existing event data from the TicketMaster API. You are able to also add your own events into the database, allowing you to share more niche and unknown events to the public. 
 
-**CSC 648 Team 02 Members:**
+<h2>
+
+<h3>
+Application URL
+</h3>
+
+[Event Monkey](https://www.google.com/ "Event Monkey")
+
+<h2>
+
+<h3>
+System Overview
+</h3>
+
+- Ubuntu Virtual Machine 20.04.1 LTS
+- Amazon AWS Cloud Server 1vCPU 1gbRAM
+- MariaDB Database 10.3.34
+- VSCode and IntelliJ IDEA IDEs
+
+<h3>
+Technologies
+</h3>
+
+- Javascript, HTML and CSS
+- Express Node.js
+- Node v17.0.1 
+- Bootstrap CSS
+- React
+
+<h2>
+
+<h3>
+Major Features
+</h3>
+
+<!-- replace space inside brackets with x in order to mark as checked/completed -->
+  
+- [ ] Logging In
+- [ ] Signing Up
+- [ ] Basic Account Customization
+- [ ] Adding Events
+- [ ] Searching Events
+- [ ] Sorting Events
+- [ ] Favorites
+- [ ] Notifications
+- [ ] Calendar
+- [ ] Friends and Friends List
+
+<h2>
+
+<h3>
+CSC 648 Team 02 Members:
+</h3>
 
 | Student Name       | Student Email             | GitHub Username | Stundet's role |
 |--------------------|---------------------------|-----------------|----------------|
@@ -13,15 +71,3 @@
 | Michael Maksoudian | mmaksoudian@mail.sfsu.edu | MMaksoudian     | Back-End Lead  |
 | Sajan Gurung       | gsajan21@gmail.com        | gsajan21        | Back-End Lead  |
 | Matthew Lee        | mlee56@mail.sfsu.edu      | Mattlee0610     | GitHub Master  |
-
-**Technology and Software:**
-1. Ubuntu Virtual Machine 20.04.1 LTS
-2. Amazon AWS Cloud Server 1vCPU 1gbRAM
-3. MariaDB Database 10.3.34
-4. VSCode and IntelliJ IDEA IDEs
-5. Express Node.js
-6. Node v17.0.1 
-7. Bootstrap CSS
-8. React
-
-## NO code needs to be stored in the root of your repository. You may rename the application folder if you like to your team's application name. But all source code related to your team's application should be stored inside the application folder.

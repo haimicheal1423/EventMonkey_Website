@@ -13,9 +13,10 @@ router.get("/", async function(req,res){
     }
 })
 router.get('/:id', async function(req,res){
-    try{
-        const user = await user.findById(req.params.id);
-        res.json(user);
+    try {
+        const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
+        const rows = await pool.query(sqlQuery, req.params.id);
+        res.status(200).json(rows);
     } catch (error) {
         res.status(400).send(error.message);
     }
@@ -27,6 +28,17 @@ router.get('/:id', async function(req,res){
     //     res.status(400).send(error.message);
     // }
 });
+
+// router.get("/:id", async function(req, res){
+//     try{
+//         const sqlQuery = "SELECT event_id, name, dates FROM Event WHERE event_id=?";
+//         const rows = await pool.query(sqlQuery, req.params.id);
+//         res.status(200).json(rows);
+//     } catch (error){
+//         res.status(400).send(error.message);
+//     }
+//     res.status(200).json({id:req.params.id});
+// })
 
 // router.get("/:id", (req,res)=>{
 //     res.status(200).json({id:req.params.id});
