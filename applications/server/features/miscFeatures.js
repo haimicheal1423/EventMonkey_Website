@@ -22,6 +22,6 @@ function deleteNotif() {
 
 }
 
-function displayNotif() [
+function displayNotif() {
 
-]
+}
