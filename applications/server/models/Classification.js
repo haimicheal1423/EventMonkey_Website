@@ -1,4 +1,4 @@
-export class Classification {
+export default class Classification {
     id;
     segment;
     genre;

@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import Event from '../models/Event.js';
 import Image from '../models/Image.js';
 import Genre from '../models/Genre';
+import Classification from '../models/Classification';
 
 export class EventSource {
     constructor() {
@@ -65,14 +66,21 @@ export class TicketMasterSource extends EventSource {
                 }, {}));
 
             const images = eventObj['images']
-                .map(image => new Image(undefined, image.ratio, image.width, image.height, image.url));
+                .map(image => new Image(
+                    undefined,
+                    image['ratio'],
+                    image['width'],
+                    image['height'],
+                    image['url']
+                ));
 
             const classifications = eventObj['classifications']
-                .map(classification => ({
-                    segment: new Genre(undefined, classification['segment']['name'], classification['segment']['id']),
-                    genre: new Genre(undefined, classification['genre']['name'], classification['genre']['id']),
-                    subgenre: new Genre(undefined, classification['subGenre']['name'], classification['subGenre']['id'])
-                }));
+                .map(classification => {
+                    const segment = new Genre(undefined, classification['segment']['name'], classification['segment']['id']);
+                    const genre = new Genre(undefined, classification['genre']['name'], classification['genre']['id']);
+                    const subgenre = new Genre(undefined, classification['subGenre']['name'], classification['subGenre']['id']);
+                    return new Classification(undefined, segment, genre, subgenre);
+                });
 
             return new Event(id, name, description, date, priceRange, images, classifications);
         });
