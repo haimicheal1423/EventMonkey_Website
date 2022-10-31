@@ -29,8 +29,8 @@ export class EventSource {
     /**
      * Finds a list of {@link Event}s by matching the given event id.
      *
-     * @param {string|number} eventId the id to locate the event details from the
-     *     source
+     * @param {string|number} eventId the id to locate the event details from
+     *     the source
      *
      * @returns {Array<Event>} a list of events
      * @abstract
@@ -106,7 +106,7 @@ export class TicketMasterSource extends EventSource {
      * example,
      * <br>
      * <code>
-     *     apiRequest('http://api.request.com', {
+     *     apiRequest_('http://api.request.com', {
      *         apikey: 'someApiKey',
      *         key1: val1,
      *         key2: val2
@@ -120,8 +120,8 @@ export class TicketMasterSource extends EventSource {
      * </code>
      *
      * @param {string} baseUrl the URL to a specific api resource
-     * @param {Object} values optional query parameters to attach to the base URL;
-     *     default value is an empty JSON object
+     * @param {Object} values optional query parameters to attach to the base
+     *     URL; default value is an empty JSON object
      *
      * @returns {Promise<Response>}
      * @private
@@ -334,8 +334,8 @@ export class EventMonkeySource extends EventSource {
     /**
      * Finds a list of {@link Event}s by matching the given event id.
      *
-     * @param {string|number} eventId the id to locate the event details from the
-     *     source
+     * @param {string|number} eventId the id to locate the event details from
+     *     the source
      *
      * @returns {Array<Event>} a list of events
      */
@@ -403,8 +403,8 @@ export class CompositeSource extends EventSource {
     /**
      * Finds a list of {@link Event}s by matching the given event id.
      *
-     * @param {string|number} eventId the id to locate the event details from the
-     *     source
+     * @param {string|number} eventId the id to locate the event details from
+     *     the source
      *
      * @returns {Array<Event>} a list of events
      */
