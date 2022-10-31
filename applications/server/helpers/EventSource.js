@@ -52,49 +52,79 @@ export class TicketMasterSource extends EventSource {
         return fetch(`${baseUrl}?${params}`);
     }
 
-    #extractEventList(events) {
-        return events.map(eventObj => {
-            const id = eventObj['id'];
-            const name = eventObj['name'];
-            const description = eventObj['description'] || eventObj['info'] || eventObj['pleaseNote'];
-            const date = new Date(eventObj['dates']['start']['dateTime']);
+    constructEvent_(eventObj) {
+        function constructPriceRange(priceRanges) {
 
-            const priceRange = Object.values((eventObj['priceRanges'] || [])
-                .map(price => ({
-                    currency: price.currency,
-                    min: price.min,
-                    max: price.max
-                }))
-                .reduce((obj, price) => {
-                    if (obj[price.currency]) {
-                        let { min, max } = obj[price.currency];
-                        obj[price.currency].min = Math.min(min, price.min);
-                        obj[price.currency].max = Math.max(max, price.max);
-                    } else {
-                        obj[price.currency] = price;
-                    }
-                    return obj;
-                }, {}));
+            const rangeMap = {};
 
-            const images = eventObj['images']
-                .map(image => new Image(
-                    undefined,
-                    image['ratio'],
-                    image['width'],
-                    image['height'],
-                    image['url']
-                ));
+            for (const nextPriceRange of priceRanges) {
+                const { currency: currency, min: nextMin, max: nextMax }
+                    = nextPriceRange;
 
-            const classifications = eventObj['classifications']
-                .map(classification => {
-                    const segment = new Genre(undefined, classification['segment']['name'], classification['segment']['id']);
-                    const genre = new Genre(undefined, classification['genre']['name'], classification['genre']['id']);
-                    const subgenre = new Genre(undefined, classification['subGenre']['name'], classification['subGenre']['id']);
-                    return new Classification(undefined, segment, genre, subgenre);
-                });
+                if (rangeMap[currency]) {
+                    const { min: curMin, max: curMax } = rangeMap[currency];
 
-            return new Event(id, name, description, date, priceRange, images, classifications);
-        });
+                    // update the price range for the mapped currency type
+                    rangeMap[currency].min = Math.min(curMin, nextMin);
+                    rangeMap[currency].max = Math.max(curMax, nextMax);
+                } else {
+                    // no mapping for currency type yet
+                    rangeMap[currency] = {
+                        currency: currency,
+                        min: nextMin,
+                        max: nextMax
+                    };
+                }
+            }
+
+            // the 'currency' keys can be dropped and only keep the values array
+            return Object.values(rangeMap);
+        }
+
+        function constructImage(imageObj) {
+            const { ratio, width, height, url } = imageObj;
+            return new Image(undefined, ratio, width, height, url);
+        }
+
+        function constructClassification(classification) {
+            // helper function for enhancing readability
+            function constructGenre(genreObj) {
+                return new Genre(undefined, genreObj['name'], genreObj['id']);
+            }
+
+            const segment = constructGenre(classification['segment']);
+            const genre = constructGenre(classification['genre']);
+            const subgenre = constructGenre(classification['subGenre']);
+            return new Classification(undefined, segment, genre, subgenre);
+        }
+
+        // sometimes TicketMaster event properties are undefined, so try and
+        // find the best information to fill in
+        const description = eventObj['description']
+            || eventObj['info']
+            || eventObj['pleaseNote']
+            || 'No description available';
+
+        const date = new Date(eventObj['dates']['start']['dateTime']);
+
+        // not all TicketMaster events have defined price ranges
+        const priceRange = constructPriceRange(eventObj['priceRanges'] || []);
+
+        const images = eventObj['images']
+            .map(image => constructImage(image));
+
+        const classifications = eventObj['classifications']
+            .map(classification => constructClassification(classification));
+
+        return new Event(
+            eventObj['id'],
+            eventObj['name'],
+            description,
+            date,
+            priceRange,
+            images,
+            classifications
+        );
     }
 
     async findByEventId(eventId) {
@@ -103,7 +133,10 @@ export class TicketMasterSource extends EventSource {
             eventId: eventId
         })
             .then(response => response.json())
-            .then(response => this.#extractEventList(response['_embedded']['events']));
+            .then(response => {
+                const events = response['_embedded']['events'];
+                return events.map(eventObj => this.constructEvent_(eventObj));
+            });
     }
 
     async findByClassification(classification) {
@@ -112,7 +145,10 @@ export class TicketMasterSource extends EventSource {
             classificationId: classification.id
         })
             .then(response => response.json())
-            .then(response => this.#extractEventList(response['_embedded']['events']));
+            .then(response => {
+                const events = response['_embedded']['events'];
+                return events.map(eventObj => this.constructEvent_(eventObj));
+            });
     }
 
     async findBySegment(segment) {
@@ -121,7 +157,10 @@ export class TicketMasterSource extends EventSource {
             segmentId: segment.id
         })
             .then(response => response.json())
-            .then(response => this.#extractEventList(response['_embedded']['events']));
+            .then(response => {
+                const events = response['_embedded']['events'];
+                return events.map(eventObj => this.constructEvent_(eventObj));
+            });
     }
 
     async findByKeyword(searchText) {
@@ -130,7 +169,10 @@ export class TicketMasterSource extends EventSource {
             keyword: searchText
         })
             .then(response => response.json())
-            .then(response => this.#extractEventList(response['_embedded']['events']));
+            .then(response => {
+                const events = response['_embedded']['events'];
+                return events.map(eventObj => this.constructEvent_(eventObj));
+            });
     }
 }
 
