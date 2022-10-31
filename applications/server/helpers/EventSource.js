@@ -30,16 +30,27 @@ export class EventSource {
 }
 
 export class TicketMasterSource extends EventSource {
-    #apiUrl(host, values = {}) {
+    static eventURL_ = 'https://app.ticketmaster.com/discovery/v2/events';
+    static apiKey_ = 'GizI5muMuL6p9HaGh2FkmyHz9Hv3WMfW';
+
+    apiRequest_(baseUrl, values = {}) {
         const entries = Object.entries(values);
 
         if (entries.length === 0) {
-            return host;
+            // default empty values object can just fetch using the base url
+            return fetch(baseUrl);
         }
 
-        const params = entries.map(([key, val]) => `${key}=${val}`).join('&');
-        return `${host}?${params}`;
-    };
+        // convert the key-value entries into a param string in the form
+        // key1=val1&key2=val2...&keyN=valN
+        const params = entries
+            .map(([key, val]) => `${key}=${val}`)
+            .join('&');
+
+        // join the url with query parameters in the form
+        // baseUrl?key1=val1&key2=val2...&keyN=valN
+        return fetch(`${baseUrl}?${params}`);
+    }
 
     #extractEventList(events) {
         return events.map(eventObj => {
@@ -87,37 +98,37 @@ export class TicketMasterSource extends EventSource {
     }
 
     async findByEventId(eventId) {
-        return await fetch(this.#apiUrl('https://app.ticketmaster.com/discovery/v2/events', {
-            apikey: 'GizI5muMuL6p9HaGh2FkmyHz9Hv3WMfW',
+        return await this.apiRequest_(TicketMasterSource.eventURL_, {
+            apikey: TicketMasterSource.apiKey_,
             eventId: eventId
-        }))
+        })
             .then(response => response.json())
             .then(response => this.#extractEventList(response['_embedded']['events']));
     }
 
     async findByClassification(classification) {
-        return await fetch(this.#apiUrl('https://app.ticketmaster.com/discovery/v2/events', {
-            apikey: 'GizI5muMuL6p9HaGh2FkmyHz9Hv3WMfW',
+        return await this.apiRequest_(TicketMasterSource.eventURL_, {
+            apikey: TicketMasterSource.apiKey_,
             classificationId: classification.id
-        }))
+        })
             .then(response => response.json())
             .then(response => this.#extractEventList(response['_embedded']['events']));
     }
 
     async findBySegment(segment) {
-        return await fetch(this.#apiUrl('https://app.ticketmaster.com/discovery/v2/events', {
-            apikey: 'GizI5muMuL6p9HaGh2FkmyHz9Hv3WMfW',
+        return await this.apiRequest_(TicketMasterSource.eventURL_, {
+            apikey: TicketMasterSource.apiKey_,
             segmentId: segment.id
-        }))
+        })
             .then(response => response.json())
             .then(response => this.#extractEventList(response['_embedded']['events']));
     }
 
     async findByKeyword(searchText) {
-        return await fetch(this.#apiUrl('https://app.ticketmaster.com/discovery/v2/events', {
-            apikey: 'GizI5muMuL6p9HaGh2FkmyHz9Hv3WMfW',
+        return await this.apiRequest_(TicketMasterSource.eventURL_, {
+            apikey: TicketMasterSource.apiKey_,
             keyword: searchText
-        }))
+        })
             .then(response => response.json())
             .then(response => this.#extractEventList(response['_embedded']['events']));
     }
