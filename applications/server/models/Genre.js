@@ -3,29 +3,29 @@
  */
 export default class Genre {
 
-  /**
-   * The EventMonkey genre id.
-   * @type {number}
-   */
-  id;
+    /**
+     * The EventMonkey genre id.
+     * @type {number}
+     */
+    id;
 
-  /**
-   * The TicketMaster genre id.
-   * @type {string}
-   */
-  apiId;
+    /**
+     * The TicketMaster genre id.
+     * @type {string}
+     */
+    apiId;
 
-  /** @type {string} */
-  name;
+    /** @type {string} */
+    name;
 
     /**
      * @param {number} id the EventMonkey genre id
-     * @param {string} apiId the TicketMaster genre id
+     * @param {string} [apiId] the TicketMaster genre id
      * @param {string} name the genre name
      */
-  constructor(id, apiId, name) {
-    this.id = id;
-    this.name = name;
-    this.apiId = apiId;
-  }
+    constructor(id, apiId, name) {
+        this.id = id;
+        this.apiId = apiId;
+        this.name = name;
+    }
 }

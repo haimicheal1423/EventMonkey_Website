@@ -124,9 +124,9 @@ export class Attendee extends User {
      * @param {string} password
      * @param {string} username
      * @param {string} profilePictureUrl
-     * @param {Array<Notification>} notificationList
-     * @param {Array<Event>} eventList
-     * @param {Array<User>} friendsList
+     * @param {Array<Notification>} [notificationList]
+     * @param {Array<Event>} [eventList]
+     * @param {Array<User>} [friendsList]
      */
     constructor(userId, email, password, username, profilePictureUrl,
                 notificationList = [], eventList = [], friendsList = []) {
@@ -178,6 +178,16 @@ export class Attendee extends User {
  * and manage their events.
  */
 export class Organizer extends User {
+
+    /**
+     * @param {number} userId
+     * @param {string} email
+     * @param {string} password
+     * @param {string} username
+     * @param {string} profilePictureUrl
+     * @param {Array<Notification>} [notificationList]
+     * @param {Array<Event>} [eventList]
+     */
     constructor(userId, email, password, username, profilePictureUrl,
                 notificationList = [], eventList = []) {
         super(userId, TYPE_ORGANIZER, email, password, username,

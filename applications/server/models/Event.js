@@ -30,8 +30,8 @@ export default class Event {
      * @param {string} description
      * @param {Date} date
      * @param {{currency: string, min: number, max: number}} priceRange
-     * @param {Array<Image>} images
-     * @param {Array<Classification>} classifications
+     * @param {Array<Image>} [images]
+     * @param {Array<Classification>} [classifications]
      */
     constructor(eventId, name, description, date, priceRange, images = [],
                 classifications = []) {
@@ -91,7 +91,7 @@ export default class Event {
      *
      * @param {string} currency the currency type
      * @param {number} min the minimum price
-     * @param {number} max the maximum price
+     * @param {number} [max=min] the maximum price
      */
     setPriceRange(currency, min, max = min) {
         this.priceRange = {
