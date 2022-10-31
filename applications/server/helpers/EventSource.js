@@ -10,7 +10,6 @@ import Classification from '../models/Classification.js';
  * files, etc.)
  *
  * @abstract
- * @author Michael Maksoudian
  */
 export class EventSource {
 
@@ -81,8 +80,6 @@ export class EventSource {
 /**
  * An implementation of {@link EventSource} which sources {@link Event} details
  * through the TicketMaster api using the HTTP protocol.
- *
- * @author Michael Maksoudian
  */
 export class TicketMasterSource extends EventSource {
 
@@ -315,8 +312,6 @@ export class TicketMasterSource extends EventSource {
 /**
  * An implementation of {@link EventSource} which sources {@link Event} details
  * from a sql database.
- *
- * @author Michael Maksoudian
  */
 export class EventMonkeySource extends EventSource {
     async createEvent(organizer, event) {
@@ -382,8 +377,6 @@ export class EventMonkeySource extends EventSource {
 /**
  * An implementation of {@link EventSource} which aggregates {@link Event}s from
  * multiple sources.
- *
- * @author Michael Maksoudian
  */
 export class CompositeSource extends EventSource {
 
