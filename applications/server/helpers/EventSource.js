@@ -164,24 +164,36 @@ export class CompositeSource extends EventSource {
     async findByEventId(eventId) {
         return this.#sources
             .map(source => source.findByEventId(eventId))
-            .reduce((prev, curr) => prev.push(...curr), []);
+            .reduce((prev, curr) => {
+                prev.push(...curr);
+                return prev;
+            }, []);
     }
 
     async findByClassification(classification) {
         return this.#sources
             .map(source => source.findByClassification(classification))
-            .reduce((prev, curr) => prev.push(...curr), []);
+            .reduce((prev, curr) => {
+                prev.push(...curr);
+                return prev;
+            }, []);
     }
 
     async findBySegment(segment) {
         return this.#sources
             .map(source => source.findBySegment(segment))
-            .reduce((prev, curr) => prev.push(...curr), []);
+            .reduce((prev, curr) => {
+                prev.push(...curr);
+                return prev;
+            }, []);
     }
 
     async findByKeyword(searchText) {
         return this.#sources
             .map(source => source.findByKeyword(searchText))
-            .reduce((prev, curr) => prev.push(...curr), []);
+            .reduce((prev, curr) => {
+                prev.push(...curr);
+                return prev;
+            }, []);
     }
 }
