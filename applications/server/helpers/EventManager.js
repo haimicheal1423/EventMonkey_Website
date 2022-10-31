@@ -72,26 +72,29 @@ export class EventManager {
 
         const eventList = [];
 
+        // helper function to reduce line length
+        async function addEvents(promise) {
+            eventList.push(...(await promise));
+        }
+
         if (eventId) {
-            eventList.push(...(await eventSource.findByEventId(eventId)));
+            await addEvents(eventSource.findByEventId(eventId));
         }
 
         if (classification) {
-            eventList.push(...(await eventSource
-                                        .findByClassification(classification)));
+            await addEvents(eventSource.findByClassification(classification));
         }
 
         if (segment) {
-            eventList.push(...(await eventSource.findBySegment(segment)));
+            await addEvents(eventSource.findBySegment(segment));
         }
 
         if (organizerId) {
-            eventList.push(...(await this.eventMonkey_
-                                            .findByOrganizerId(organizerId)));
+            await addEvents(this.eventMonkey_.findByOrganizerId(organizerId));
         }
 
         if (keyword) {
-            eventList.push(...(await eventSource.findByKeyword(keyword)));
+            await addEvents(eventSource.findByKeyword(keyword));
         }
 
         return eventList;
