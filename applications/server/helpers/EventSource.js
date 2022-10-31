@@ -2,8 +2,8 @@ import fetch from 'node-fetch';
 
 import Event from '../models/Event.js';
 import Image from '../models/Image.js';
-import Genre from '../models/Genre';
-import Classification from '../models/Classification';
+import Genre from '../models/Genre.js';
+import Classification from '../models/Classification.js';
 
 export class EventSource {
     constructor() {
