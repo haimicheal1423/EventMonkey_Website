@@ -207,15 +207,15 @@ export class EventMonkeySource extends EventSource {
 }
 
 export class CompositeSource extends EventSource {
-    #sources;
+    sources_;
 
     constructor(...sources) {
         super();
-        this.#sources = sources || [];
+        this.sources_ = sources || [];
     }
 
     async findByEventId(eventId) {
-        return this.#sources
+        return this.sources_
             .map(source => source.findByEventId(eventId))
             .reduce((prev, curr) => {
                 prev.push(...curr);
@@ -224,7 +224,7 @@ export class CompositeSource extends EventSource {
     }
 
     async findByClassification(classification) {
-        return this.#sources
+        return this.sources_
             .map(source => source.findByClassification(classification))
             .reduce((prev, curr) => {
                 prev.push(...curr);
@@ -233,7 +233,7 @@ export class CompositeSource extends EventSource {
     }
 
     async findBySegment(segment) {
-        return this.#sources
+        return this.sources_
             .map(source => source.findBySegment(segment))
             .reduce((prev, curr) => {
                 prev.push(...curr);
@@ -242,7 +242,7 @@ export class CompositeSource extends EventSource {
     }
 
     async findByKeyword(searchText) {
-        return this.#sources
+        return this.sources_
             .map(source => source.findByKeyword(searchText))
             .reduce((prev, curr) => {
                 prev.push(...curr);
