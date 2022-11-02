@@ -8,12 +8,18 @@ const pool = mariadb.createPool({
     connectionLimit: 5
 });
 
-async function asyncFunction() {
+/**
+ * Queries the database with optional query values.
+ *
+ * @param sql the sql query to execute
+ * @param [values] optional values to execute the query
+ * @return {Array<any>} an array of rows as the result
+ */
+async function query(sql, values) {
     let conn;
     try {
         conn = await pool.getConnection();
-        const rows = await conn.query("SELECT name FROM Event");
-        console.table(rows);
+        return await conn.query(sql, values);
     } catch (err) {
         throw err;
     } finally {
@@ -23,5 +29,4 @@ async function asyncFunction() {
     }
 }
 
-// asyncFunction();
-module.exports = pool;
+module.exports.query = query;
