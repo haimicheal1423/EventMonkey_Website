@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../helpers/database");
+const pool = require("../helpers/Database");
 
 const eventGenreSqlQuery =
   `select event.*, class.*
@@ -54,7 +54,7 @@ router.get("/:genre", async function(req, res, next){
 
 // router.post("/", async(req, res)=>{
 //     let emp = req.body;
-    
+
 
 // })
 

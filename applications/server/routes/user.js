@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../helpers/database");
+const pool = require("../helpers/Database");
 const bcrypt = require("bcrypt");
 
 router.get("/", async function(req,res){
@@ -47,7 +47,7 @@ router.get('/:id', async function(req,res){
 // router.post('/register', async function(req,res) {
 //     try {
 //         const {email, password} = req.body;
-        
+
 //         const encryptedPassword = await bcrypt.hash(password,10)
 
 //         const sqlQuery = 'INSERT INTO User (email, password) VALUES (?,?)';
@@ -66,12 +66,12 @@ router.get('/:id', async function(req,res){
 //         const sqlGetUser = 'SELECT password FROM User WHERE id=?';
 //         const rows = await pool.query(sqlGetUser,id);
 //         if(rows){
-            
+
 //             const isValid = await bcrypt.compare(password,rows[0].password)
 //             res.status(200).json({valid_password: isValid});
 //         }
 //         res.status(200).send(`User with id ${id} was not found`);
-        
+
 //     } catch (error) {
 //         res.status(400).send(error.message)
 //     }
