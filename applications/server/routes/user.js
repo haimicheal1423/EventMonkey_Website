@@ -1,9 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const database = require("../helpers/Database");
-const bcrypt = require("bcrypt");
+const database = require('../helpers/Database');
+const bcrypt = require('bcrypt');
 
-router.get("/", function(req, res) {
+router.get('/', function(req, res) {
     try {
         const sqlQuery = 'SELECT * FROM User';
         const rows = database.query(sqlQuery, req.params);
@@ -30,9 +30,9 @@ router.get('/:id', function(req, res) {
     // }
 });
 
-// router.get("/:id", async function(req, res) {
+// router.get('/:id', async function(req, res) {
 //     try {
-//         const sqlQuery = "SELECT event_id, name, dates FROM Event WHERE event_id=?";
+//         const sqlQuery = 'SELECT event_id, name, dates FROM Event WHERE event_id=?';
 //         const rows = await database.query(sqlQuery, req.params.id);
 //         res.status(200).json(rows);
 //     } catch (error) {
@@ -41,7 +41,7 @@ router.get('/:id', function(req, res) {
 //     res.status(200).json({ id: req.params.id });
 // });
 
-// router.get("/:id", (req, res) => {
+// router.get('/:id', (req, res) => {
 //     res.status(200).json({ id: req.params.id });
 // });
 

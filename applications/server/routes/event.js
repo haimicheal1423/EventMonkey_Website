@@ -1,6 +1,6 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const database = require("../helpers/Database");
+const database = require('../helpers/Database');
 
 const eventGenreSqlQuery =
     `SELECT event.*, class.*
@@ -25,7 +25,7 @@ const allEventsSqlQuery =
      USING (event_id)
      GROUP BY event_id`;
 
-router.get("/", function(req, res) {
+router.get('/', function(req, res) {
     try {
         const rows = database.query(allEventsSqlQuery);
         res.status(200).json(rows);
@@ -34,9 +34,9 @@ router.get("/", function(req, res) {
     }
 });
 
-// router.get("/:id", async function(req, res) {
+// router.get('/:id', async function(req, res) {
 //     try {
-//         const sqlQuery = "SELECT event_id, name, dates FROM Event WHERE event_id=?";
+//         const sqlQuery = 'SELECT event_id, name, dates FROM Event WHERE event_id=?';
 //         const rows = await database.query(sqlQuery, req.params.id);
 //         res.status(200).json(rows);
 //     } catch (error) {
@@ -44,7 +44,7 @@ router.get("/", function(req, res) {
 //     }
 // });
 
-router.get("/:genre", function(req, res, next) {
+router.get('/:genre', function(req, res, next) {
     try {
         const rows = database.query(eventGenreSqlQuery, req.params.genre);
         if (rows && rows.length > 0) {
