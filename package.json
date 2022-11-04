@@ -16,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/CSC-648-SFSU/csc648-01-fa22-team02/issues"
   },
-  "homepage": "https://github.com/CSC-648-SFSU/csc648-01-fa22-team02#readme"
+  "homepage": "https://github.com/CSC-648-SFSU/csc648-01-fa22-team02#readme",
+  "coverageReporters": ["text", "text-summary"]
 }
