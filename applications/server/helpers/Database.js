@@ -1,4 +1,4 @@
-const mariadb = require('mariadb');
+import mariadb from 'mariadb';
 
 const pool = mariadb.createPool({
     host: 'eventmonkey.xyz',
@@ -15,7 +15,7 @@ const pool = mariadb.createPool({
  * @param [values] optional values to execute the query
  * @return {Array<any>} an array of rows as the result
  */
-async function query(sql, values) {
+export async function query(sql, values) {
     let conn;
     try {
         conn = await pool.getConnection();
@@ -28,5 +28,3 @@ async function query(sql, values) {
         }
     }
 }
-
-module.exports.query = query;

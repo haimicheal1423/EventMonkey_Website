@@ -1,6 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const database = require('../helpers/Database');
+import { Router } from 'express';
+
+import { query as queryDB } from '../helpers/Database.js'
+
+export const router = Router();
 
 const eventGenreSqlQuery =
     `SELECT event.*, class.*
@@ -25,34 +27,20 @@ const allEventsSqlQuery =
      USING (event_id)
      GROUP BY event_id`;
 
-router.get('/', function(req, res) {
+router.get('/', async function(req, res) {
     try {
-        const rows = database.query(allEventsSqlQuery);
+        let rows;
+        if (req.query.genre) {
+            rows = await queryDB(eventGenreSqlQuery, req.query.genre);
+        } else {
+            rows = await queryDB(allEventsSqlQuery);
+        }
         res.status(200).json(rows);
     } catch (error) {
         res.status(400).send(error.message);
     }
 });
 
-// router.get('/:id', async function(req, res) {
-//     try {
-//         const sqlQuery = 'SELECT event_id, name, dates FROM Event WHERE event_id=?';
-//         const rows = await database.query(sqlQuery, req.params.id);
-//         res.status(200).json(rows);
-//     } catch (error) {
-//         res.status(400).send(error.message);
-//     }
-// });
-
-router.get('/:genre', function(req, res, next) {
-    try {
-        const rows = database.query(eventGenreSqlQuery, req.params.genre);
-        if (rows && rows.length > 0) {
-            res.status(200).json(rows);
-        }
-    } catch (error) {
-        res.status(400).send(error.message);
-    }
+router.get('/create', async function(req, res) {
+    res.status(200);
 });
-
-module.exports = router;

@@ -1,29 +1,31 @@
-const express = require('express');
-const router = express.Router();
-const database = require('../helpers/Database');
-const bcrypt = require('bcrypt');
+import { Router } from 'express';
+import bcrypt from 'bcrypt';
 
-router.get('/', function(req, res) {
+import { query as queryDB } from '../helpers/Database.js';
+
+export const router = Router();
+
+router.get('/', async function(req, res) {
     try {
         const sqlQuery = 'SELECT * FROM User';
-        const rows = database.query(sqlQuery, req.params);
+        const rows = await queryDB(sqlQuery, req.params);
         res.status(200).json(rows);
     } catch (error) {
         res.status(400).send(error.message);
     }
 });
 
-router.get('/:id', function(req, res) {
+router.get('/:id', async function(req, res) {
     try {
         const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
-        const rows = database.query(sqlQuery, req.params.id);
+        const rows = await queryDB(sqlQuery, req.params.id);
         res.status(200).json(rows);
     } catch (error) {
         res.status(400).send(error.message);
     }
     // try {
     //     const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
-    //     const rows = await database.query(sqlQuery, req.params.id);
+    //     const rows = await queryDB(sqlQuery, req.params.id);
     //     res.status(200).json(rows);
     // } catch (error) {
     //     res.status(400).send(error.message);
@@ -33,7 +35,7 @@ router.get('/:id', function(req, res) {
 // router.get('/:id', async function(req, res) {
 //     try {
 //         const sqlQuery = 'SELECT event_id, name, dates FROM Event WHERE event_id=?';
-//         const rows = await database.query(sqlQuery, req.params.id);
+//         const rows = await queryDB(sqlQuery, req.params.id);
 //         res.status(200).json(rows);
 //     } catch (error) {
 //         res.status(400).send(error.message);
@@ -50,7 +52,7 @@ router.get('/:id', function(req, res) {
 //         const { email, password } = req.body;
 //         const encryptedPassword = await bcrypt.hash(password, 10);
 //         const sqlQuery = 'INSERT INTO User (email, password) VALUES (?,?)';
-//         const result = await database.query(sqlQuery, [email, encryptedPassword]);
+//         const result = await queryDB(sqlQuery, [email, encryptedPassword]);
 //         res.status(200).json({ userId: result.insertId });
 //     } catch (error) {
 //         res.status(400).send(error.message);
@@ -61,7 +63,7 @@ router.get('/:id', function(req, res) {
 //     try {
 //         const { id, password } = req.body;
 //         const sqlGetUser = 'SELECT password FROM User WHERE Id=?';
-//         const rows = await database.query(sqlGetUser, id);
+//         const rows = await queryDB(sqlGetUser, id);
 //         if (rows) {
 //             const isValid = await bcrypt.compare(password, rows[0].password);
 //             res.status(200).json({ valid_password: isValid });
@@ -71,5 +73,3 @@ router.get('/:id', function(req, res) {
 //         res.status(400).send(error.message);
 //     }
 // });
-
-module.exports = router;
