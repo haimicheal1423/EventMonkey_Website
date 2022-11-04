@@ -1,0 +1,15 @@
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: npm ci
+      - name: Running tests
+        working-directory: applications/server/tests/
+        run:
+          npx jest --coverage --coverageReporters json-summary
+      - name: Jest Coverage Comment
+        uses: MishaKav/jest-coverage-comment@main
