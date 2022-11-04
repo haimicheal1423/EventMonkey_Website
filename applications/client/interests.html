@@ -3,12 +3,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Interests</title>
+
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     
     <!-- Interests.css Stylesheet -->
-    <link rel="stylesheet" href="/applications/client/assets/css/home.css">
+    <link rel="stylesheet" href="/applications/client/assets/css/interests.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +22,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-772f1c border-bottom border-warning">
             <div class="container">
-                <a class="navbar-brand" href="home.html">
+                <a class="navbar-brand" href="#">
                     <img 
                     src="/applications/client/assets/eventmonkey/eventmonkey500.png" 
                     alt="Logo" 
@@ -61,7 +62,7 @@
                             </a>
                             <ul class="dropdown-menu">
                               <li><a class="dropdown-item" href="#">Profile</a></li>
-                              <li><a class="dropdown-item" href="interests.html">Interests</a></li>
+                              <li><a class="dropdown-item" href="#/interests.html">Interests</a></li>
                               <li><a class="dropdown-item" href="#">Something</a></li>
                             </ul>
                           </li>
@@ -72,69 +73,92 @@
     </header> 
     <!-- End Header -->
 
-    <main class="container">
-        <div class="banner d-flex">
-            <div class="welcome">
-                <h1>Still looking for your next event?</h1>
-                <input type="text" placeholder="Search with EventMonkey!" class="rounded border-warning">
-            </div>
-            <img 
-            src="/applications/client/assets/eventmonkey/eventmonkey-nobg.png" 
-            alt=""
-            class="img-fluid"
-            >
-            
-        </div>
+    <!-- Main Content -->
+    <main>
+        <div class="card-container container">
+            <h5 class="card-title interests" width="50">Select your interests</h5>
+            <!-- <h5 class="title-card text-center card">Select your interests</h5> -->
+            <!-- <img src="/applications/client/assets/eventmonkey/white-pattern-bg2.jpg" id="background"> -->
 
-        <article class="browse container">
-            <h2> Or Browse by Category </h2>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere quaerat numquam quasi est totam, voluptatibus blanditiis sunt, maiores dolorem cum hic dolores veritatis expedita tempora! Doloremque exercitationem necessitatibus natus fugiat!</p>
-            
-        </article>
-        
-        <div class="card-group">
-            <div class="card rounded-3 border border-warning">
-            <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title text-center">Concerts</h5>
-            </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-            <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title text-center">Sports</h5>
-            </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-            <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title text-center">Food</h5>
-            </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-                <div class="card-body ">
-                <h5 class="card-title text-center">Concerts</h5>
-                </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
+            <div class="card-group">
+                <div class="card rounded-3 border border-warning">
                 <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
                 <div class="card-body">
-                <h5 class="card-title text-center">Sports</h5>
+                    <h5 class="card-title text-center">Concerts</h5>
                 </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
+                </div>
+                <div class="card rounded-3 border border-warning">
                 <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
                 <div class="card-body">
-                <h5 class="card-title text-center">Food</h5>
+                    <h5 class="card-title text-center">Sports</h5>
+                </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Food</h5>
+                </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                    <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                    <div class="card-body ">
+                    <h5 class="card-title text-center">Concerts</h5>
+                    </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                    <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                    <div class="card-body">
+                    <h5 class="card-title text-center">Sports</h5>
+                    </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                    <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                    <div class="card-body">
+                    <h5 class="card-title text-center">Food</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="card-group">
+                <div class="card rounded-3 border border-warning">
+                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Concerts</h5>
+                </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Sports</h5>
+                </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Food</h5>
+                </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                    <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                    <div class="card-body ">
+                    <h5 class="card-title text-center">Concerts</h5>
+                    </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                    <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                    <div class="card-body">
+                    <h5 class="card-title text-center">Sports</h5>
+                    </div>
+                </div>
+                <div class="card rounded-3 border border-warning">
+                    <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
+                    <div class="card-body">
+                    <h5 class="card-title text-center">Food</h5>
+                    </div>
                 </div>
             </div>
         </div>
-
-    
     </main>
-
-    
+    <!-- End Main Content -->
 
     <!-- Footer -->
     <footer class="bg-chocolate text-center text-white">
