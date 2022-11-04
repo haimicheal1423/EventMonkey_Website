@@ -3,19 +3,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Sign Up</title>
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     
     <!-- Interests.css Stylesheet -->
-    <link rel="stylesheet" href="/applications/client/assets/css/home.css">
+    <link rel="stylesheet" href="/applications/client/assets/css/interests.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
-</head>
 
+</head>
 <body>
     <!-- ======= Header ======= -->
     <header>
@@ -72,69 +72,39 @@
     </header> 
     <!-- End Header -->
 
-    <main class="container">
-        <div class="banner d-flex">
-            <div class="welcome">
-                <h1>Still looking for your next event?</h1>
-                <input type="text" placeholder="Search with EventMonkey!" class="rounded border-warning">
-            </div>
-            <img 
-            src="/applications/client/assets/eventmonkey/eventmonkey-nobg.png" 
-            alt=""
-            class="img-fluid"
-            >
+    <!-- Main Content -->
+    <main>
+        <div class="signup-box">
+            <h1 class=>Sign Up</h1>
+            <h4>Already have an EventMonkey Account? <a href="login.html"> Sign In </a></h4>
+            <form class="signup-form">
+                <label>First Name</label>
+                <input type="text" placeholder="">
             
-        </div>
-
-        <article class="browse container">
-            <h2> Or Browse by Category </h2>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere quaerat numquam quasi est totam, voluptatibus blanditiis sunt, maiores dolorem cum hic dolores veritatis expedita tempora! Doloremque exercitationem necessitatibus natus fugiat!</p>
-            
-        </article>
+                <label>Last Name</label>
+                <input type="text" placeholder="">
         
-        <div class="card-group">
-            <div class="card rounded-3 border border-warning">
-            <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title text-center">Concerts</h5>
-            </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-            <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title text-center">Sports</h5>
-            </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-            <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-            <div class="card-body">
-                <h5 class="card-title text-center">Food</h5>
-            </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-                <div class="card-body ">
-                <h5 class="card-title text-center">Concerts</h5>
-                </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-                <div class="card-body">
-                <h5 class="card-title text-center">Sports</h5>
-                </div>
-            </div>
-            <div class="card rounded-3 border border-warning">
-                <img class="card-img-top" src="/applications/client/assets/eventmonkey/eventmonkey500.png" alt="Card image cap">
-                <div class="card-body">
-                <h5 class="card-title text-center">Food</h5>
-                </div>
-            </div>
+                <label>Username</label>
+                <input type="text" placeholder="">
+
+                <label>User Type</label>
+                <input type="text" placeholder="">
+        
+                <label>Email</label>
+                <input type="email" placeholder="">
+            
+                <label>Password</label>
+                <input type="password" placeholder="">
+            
+                <label>Confirm Password</label>
+                <input type="password" placeholder="">
+            
+                <input type="button" placeholder="" value="Submit">
+                <p>By continuing past this page, you agree to the <a href="#">Terms of Service</a></p>
+            </form>
         </div>
-
-    
     </main>
-
-    
+    <!-- End Main Content -->
 
     <!-- Footer -->
     <footer class="bg-chocolate text-center text-white">

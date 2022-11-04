@@ -1,6 +1,21 @@
 {
+  "name": "csc648-01-fa22-team02",
+  "version": "1.0.0",
+  "description": "<h1 align='center'>\r CSC648-01-fall22-team02 Repository",
+  "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CSC-648-SFSU/csc648-01-fa22-team02.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CSC-648-SFSU/csc648-01-fa22-team02/issues"
+  },
+  "homepage": "https://github.com/CSC-648-SFSU/csc648-01-fa22-team02#readme",
   "coverageReporters": ["text", "text-summary"]
 }
