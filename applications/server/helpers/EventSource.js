@@ -143,6 +143,19 @@ export class TicketMasterSource extends EventSource {
         return fetch(`${baseUrl}?${params}`);
     }
 
+    async ticketMasterEventRequest_(baseUrl, values = {}) {
+        // make an api request using the events url and api key, then spread out
+        // the optional query parameters
+        const response = await this.apiRequest_(
+            TicketMasterSource.eventURL_,
+            { apikey: TicketMasterSource.apiKey_, ...values }
+        );
+
+        const json = await response.json()
+        const events = json['_embedded']['events'];
+        return events.map(eventObj => this.constructEvent_(eventObj));
+    }
+
     /**
      * Constructs a new {@link Event} using details extracted from the
      * TicketMaster api response object.
@@ -239,15 +252,9 @@ export class TicketMasterSource extends EventSource {
      * @return {Array<Event>} a list of events
      */
     async findByEventId(eventId) {
-        return await this.apiRequest_(TicketMasterSource.eventURL_, {
-            apikey: TicketMasterSource.apiKey_,
+        return await this.ticketMasterEventRequest_({
             eventId: eventId
-        })
-            .then(response => response.json())
-            .then(response => {
-                const events = response['_embedded']['events'];
-                return events.map(eventObj => this.constructEvent_(eventObj));
-            });
+        });
     }
 
     /**
@@ -259,15 +266,9 @@ export class TicketMasterSource extends EventSource {
      * @returns {Array<Event>} a list of events
      */
     async findByClassification(classification) {
-        return await this.apiRequest_(TicketMasterSource.eventURL_, {
-            apikey: TicketMasterSource.apiKey_,
-            classificationId: classification.id
-        })
-            .then(response => response.json())
-            .then(response => {
-                const events = response['_embedded']['events'];
-                return events.map(eventObj => this.constructEvent_(eventObj));
-            });
+        return await this.ticketMasterEventRequest_({
+            classificationId: classification.classId
+        });
     }
 
     /**
@@ -279,15 +280,9 @@ export class TicketMasterSource extends EventSource {
      * @returns {Array<Event>} a list of events
      */
     async findBySegment(segment) {
-        return await this.apiRequest_(TicketMasterSource.eventURL_, {
-            apikey: TicketMasterSource.apiKey_,
+        return await this.ticketMasterEventRequest_({
             segmentId: segment.id
-        })
-            .then(response => response.json())
-            .then(response => {
-                const events = response['_embedded']['events'];
-                return events.map(eventObj => this.constructEvent_(eventObj));
-            });
+        });
     }
 
     /**
@@ -298,15 +293,9 @@ export class TicketMasterSource extends EventSource {
      * @returns {Array<Event>} a list of events
      */
     async findByKeyword(searchText) {
-        return await this.apiRequest_(TicketMasterSource.eventURL_, {
-            apikey: TicketMasterSource.apiKey_,
+        return await this.ticketMasterEventRequest_({
             keyword: searchText
-        })
-            .then(response => response.json())
-            .then(response => {
-                const events = response['_embedded']['events'];
-                return events.map(eventObj => this.constructEvent_(eventObj));
-            });
+        });
     }
 }
 
