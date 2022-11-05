@@ -74,9 +74,9 @@
 
     <!-- Main Content -->
     <main>
-        <div class="signup-box">
+        <div class="signup-box rounded border border-warning border-3">
             <h1 class=>Sign Up</h1>
-            <h4>Already have an EventMonkey Account? <a href="login.html"> Sign In </a></h4>
+            <h4>Already have an EventMonkey account? <a href="login.html">Sign In</a></h4>
             <form class="signup-form">
                 <label>First Name</label>
                 <input type="text" placeholder="">
@@ -87,8 +87,12 @@
                 <label>Username</label>
                 <input type="text" placeholder="">
 
-                <label>User Type</label>
-                <input type="text" placeholder="">
+                <select class="form-select color-chocolate" aria-label="Disabled select example disabled">
+                  <option selected>Select User Type</option>
+                  <option value="1">Admin (Test)</option>
+                  <option value="2">Event Host</option>
+                  <option value="3">Normal User</option>
+                </select>
         
                 <label>Email</label>
                 <input type="email" placeholder="">
