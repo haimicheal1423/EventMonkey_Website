@@ -304,6 +304,49 @@ export class TicketMasterSource extends EventSource {
  * from a sql database.
  */
 export class EventMonkeySource extends EventSource {
+
+    /**
+     * Constructs a {@link Classification} for the given EventMonkey
+     * classification and {@link Genre} ids.
+     *
+     * @param classId the EventMonkey classification id
+     * @param segmentId the EventMonkey segment id
+     * @param genreId the EventMonkey genre id
+     * @param subgenreId the EventMonkey subgenre id
+     * @return {Promise<Classification>}
+     * @private
+     */
+    async constructClassification_(classId, segmentId, genreId, subgenreId) {
+        /**
+         * Constructs a {@link Genre} for a given EventMonkey genre id. The genre
+         * name is retrieved by querying the database.
+         *
+         * @param genreId the EventMonkey genre id
+         * @param [apiKey] the TicketMaster api key, if any
+         * @return {Promise<Genre>}
+         */
+        async function constructGenre(genreId, apiKey) {
+            const rows = await queryDB(
+                `SELECT genre.name
+                 FROM Genre genre
+                 WHERE genre.id = ?`, genreId
+            );
+
+            const { name } = rows[0]; // TODO: handle no genre results
+            return new Genre(genreId, apiKey, name);
+        }
+
+        // block until all genre types are constructed (asynchronously)
+        const [segment, genre, subgenre]
+            = await Promise.all([
+                constructGenre(segmentId),
+                constructGenre(genreId),
+                constructGenre(subgenreId)
+            ]);
+
+        return new Classification(classId, segment, genre, subgenre);
+    }
+
     async createEvent(organizer, event) {
         // insert event details to database
         // if successful
@@ -325,7 +368,46 @@ export class EventMonkeySource extends EventSource {
      * @returns {Array<Event>} a list of events
      */
     async findByEventId(eventId) {
-        return [];
+        const eventRows = await queryDB(
+            `SELECT event.*
+             FROM Event event
+             WHERE event.event_id = ?`, eventId
+        );
+
+        const { event_id: eId, name, price_ranges: priceRanges, dates,
+                description } = eventRows[0]; // TODO: handle no event results
+
+        const { dateTime } = JSON.parse(dates);
+        const priceRange = JSON.parse(priceRanges);
+
+        const event = new Event(eId, name, description, dateTime, priceRange);
+
+        // block until database results are fetched
+        const classRows = await queryDB(
+            `SELECT class.*
+             FROM Classification class
+             JOIN Event_Classification_List ecl
+               USING (class_id)
+             WHERE ecl.event_id = ?`, eventId
+        );
+
+        // block until all classifications are constructed (asynchronously)
+        const classList = await Promise.all(
+            classRows.map(row =>
+                this.constructClassification_(
+                    row['class_id'],
+                    row['segment_id'],
+                    row['genre_id'],
+                    row['subgenre_id']
+                )
+            ));
+
+        // after all classifications are resolved, add then to the event
+        classList.forEach(classification => {
+            event.addClassification(classification);
+        });
+
+        return [event];
     }
 
     /**
@@ -336,8 +418,26 @@ export class EventMonkeySource extends EventSource {
      *
      * @returns {Array<Classification>} a list of events
      */
-    async findByClassification(classification) {
-        return [];
+    async findByClassification(classificationId) {
+        /*
+         * block until database result is fetched
+         *
+         * note: rows array is expected to be 0 or 1 element in length since all
+         *       classifications have a unique class_id
+         */
+        const classRows = await queryDB(
+            `SELECT class.*
+             FROM Classification class
+             WHERE class.class_id = ?`, classificationId
+        );
+
+        // block until classification is constructed
+        return await this.constructClassification_(
+            classRows[0]['class_id'],
+            classRows[0]['segment_id'],
+            classRows[0]['genre_id'],
+            classRows[0]['subgenre_id']
+        );
     }
 
     /**
