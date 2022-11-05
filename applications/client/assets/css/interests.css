@@ -69,7 +69,7 @@ footer {
 
 .signup-box {
   width: 360px;
-  height: 620px;
+  height: 750px;
   padding: 10px;
   margin: auto;
   background-color: #fffce2;
@@ -90,6 +90,7 @@ footer {
 .signup-form {
   width: 300px;
   margin-left: 20px;
+  padding-bottom: 100;
 }
 
 .signup-form label {
@@ -107,7 +108,7 @@ footer {
   outline: none;
 }
 .signup-form input[type="button"] {
-  width: 320px;
+  width: 300px;
   height: 35px;
   margin-top: 20px;
   border: none;
@@ -121,11 +122,17 @@ footer {
   font-size: 14px;
 }
 
+.form-select {
+  color: chocolate;
+  margin-top: 30;
+  border: 1px solid grey;
+}
+
 /* Login Css */
 
 .login-box {
   width: 360px;
-  height: 300px;
+  height: 325px;
   margin: auto;
   border-radius: 3px;
   background-color: #fffce2;
@@ -133,6 +140,8 @@ footer {
 
 .login-box h1 {
   text-align: center;
+  padding-top: 20;
+  font-size: 30;
 }
 
 .login-form {
@@ -166,5 +175,6 @@ footer {
 }
 
 .login-form p {
+  padding-top: 10;
   text-align: center;
 }
