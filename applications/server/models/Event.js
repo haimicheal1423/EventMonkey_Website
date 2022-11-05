@@ -84,7 +84,7 @@ export default class Event {
      */
     removeClassification(classification) {
         this.classifications = this.classifications
-            .filter(other => other.id !== classification.id);
+            .filter(other => other.classId !== classification.classId);
     }
 
     /**

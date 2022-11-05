@@ -14,7 +14,7 @@
 export default class Classification {
 
   /** @type {number} */
-  id;
+  classId;
 
   /** @type {Genre} */
   segment;
@@ -32,7 +32,7 @@ export default class Classification {
    * @param {Genre} subgenre
    */
   constructor(classId, segment, genre, subgenre) {
-    this.id = classId;
+    this.classId = classId;
     this.segment = segment;
     this.genre = genre;
     this.subgenre = subgenre;
