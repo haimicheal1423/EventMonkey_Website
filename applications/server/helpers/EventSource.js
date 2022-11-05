@@ -41,14 +41,14 @@ export class EventSource {
 
     /**
      * Finds a list of {@link Event}s which contain the given
-     * {@link Classification}.
+     * {@link Classification} id.
      *
-     * @param {Classification} classification the event classification
+     * @param {number} classificationId the classification id
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Array<Classification>} a list of events
      * @abstract
      */
-    findByClassification(classification) {
+    findByClassification(classificationId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -259,15 +259,15 @@ export class TicketMasterSource extends EventSource {
 
     /**
      * Finds a list of {@link Event}s which contain the given
-     * {@link Classification}.
+     * {@link Classification} id.
      *
-     * @param {Classification} classification the event classification
+     * @param {number} classificationId the classification id
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Array<Classification>} a list of events
      */
-    async findByClassification(classification) {
+    async findByClassification(classificationId) {
         return await this.ticketMasterEventRequest_({
-            classificationId: classification.classId
+            classificationId: classificationId
         });
     }
 
@@ -330,11 +330,11 @@ export class EventMonkeySource extends EventSource {
 
     /**
      * Finds a list of {@link Event}s which contain the given
-     * {@link Classification}.
+     * {@link Classification} id.
      *
-     * @param {Classification} classification the event classification
+     * @param {number} classificationId the classification id
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Array<Classification>} a list of events
      */
     async findByClassification(classification) {
         return [];
@@ -416,11 +416,11 @@ export class CompositeSource extends EventSource {
 
     /**
      * Finds a list of {@link Event}s which contain the given
-     * {@link Classification}.
+     * {@link Classification} id.
      *
-     * @param {Classification} classification the event classification
+     * @param {number} classificationId the classification id
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Array<Classification>} a list of events
      */
     async findByClassification(classificationId) {
         return await this.collate_(source => {

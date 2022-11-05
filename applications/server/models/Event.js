@@ -48,7 +48,7 @@ export default class Event {
      * Adds an {@link Image} to the end of the {@link images}
      * array.
      *
-     * @param image the {@link Image} to add to the array
+     * @param {Image} image the {@link Image} to add to the array
      */
     addImage(image) {
         this.images.push(image);
@@ -58,7 +58,7 @@ export default class Event {
      * Removes all {@link Image}s from the {@link images}
      * array.
      *
-     * @param image the image to filter out of the array (by image id)
+     * @param {Image} image the image to filter out of the array (by image id)
      */
     removeImage(image) {
         this.images = this.images
@@ -68,7 +68,8 @@ export default class Event {
     /**
      * Add a {@link Classification} to the {@link classifications} array.
      *
-     * @param classification the classification to add to the array
+     * @param {Classification} classification the classification to add to the
+     *     array
      */
     addClassification(classification) {
         this.classifications.push(classification);
@@ -78,8 +79,8 @@ export default class Event {
      * Remove every occurrence of the given classification from the
      * {@link classifications} array.
      *
-     * @param classification the classification to filter out of the array (by
-     *     classification id)
+     * @param {Classification} classification the classification to filter out
+     *     of the array (by classification id)
      */
     removeClassification(classification) {
         this.classifications = this.classifications

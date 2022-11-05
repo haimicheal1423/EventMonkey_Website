@@ -13,7 +13,7 @@ const pool = mariadb.createPool({
  *
  * @param sql the sql query to execute
  * @param [values] optional values to execute the query
- * @return {Array<any>} an array of rows as the result
+ * @return {any} the database result
  */
 export async function query(sql, values) {
     let conn;
