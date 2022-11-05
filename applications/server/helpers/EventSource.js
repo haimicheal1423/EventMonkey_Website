@@ -4,6 +4,7 @@ import Event from '../models/Event.js';
 import Image from '../models/Image.js';
 import Genre from '../models/Genre.js';
 import Classification from '../models/Classification.js';
+import { query as queryDB } from '../helpers/Database.js';
 
 /**
  * An interface to access event details from some data source (HTTP, databases,
@@ -123,7 +124,7 @@ export class TicketMasterSource extends EventSource {
      * @returns {Promise<Response>}
      * @private
      */
-    apiRequest_(baseUrl, values = {}) {
+    async apiRequest_(baseUrl, values = {}) {
         const entries = Object.entries(values);
 
         if (entries.length === 0) {
@@ -394,6 +395,23 @@ export class CompositeSource extends EventSource {
     }
 
     /**
+     * Collect and combine all results from multiple {@link EventSource}s.
+     *
+     * @param sourceMapper a function which maps a source to an array of values
+     *     to collate
+     *
+     * @return {Promise<Awaited<*>[]>}
+     * @private
+     */
+    collate_(sourceMapper) {
+        return Promise.all(
+            this.sources_.map(source => {
+                return sourceMapper(source);
+            })
+        );
+    }
+
+    /**
      * Finds a list of {@link Event}s by matching the given event id.
      *
      * @param {string|number} eventId the id to locate the event details from
@@ -402,12 +420,9 @@ export class CompositeSource extends EventSource {
      * @returns {Array<Event>} a list of events
      */
     async findByEventId(eventId) {
-        return this.sources_
-            .map(source => source.findByEventId(eventId))
-            .reduce((prev, curr) => {
-                prev.push(...curr);
-                return prev;
-            }, []);
+        return await this.collate_(source => {
+            return source.findByEventId(eventId);
+        });
     }
 
     /**
@@ -418,13 +433,10 @@ export class CompositeSource extends EventSource {
      *
      * @returns {Array<Event>} a list of events
      */
-    async findByClassification(classification) {
-        return this.sources_
-            .map(source => source.findByClassification(classification))
-            .reduce((prev, curr) => {
-                prev.push(...curr);
-                return prev;
-            }, []);
+    async findByClassification(classificationId) {
+        return await this.collate_(source => {
+            return source.findByClassification(classificationId);
+        });
     }
 
     /**
@@ -436,12 +448,9 @@ export class CompositeSource extends EventSource {
      * @returns {Array<Event>} a list of events
      */
     async findBySegment(segment) {
-        return this.sources_
-            .map(source => source.findBySegment(segment))
-            .reduce((prev, curr) => {
-                prev.push(...curr);
-                return prev;
-            }, []);
+        return await this.collate_(source => {
+            return source.findBySegment(segment);
+        });
     }
 
     /**
@@ -452,11 +461,8 @@ export class CompositeSource extends EventSource {
      * @returns {Array<Event>} a list of events
      */
     async findByKeyword(searchText) {
-        return this.sources_
-            .map(source => source.findByKeyword(searchText))
-            .reduce((prev, curr) => {
-                prev.push(...curr);
-                return prev;
-            }, []);
+        return await this.collate_(source => {
+            return source.findByKeyword(searchText);
+        });
     }
 }
