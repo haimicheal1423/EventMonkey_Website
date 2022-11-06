@@ -195,6 +195,7 @@ export class TicketMasterSource extends EventSource {
             }
 
             // the 'currency' keys can be dropped and only keep the values array
+            // of price ranges, each with a unique currency type
             return Object.values(rangeMap);
         }
 

@@ -51,7 +51,7 @@ export class EventManager {
      * @param [literal.organizerId] the id of the {@link Organizer} user type
      * @param [literal.keyword] a search string
      *
-     * @return {Array<Event>} the event list of any matching events
+     * @return {Promise<Array<Event>>} the event list of any matching events
      */
     async search({ source = 'composite', eventId, classification, segment,
                    organizerId, keyword }) {
