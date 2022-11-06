@@ -13,7 +13,6 @@ function App() {
                 </div>
 
                 <h1>EventMonkey
-
                     <nav className="navbar">
                         <div className="navbar-nav">
                             <ul>
