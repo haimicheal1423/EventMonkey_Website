@@ -161,7 +161,19 @@ export class TicketMasterSource extends EventSource {
         );
 
         const json = await response.json()
+
+        if (!json['_embedded']) {
+            // response does not contain _embedded data
+            return [];
+        }
+
         const events = json['_embedded']['events'];
+
+        if (!events) {
+            // _embedded data does not contain events
+            return [];
+        }
+
         return events.map(eventObj => this.constructEvent_(eventObj));
     }
 
@@ -342,7 +354,11 @@ export class EventMonkeySource extends EventSource {
                  WHERE genre.id = ?`, genreId
             );
 
-            const { name } = rows[0]; // TODO: handle no genre results
+            if (!rows[0]) {
+                // no genre results
+                return undefined;
+            }
+            const { name } = rows[0];
             return new Genre(genreId, apiKey, name);
         }
 
@@ -384,8 +400,13 @@ export class EventMonkeySource extends EventSource {
              WHERE event.event_id = ?`, eventId
         );
 
+        if (!eventRows[0]) {
+            // no database results for the given event id
+            return [];
+        }
+
         const { event_id: eId, name, price_ranges: priceRanges, dates,
-                description } = eventRows[0]; // TODO: handle no event results
+                description } = eventRows[0];
 
         const { dateTime } = JSON.parse(dates);
         const priceRange = JSON.parse(priceRanges);
