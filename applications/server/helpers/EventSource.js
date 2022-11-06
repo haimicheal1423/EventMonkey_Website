@@ -143,7 +143,7 @@ export class TicketMasterSource extends EventSource {
         return fetch(`${baseUrl}?${params}`);
     }
 
-    async ticketMasterEventRequest_(baseUrl, values = {}) {
+    async ticketMasterEventRequest_(values = {}) {
         // make an api request using the events url and api key, then spread out
         // the optional query parameters
         const response = await this.apiRequest_(
