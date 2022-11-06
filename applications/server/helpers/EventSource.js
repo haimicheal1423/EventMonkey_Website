@@ -261,9 +261,9 @@ export class TicketMasterSource extends EventSource {
      *
      * @return {Event[]} a list of events
      */
-    async findByEventId(eventId) {
-        return await this.ticketMasterEventRequest_({
-            eventId: eventId
+    findByEventId(eventId) {
+        return this.ticketMasterEventRequest_({
+            id: eventId
         });
     }
 
@@ -275,8 +275,8 @@ export class TicketMasterSource extends EventSource {
      *
      * @returns {Classification[]} a list of events
      */
-    async findByClassification(classificationId) {
-        return await this.ticketMasterEventRequest_({
+    findByClassification(classificationId) {
+        return this.ticketMasterEventRequest_({
             classificationId: classificationId
         });
     }
@@ -289,8 +289,8 @@ export class TicketMasterSource extends EventSource {
      *
      * @returns {Event[]} a list of events
      */
-    async findBySegment(segment) {
-        return await this.ticketMasterEventRequest_({
+    findBySegment(segment) {
+        return this.ticketMasterEventRequest_({
             segmentId: segment.id
         });
     }
@@ -302,8 +302,8 @@ export class TicketMasterSource extends EventSource {
      *
      * @returns {Event[]} a list of events
      */
-    async findByKeyword(searchText) {
-        return await this.ticketMasterEventRequest_({
+    findByKeyword(searchText) {
+        return this.ticketMasterEventRequest_({
             keyword: searchText
         });
     }
@@ -499,15 +499,22 @@ export class CompositeSource extends EventSource {
      * @param sourceMapper a function which maps a source to an array of values
      *     to collate
      *
-     * @return {Promise<Awaited<*>[]>}
+     * @return {any[]}
      * @private
      */
-    collate_(sourceMapper) {
-        return Promise.all(
+    async collate_(sourceMapper) {
+        /** @type {any[][]} */
+        const values = await Promise.all(
             this.sources_.map(source => {
                 return sourceMapper(source);
             })
         );
+
+        // values is an array of arrays, so flatten it to a single array
+        return values.reduce((acc, arr) => {
+            acc.push(...arr);
+            return acc;
+        }, []);
     }
 
     /**
@@ -518,8 +525,8 @@ export class CompositeSource extends EventSource {
      *
      * @returns {Event[]} a list of events
      */
-    async findByEventId(eventId) {
-        return await this.collate_(source => {
+    findByEventId(eventId) {
+        return this.collate_(source => {
             return source.findByEventId(eventId);
         });
     }
@@ -532,8 +539,8 @@ export class CompositeSource extends EventSource {
      *
      * @returns {Classification[]} a list of events
      */
-    async findByClassification(classificationId) {
-        return await this.collate_(source => {
+    findByClassification(classificationId) {
+        return this.collate_(source => {
             return source.findByClassification(classificationId);
         });
     }
@@ -546,8 +553,8 @@ export class CompositeSource extends EventSource {
      *
      * @returns {Event[]} a list of events
      */
-    async findBySegment(segment) {
-        return await this.collate_(source => {
+    findBySegment(segment) {
+        return this.collate_(source => {
             return source.findBySegment(segment);
         });
     }
@@ -559,8 +566,8 @@ export class CompositeSource extends EventSource {
      *
      * @returns {Event[]} a list of events
      */
-    async findByKeyword(searchText) {
-        return await this.collate_(source => {
+    findByKeyword(searchText) {
+        return this.collate_(source => {
             return source.findByKeyword(searchText);
         });
     }
