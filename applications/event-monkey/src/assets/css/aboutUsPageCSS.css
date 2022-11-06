@@ -1,0 +1,189 @@
+body {
+    background-color: #25282b !important;
+}
+
+.body-page {
+    margin: 0 auto;
+    width: fit-content;
+    padding: 10px;
+    color: #D9DEE2 !important;
+}
+
+.btn {
+    background: maroon;
+    color: white;
+    outline: none !important;
+    box-shadow: none !important;
+}
+.btn:focus {
+    outline: none !important;
+}
+
+.navbar-brand {
+    margin-left: 30px;
+}
+
+.about-card {
+    display: grid;
+    row-gap: 2vh;
+    margin: 2vh 0px 5vh 0px;
+    grid-template-rows: auto auto auto auto;
+    font-family: Georgia, serif;
+    padding: 20px;
+    background-color: #25282b;
+    border-radius: 1rem;
+    filter: drop-shadow(0 0 1rem #0F1011);
+}
+
+.section-title {
+    display: none;
+    color: #3b56ed;
+    font-size: calc(16px + .2vw);
+    text-decoration: underline;
+    margin: 0px;
+}
+
+.profile-image-section {
+    margin: auto;
+    border-radius: 20%;
+    overflow: hidden;
+}
+.profile-image-section img {
+    object-fit: cover;
+    width: 70vw;
+    height: 70vw;
+    max-width: 300px;
+    max-height: 300px;
+}
+
+.person-name-section {
+    grid-row: 1;
+}
+.person-name-section .name {
+    font-size: calc(22px + 1vw);
+    margin: 0px 20px 0px 0px;
+    font-weight: bold;
+}
+.person-name-section .role {
+    font-size: calc(18px + 1vw);
+    margin: 0px 40px 0px 0px;
+    color: #81909c;
+    font-style: italic;
+    font-family: serif;
+}
+
+.basic-info-section i {
+    color: #2a45de;
+    font-size: calc(16px + 1vw);
+    padding-right: 5px;
+}
+.basic-info-section .info {
+    font-size: calc(12px + 1vw);
+    margin: 5px 0px;
+    font-family: serif;
+    padding: 3px 0px 0px 0px;
+}
+
+.skills {
+    display: none;
+}
+
+.circle {
+    height: 15px;
+    width: 15px;
+    background-color: #2a45de;
+    border-radius: 50%;
+    display: inline-block;
+}
+.circleE {
+    height: 15px;
+    width: 15px;
+    background-color: #404a54;
+    /* border: 2px solid #bbb; */
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.listNames {
+    padding-left: 0px;
+    list-style-type: none;
+    display: inline-block;
+}
+.proficiency {
+    padding-left: 10px;
+    list-style-type: none;
+    display: inline-block;
+}
+
+.extra-notes-section {
+    font-size: calc(12px + .5vw);
+    grid-row: 4;
+}
+
+/* When the width of the screen is larger than 600px */
+@media (min-width: 1000px) {
+    .about-card {
+        column-gap: 10px;
+        grid-template-columns: 25vw 20vw 25vw;
+        grid-template-rows: calc(95px - 4vh) 20vh auto;
+        row-gap: 0px;
+        margin: 5vh 0px 20vh 0px;
+    }
+
+    .section-title {
+        display: block;
+    }
+
+    .profile-image-section {
+        grid-column: 1;
+        grid-row: 1/4;
+    }
+    .profile-image-section img {
+        max-width: 20vw;
+        max-height: 20vw;
+    }
+
+    .person-name-section {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .person-name-section .name {
+        font-size: 24px;
+    }
+    .person-name-section .role {
+        font-size: 20px;
+    }
+
+    .basic-info-section {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    .basic-info-section i {
+        font-size: 20px;
+    }
+    .basic-info-section .info {
+        font-size: 18px;
+    }
+
+    .skills {
+        display: flex;
+        align-items: center;
+        grid-column: 3;
+        grid-row: 1/4;
+    }
+
+    .extra-notes-section {
+        grid-column: 2/4;
+        grid-row: 3;
+    }
+    .extra-notes-section p {
+        font-size: calc(8px + .5vw);
+    }
+}
+
+/* When the width is larger than 1000px and the height is smaller than 500px */
+@media (max-height: 500px) and (min-width: 1000px) {
+    .extra-notes-section {
+        display: none;
+    }
+}
