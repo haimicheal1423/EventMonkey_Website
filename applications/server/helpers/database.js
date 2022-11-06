@@ -1,6 +1,6 @@
 const mariadb = require('mariadb');
 const pool = mariadb.createPool({
-  host: 'eventmonkey.xyz',
+  host: '52.53.244.250',
   user: 'dev',
   password: 'csc648',
   database: 'dev',
