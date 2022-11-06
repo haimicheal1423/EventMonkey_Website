@@ -32,7 +32,7 @@ export class EventSource {
      * @param {string|number} eventId the id to locate the event details from
      *     the source
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      * @abstract
      */
     findByEventId(eventId) {
@@ -45,7 +45,7 @@ export class EventSource {
      *
      * @param {number} classificationId the classification id
      *
-     * @returns {Array<Classification>} a list of events
+     * @returns {Classification[]} a list of events
      * @abstract
      */
     findByClassification(classificationId) {
@@ -58,7 +58,7 @@ export class EventSource {
      *
      * @param {Genre} segment the event segment
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      * @abstract
      */
     findBySegment(segment) {
@@ -70,7 +70,7 @@ export class EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      * @abstract
      */
     findByKeyword(searchText) {
@@ -143,6 +143,15 @@ export class TicketMasterSource extends EventSource {
         return fetch(`${baseUrl}?${params}`);
     }
 
+    /**
+     * Fetch an array of {@link Event}s or {@link Classification}s by sending a
+     * request to the TicketMaster api with optional parameter values.
+     *
+     * @param values values to append as a query string when creating the api
+     *     request
+     * @return {Event[]|Classification[]}
+     * @private
+     */
     async ticketMasterEventRequest_(values = {}) {
         // make an api request using the events url and api key, then spread out
         // the optional query parameters
@@ -250,7 +259,7 @@ export class TicketMasterSource extends EventSource {
      *
      * @param {string} eventId the TicketMaster event id
      *
-     * @return {Array<Event>} a list of events
+     * @return {Event[]} a list of events
      */
     async findByEventId(eventId) {
         return await this.ticketMasterEventRequest_({
@@ -264,7 +273,7 @@ export class TicketMasterSource extends EventSource {
      *
      * @param {number} classificationId the classification id
      *
-     * @returns {Array<Classification>} a list of events
+     * @returns {Classification[]} a list of events
      */
     async findByClassification(classificationId) {
         return await this.ticketMasterEventRequest_({
@@ -278,7 +287,7 @@ export class TicketMasterSource extends EventSource {
      *
      * @param {Genre} segment the event segment
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findBySegment(segment) {
         return await this.ticketMasterEventRequest_({
@@ -291,7 +300,7 @@ export class TicketMasterSource extends EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findByKeyword(searchText) {
         return await this.ticketMasterEventRequest_({
@@ -366,7 +375,7 @@ export class EventMonkeySource extends EventSource {
      * @param {string|number} eventId the id to locate the event details from
      *     the source
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findByEventId(eventId) {
         const eventRows = await queryDB(
@@ -417,7 +426,7 @@ export class EventMonkeySource extends EventSource {
      *
      * @param {number} classificationId the classification id
      *
-     * @returns {Array<Classification>} a list of events
+     * @returns {Classification[]} a list of events
      */
     async findByClassification(classificationId) {
         /*
@@ -447,7 +456,7 @@ export class EventMonkeySource extends EventSource {
      *
      * @param {Genre} segment the event segment
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findBySegment(segment) {
         return [];
@@ -458,7 +467,7 @@ export class EventMonkeySource extends EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findByKeyword(searchText) {
         return [];
@@ -471,7 +480,7 @@ export class EventMonkeySource extends EventSource {
  */
 export class CompositeSource extends EventSource {
 
-    /** @type {Array<EventSource>} */
+    /** @type {EventSource[]} */
     sources_;
 
     /**
@@ -507,7 +516,7 @@ export class CompositeSource extends EventSource {
      * @param {string|number} eventId the id to locate the event details from
      *     the source
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findByEventId(eventId) {
         return await this.collate_(source => {
@@ -521,7 +530,7 @@ export class CompositeSource extends EventSource {
      *
      * @param {number} classificationId the classification id
      *
-     * @returns {Array<Classification>} a list of events
+     * @returns {Classification[]} a list of events
      */
     async findByClassification(classificationId) {
         return await this.collate_(source => {
@@ -535,7 +544,7 @@ export class CompositeSource extends EventSource {
      *
      * @param {Genre} segment the event segment
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findBySegment(segment) {
         return await this.collate_(source => {
@@ -548,7 +557,7 @@ export class CompositeSource extends EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
-     * @returns {Array<Event>} a list of events
+     * @returns {Event[]} a list of events
      */
     async findByKeyword(searchText) {
         return await this.collate_(source => {
