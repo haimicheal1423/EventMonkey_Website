@@ -31,9 +31,9 @@ export class EventSource {
      *
      * @param {string|number} eventId the id to locate the event details from
      *     the source
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      * @abstract
      */
     findByEventId(eventId, limit) {
@@ -44,9 +44,9 @@ export class EventSource {
      * Finds a list of {@link Event}s by an array of genre names.
      *
      * @param {string[]} names an array of genre names
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      * @abstract
      */
     findByGenre(names, limit) {
@@ -57,9 +57,9 @@ export class EventSource {
      * Finds a list of {@link Event}s using a keyword to search with.
      *
      * @param {string} searchText the keyword to search with
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      * @abstract
      */
     findByKeyword(searchText, limit) {
@@ -113,7 +113,7 @@ export class TicketMasterSource extends EventSource {
      * @returns {Promise<Response>}
      * @private
      */
-    async apiRequest_(baseUrl, values = {}) {
+    apiRequest_(baseUrl, values = {}) {
         const entries = Object.entries(values);
 
         if (entries.length === 0) {
@@ -139,7 +139,8 @@ export class TicketMasterSource extends EventSource {
      * @param values values to append as a query string when creating the api
      *     request
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]}
+     *
+     * @returns {Promise<Event[]>}
      * @private
      */
     async ticketMasterEventRequest_(values = {}, limit) {
@@ -265,9 +266,9 @@ export class TicketMasterSource extends EventSource {
      * Finds a list of {@link Event}s by matching the given event id.
      *
      * @param {string} eventId the TicketMaster event id
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     findByEventId(eventId, limit) {
         return this.ticketMasterEventRequest_({
@@ -280,9 +281,9 @@ export class TicketMasterSource extends EventSource {
      * Finds a list of {@link Event}s by an array of genre names.
      *
      * @param {string[]} names an array of genre names
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     findByGenre(names, limit) {
         return this.ticketMasterEventRequest_({
@@ -295,9 +296,9 @@ export class TicketMasterSource extends EventSource {
      * Finds a list of {@link Event}s using a keyword to search with.
      *
      * @param {string} searchText the keyword to search with
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     findByKeyword(searchText, limit) {
         return this.ticketMasterEventRequest_({
@@ -321,6 +322,7 @@ export class EventMonkeySource extends EventSource {
      * @param segmentId the EventMonkey segment id
      * @param genreId the EventMonkey genre id
      * @param subgenreId the EventMonkey subgenre id
+     *
      * @returns {Promise<Classification>}
      * @private
      */
@@ -358,6 +360,16 @@ export class EventMonkeySource extends EventSource {
         return new Classification(classId, segment, genre, subgenre);
     }
 
+    /**
+     * Create an event by inserting it into the database. The event id will get
+     * set if the insert operation was successful, and the event will be
+     * assigned to the organizer.
+     *
+     * @param {Organizer} organizer the owner of this event
+     * @param {Event} event the event to insert into the database
+     *
+     * @return {Promise<void>}
+     */
     async createEvent(organizer, event) {
         // insert event details to database
         // if successful
@@ -366,6 +378,13 @@ export class EventMonkeySource extends EventSource {
         // return event?
     }
 
+    /**
+     * Finds all events owned by a specific organizer.
+     *
+     * @param organizerId the id of the organizer
+     *
+     * @return {Promise<Event[]>}
+     */
     async findByOrganizerId(organizerId) {
         return [];
     }
@@ -375,9 +394,9 @@ export class EventMonkeySource extends EventSource {
      *
      * @param {string|number} eventId the id to locate the event details from
      *     the source
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     async findByEventId(eventId, limit) {
         const eventRows = await Database.query(
@@ -431,11 +450,11 @@ export class EventMonkeySource extends EventSource {
      * Finds a list of {@link Event}s by an array of genre names.
      *
      * @param {string[]} names an array of genre names
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
-    findByGenre(names, limit) {
+    async findByGenre(names, limit) {
         return [];
     }
 
@@ -443,9 +462,9 @@ export class EventMonkeySource extends EventSource {
      * Finds a list of {@link Event}s using a keyword to search with.
      *
      * @param {string} searchText the keyword to search with
-     *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     async findByKeyword(searchText, limit) {
         return [];
@@ -478,7 +497,8 @@ export class CompositeSource extends EventSource {
      *     source to an array of values to collate
      *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {any[]} a list of results
+     *
+     * @returns {Promise<any[]>} a promise for a list of results
      * @private
      */
     async collate_(sourceMapper, limit) {
@@ -493,8 +513,8 @@ export class CompositeSource extends EventSource {
         values.length = Math.min(values.length, limit);
 
         // values is an array of arrays, so flatten it to a single array
-        return values.reduce((acc, arr) => {
-            acc.push(...arr);
+        return values.reduce((acc, array) => {
+            acc.push(...array);
             return acc;
         }, []);
     }
@@ -506,7 +526,8 @@ export class CompositeSource extends EventSource {
      *     the source
      *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     findByEventId(eventId, limit) {
         return this.collate_(source => {
@@ -520,7 +541,8 @@ export class CompositeSource extends EventSource {
      * @param {string[]} names an array of genre names
      *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     findByGenre(names, limit) {
         return this.collate_(source => {
@@ -534,7 +556,8 @@ export class CompositeSource extends EventSource {
      * @param {string} searchText the keyword to search with
      *
      * @param {number} limit the maximum size of the resulting array
-     * @returns {Event[]} a list of events
+     *
+     * @returns {Promise<Event[]>} a list of events
      */
     findByKeyword(searchText, limit) {
         return this.collate_(source => {
