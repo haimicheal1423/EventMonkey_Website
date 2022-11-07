@@ -220,6 +220,9 @@ export class TicketMasterSource extends EventSource {
         function constructClassification(classification) {
             // helper function for enhancing readability
             function constructGenre(genreObj) {
+                if (!genreObj) {
+                    return new Genre(undefined, undefined);
+                }
                 return new Genre(genreObj['id'], genreObj['name']);
             }
 
