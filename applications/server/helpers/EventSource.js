@@ -38,7 +38,8 @@ export class EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by an array of genre names.
+     * Finds a list of {@link Event}s by an array of genre names. The genre
+     * names are case-insensitive.
      *
      * @param {string[]} names an array of genre names
      * @param {number} limit the maximum size of the resulting array
@@ -265,7 +266,8 @@ export class TicketMasterSource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by an array of genre names.
+     * Finds a list of {@link Event}s by an array of genre names. The genre
+     * names are case-insensitive.
      *
      * @param {string[]} names an array of genre names
      * @param {number} limit the maximum size of the resulting array
@@ -309,7 +311,7 @@ export class EventMonkeySource extends EventSource {
      * @param {Organizer} organizer the owner of this event
      * @param {Event} event the event to insert into the database
      *
-     * @return {Promise<void>}
+     * @returns {Promise<void>}
      */
     async createEvent(organizer, event) {
         // insert event details to database
@@ -324,7 +326,7 @@ export class EventMonkeySource extends EventSource {
      *
      * @param organizerId the id of the organizer
      *
-     * @return {Promise<Event[]>}
+     * @returns {Promise<Event[]>}
      */
     async findByOrganizerId(organizerId) {
         return [];
@@ -378,7 +380,8 @@ export class EventMonkeySource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by an array of genre names.
+     * Finds a list of {@link Event}s by an array of genre names. The genre
+     * names are case-insensitive.
      *
      * @param {string[]} names an array of genre names
      * @param {number} limit the maximum size of the resulting array
@@ -386,7 +389,30 @@ export class EventMonkeySource extends EventSource {
      * @returns {Promise<Event[]>} a list of events
      */
     async findByGenre(names, limit) {
-        return [];
+        // block until database results are fetched. The database is queried by
+        // giving a json array of strings as genre name inputs, and the
+        // resulting rows are an array of event_ids
+        const rows = await Database.query(
+            `SELECT DISTINCT egl.event_id
+             FROM Event_Genre_List egl
+             INNER JOIN Genre genre
+                USING (genre_id)
+             WHERE JSON_CONTAINS(LOWER(?), JSON_QUOTE(LOWER(genre.name)))`,
+            JSON.stringify(names)
+        );
+
+        // extract an array of the event ids from the query result
+        const eventIds = rows.map(row => row['event_id']);
+
+        // limit the event ids now before querying for event details
+        eventIds.length = Math.min(eventIds.length, limit);
+
+        // find all event details asynchronously
+        return await Promise.all(
+            eventIds.map(eventId => {
+                return this.findByEventId(eventId);
+            })
+        );
     }
 
     /**
@@ -461,10 +487,10 @@ export class CompositeSource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by an array of genre names.
+     * Finds a list of {@link Event}s by an array of genre names. The genre
+     * names are case-insensitive.
      *
      * @param {string[]} names an array of genre names
-     *
      * @param {number} limit the maximum size of the resulting array
      *
      * @returns {Promise<Event[]>} a list of events
