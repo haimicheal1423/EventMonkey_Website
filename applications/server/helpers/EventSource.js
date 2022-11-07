@@ -32,10 +32,11 @@ export class EventSource {
      * @param {string|number} eventId the id to locate the event details from
      *     the source
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      * @abstract
      */
-    findByEventId(eventId) {
+    findByEventId(eventId, limit) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -44,10 +45,11 @@ export class EventSource {
      *
      * @param {string[]} names an array of genre names
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      * @abstract
      */
-    findByGenre(names) {
+    findByGenre(names, limit) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -56,10 +58,11 @@ export class EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      * @abstract
      */
-    findByKeyword(searchText) {
+    findByKeyword(searchText, limit) {
         throw new Error('Unimplemented abstract function');
     }
 }
@@ -135,10 +138,11 @@ export class TicketMasterSource extends EventSource {
      *
      * @param values values to append as a query string when creating the api
      *     request
-     * @return {Event[]}
+     * @param {number} limit the maximum size of the resulting array
+     * @returns {Event[]}
      * @private
      */
-    async ticketMasterEventRequest_(values = {}) {
+    async ticketMasterEventRequest_(values = {}, limit) {
         // make an api request using the events url and api key, then spread out
         // the optional query parameters
         const response = await this.apiRequest_(
@@ -160,6 +164,8 @@ export class TicketMasterSource extends EventSource {
             return [];
         }
 
+        // trim the events list to the limit
+        events.length = Math.min(events.length, limit);
         return events.map(eventObj => this.constructEvent_(eventObj));
     }
 
@@ -257,12 +263,14 @@ export class TicketMasterSource extends EventSource {
      *
      * @param {string} eventId the TicketMaster event id
      *
-     * @return {Event[]} a list of events
+     * @param {number} limit the maximum size of the resulting array
+     * @returns {Event[]} a list of events
      */
-    findByEventId(eventId) {
+    findByEventId(eventId, limit) {
         return this.ticketMasterEventRequest_({
-            id: eventId
-        });
+            id: eventId,
+            size: limit
+        }, limit);
     }
 
     /**
@@ -270,13 +278,14 @@ export class TicketMasterSource extends EventSource {
      *
      * @param {string[]} names an array of genre names
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
-     * @abstract
      */
-    findByGenre(names) {
+    findByGenre(names, limit) {
         return this.ticketMasterEventRequest_({
-            classificationName: names
-        });
+            classificationName: names,
+            size: limit
+        }, limit);
     }
 
     /**
@@ -284,12 +293,14 @@ export class TicketMasterSource extends EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      */
-    findByKeyword(searchText) {
+    findByKeyword(searchText, limit) {
         return this.ticketMasterEventRequest_({
-            keyword: searchText
-        });
+            keyword: searchText,
+            size: limit
+        }, limit);
     }
 }
 
@@ -307,7 +318,7 @@ export class EventMonkeySource extends EventSource {
      * @param segmentId the EventMonkey segment id
      * @param genreId the EventMonkey genre id
      * @param subgenreId the EventMonkey subgenre id
-     * @return {Promise<Classification>}
+     * @returns {Promise<Classification>}
      * @private
      */
     async constructClassification_(classId, segmentId, genreId, subgenreId) {
@@ -316,7 +327,7 @@ export class EventMonkeySource extends EventSource {
          * genre name is retrieved by querying the database.
          *
          * @param genreId the EventMonkey genre id
-         * @return {Promise<Genre>}
+         * @returns {Promise<Genre>}
          */
         async function constructGenre(genreId) {
             const rows = await Database.query(
@@ -362,9 +373,10 @@ export class EventMonkeySource extends EventSource {
      * @param {string|number} eventId the id to locate the event details from
      *     the source
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      */
-    async findByEventId(eventId) {
+    async findByEventId(eventId, limit) {
         const eventRows = await Database.query(
             `SELECT event.*
              FROM Event event
@@ -417,10 +429,10 @@ export class EventMonkeySource extends EventSource {
      *
      * @param {string[]} names an array of genre names
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
-     * @abstract
      */
-    findByGenre(names) {
+    findByGenre(names, limit) {
         return [];
     }
 
@@ -429,9 +441,10 @@ export class EventMonkeySource extends EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      */
-    async findByKeyword(searchText) {
+    async findByKeyword(searchText, limit) {
         return [];
     }
 }
@@ -458,19 +471,23 @@ export class CompositeSource extends EventSource {
     /**
      * Collect and combine all results from multiple {@link EventSource}s.
      *
-     * @param {function(EventSource): *} sourceMapper a function which maps a
+     * @param {function(EventSource): any} sourceMapper a function which maps a
      *     source to an array of values to collate
      *
-     * @return {any[]}
+     * @param {number} limit the maximum size of the resulting array
+     * @returns {any[]} a list of results
      * @private
      */
-    async collate_(sourceMapper) {
+    async collate_(sourceMapper, limit) {
         /** @type {any[][]} */
         const values = await Promise.all(
             this.sources_.map(source => {
                 return sourceMapper(source);
             })
         );
+
+        // trim the values list to the limit
+        values.length = Math.min(values.length, limit);
 
         // values is an array of arrays, so flatten it to a single array
         return values.reduce((acc, arr) => {
@@ -485,12 +502,13 @@ export class CompositeSource extends EventSource {
      * @param {string|number} eventId the id to locate the event details from
      *     the source
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      */
-    findByEventId(eventId) {
+    findByEventId(eventId, limit) {
         return this.collate_(source => {
-            return source.findByEventId(eventId);
-        });
+            return source.findByEventId(eventId, limit);
+        }, limit);
     }
 
     /**
@@ -498,13 +516,13 @@ export class CompositeSource extends EventSource {
      *
      * @param {string[]} names an array of genre names
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
-     * @abstract
      */
-    findByGenre(names) {
+    findByGenre(names, limit) {
         return this.collate_(source => {
-            return source.findByGenre(names);
-        });
+            return source.findByGenre(names, limit);
+        }, limit);
     }
 
     /**
@@ -512,11 +530,12 @@ export class CompositeSource extends EventSource {
      *
      * @param {string} searchText the keyword to search with
      *
+     * @param {number} limit the maximum size of the resulting array
      * @returns {Event[]} a list of events
      */
-    findByKeyword(searchText) {
+    findByKeyword(searchText, limit) {
         return this.collate_(source => {
-            return source.findByKeyword(searchText);
-        });
+            return source.findByKeyword(searchText, limit);
+        }, limit);
     }
 }

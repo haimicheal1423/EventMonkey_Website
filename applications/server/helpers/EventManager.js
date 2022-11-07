@@ -37,6 +37,7 @@ export class EventManager {
      * @param {{
      *     source: string,
      *     eventId: string|number,
+     *     limit: number,
      *     classification: Classification,
      *     genre: string|Genre|Genre[],
      *     organizerId: number,
@@ -45,6 +46,7 @@ export class EventManager {
      * @param [literal.source = 'composite'] the {@link EventSource} type, which
      *     can be <i>'ticketMaster'</i>, <i>'EventMonkey'</i>,
      *     or <i>'composite'</i> (by default)
+     * @param [literal.limit = 20] the maximum size of the resulting array
      * @param [literal.eventId] the event id, which can be a number for
      *     EventMonkey sources or a string for TicketMaster sources
      * @param [literal.genre] the genre
@@ -53,8 +55,8 @@ export class EventManager {
      *
      * @return {Promise<Array<Event>>} the event list of any matching events
      */
-    async search({ source = 'composite', eventId, genre, organizerId,
-                     keyword }) {
+    async search({ source = 'composite', limit = 20, eventId, genre,
+                   organizerId, keyword }) {
         let eventSource;
         switch (source) {
             case 'ticketMaster':
@@ -78,7 +80,7 @@ export class EventManager {
         }
 
         if (eventId) {
-            await addEvents(eventSource.findByEventId(eventId));
+            await addEvents(eventSource.findByEventId(eventId, limit));
         }
 
         if (genre) {
@@ -91,16 +93,19 @@ export class EventManager {
             } else {
                 names = [genre];
             }
-            await addEvents(eventSource.findByGenre(names));
+            await addEvents(eventSource.findByGenre(names, limit));
         }
 
         if (organizerId) {
-            await addEvents(this.eventMonkey_.findByOrganizerId(organizerId));
+            await addEvents(this.eventMonkey_.findByOrganizerId(organizerId, limit));
         }
 
         if (keyword) {
-            await addEvents(eventSource.findByKeyword(keyword));
+            await addEvents(eventSource.findByKeyword(keyword, limit));
         }
+
+        // trim the events list to the limit
+        eventList.length = Math.min(eventList.length, limit);
 
         return eventList;
     }
