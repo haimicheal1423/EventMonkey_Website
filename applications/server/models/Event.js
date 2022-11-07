@@ -3,7 +3,7 @@
  */
 export default class Event {
 
-    /** @type {string|number} */
+    /** @type {number} */
     id;
 
     /** @type {string} */
@@ -18,30 +18,30 @@ export default class Event {
     /** @type {{currency: string, min: number, max: number}} */
     priceRange;
 
-    /** @type {Array<Image>} */
+    /** @type {Image[]} */
     images;
 
-    /** @type {Array<Classification>} */
-    classifications;
+    /** @type {Genre[]} */
+    genres;
 
     /**
-     * @param {string|number} eventId
+     * @param {number} [eventId]
      * @param {string} name
      * @param {string} description
      * @param {Date} date
      * @param {{currency: string, min: number, max: number}} priceRange
-     * @param {Array<Image>} [images]
-     * @param {Array<Classification>} [classifications]
+     * @param {Image[]} [images]
+     * @param {Genre[]} [genres]
      */
     constructor(eventId, name, description, date, priceRange, images = [],
-                classifications = []) {
+                genres = []) {
         this.id = eventId;
         this.name = name;
         this.description = description;
         this.date = date;
         this.priceRange = priceRange;
         this.images = images;
-        this.classifications = classifications;
+        this.genres = genres;
     }
 
     /**
@@ -66,25 +66,22 @@ export default class Event {
     }
 
     /**
-     * Add a {@link Classification} to the {@link classifications} array.
+     * Add a {@link Genre} to the {@link genres} array.
      *
-     * @param {Classification} classification the classification to add to the
-     *     array
+     * @param {Genre} genre the genre to add to the array
      */
-    addClassification(classification) {
-        this.classifications.push(classification);
+    addGenre(genre) {
+        this.genres.push(genre);
     }
 
     /**
-     * Remove every occurrence of the given classification from the
-     * {@link classifications} array.
+     * Remove every occurrence of the given genre from the {@link genres} array.
      *
-     * @param {Classification} classification the classification to filter out
-     *     of the array (by classification id)
+     * @param {Genre} genre the genre to filter out of the array (by genre id)
      */
-    removeClassification(classification) {
-        this.classifications = this.classifications
-            .filter(other => other.classId !== classification.classId);
+    removeGenre(genre) {
+        this.genres = this.genres
+            .filter(other => other.id !== genre.id);
     }
 
     /**

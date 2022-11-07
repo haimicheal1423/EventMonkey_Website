@@ -1,8 +1,4 @@
-import {
-    CompositeSource,
-    EventMonkeySource,
-    TicketMasterSource
-} from './EventSource.js';
+import { CompositeSource, EventMonkeySource, TicketMasterSource } from './EventSource.js';
 import Genre from "../models/Genre.js";
 
 /**
@@ -35,14 +31,13 @@ export class EventManager {
      * EventMonkey source.
      *
      * @param {{
-     *     source: string,
-     *     eventId: string|number,
-     *     limit: number,
-     *     classification: Classification,
-     *     genre: string|Genre|Genre[],
-     *     organizerId: number,
-     *     keyword: string
-     * }} literal event search parameters
+     *         source: string,
+     *         limit: number,
+     *         eventId: number,
+     *         genre: string|Genre|Genre[],
+     *         organizerId: number,
+     *         keyword: string
+     *     }} literal event search parameters
      * @param [literal.source = 'composite'] the {@link EventSource} type, which
      *     can be <i>'ticketMaster'</i>, <i>'EventMonkey'</i>,
      *     or <i>'composite'</i> (by default)
@@ -53,7 +48,7 @@ export class EventManager {
      * @param [literal.organizerId] the id of the {@link Organizer} user type
      * @param [literal.keyword] a search string
      *
-     * @return {Promise<Array<Event>>} the event list of any matching events
+     * @return {Promise<Event[]>} the event list of any matching events
      */
     async search({ source = 'composite', limit = 20, eventId, genre,
                    organizerId, keyword }) {
@@ -75,7 +70,7 @@ export class EventManager {
         const promises = [];
 
         if (eventId) {
-            promises.push(eventSource.findByEventId(eventId, limit));
+            promises.push(eventSource.findByEventId(eventId));
         }
 
         if (genre) {
@@ -92,18 +87,15 @@ export class EventManager {
         }
 
         if (organizerId) {
-            promises.push(this.eventMonkey_.findByOrganizerId(organizerId, limit));
+            promises.push(this.eventMonkey_.findByOrganizerId(organizerId));
         }
 
         if (keyword) {
             promises.push(eventSource.findByKeyword(keyword, limit));
         }
 
-        const eventList = (await Promise.all(promises))
-            .reduce((acc, awaited) => {
-                acc.push(...awaited);
-                return acc;
-            }, []);
+        // flatten the resolved array of event lists into one array
+        const eventList = (await Promise.all(promises)).flat(1);
 
         // trim the events list to the limit
         eventList.length = Math.min(eventList.length, limit);

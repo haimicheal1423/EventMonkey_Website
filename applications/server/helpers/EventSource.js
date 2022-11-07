@@ -3,7 +3,6 @@ import fetch from 'node-fetch';
 import Event from '../models/Event.js';
 import Image from '../models/Image.js';
 import Genre from '../models/Genre.js';
-import Classification from '../models/Classification.js';
 import { Database } from './Database.js';
 
 /**
@@ -27,16 +26,14 @@ export class EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by matching the given event id.
+     * Finds a single {@link Event} by matching the given event id.
      *
-     * @param {string|number} eventId the id to locate the event details from
-     *     the source
-     * @param {number} limit the maximum size of the resulting array
+     * @param {number} eventId the EventMonkey event id
      *
-     * @returns {Promise<Event[]>} a list of events
+     * @returns {Promise<Event>} the event
      * @abstract
      */
-    findByEventId(eventId, limit) {
+    findByEventId(eventId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -218,21 +215,6 @@ export class TicketMasterSource extends EventSource {
             return new Image(undefined, ratio, width, height, url);
         }
 
-        function constructClassification(classification) {
-            // helper function for enhancing readability
-            function constructGenre(genreObj) {
-                if (!genreObj) {
-                    return new Genre(undefined, undefined);
-                }
-                return new Genre(genreObj['id'], genreObj['name']);
-            }
-
-            const segment = constructGenre(classification['segment']);
-            const genre = constructGenre(classification['genre']);
-            const subgenre = constructGenre(classification['subGenre']);
-            return new Classification(undefined, segment, genre, subgenre);
-        }
-
         // sometimes TicketMaster event properties are undefined, so try and
         // find the best information to fill in
         const description = eventObj['description']
@@ -248,8 +230,13 @@ export class TicketMasterSource extends EventSource {
         const images = eventObj['images']
             .map(image => constructImage(image));
 
-        const classifications = eventObj['classifications']
-            .map(classification => constructClassification(classification));
+        const genreSet = new Set();
+
+        eventObj['genres'].forEach(classObj => {
+            genreSet.add(new Genre(undefined, classObj['segment']['name']));
+            genreSet.add(new Genre(undefined, classObj['genre']['name']));
+            genreSet.add(new Genre(undefined, classObj['subGenre']['name']));
+        });
 
         return new Event(
             eventObj['id'],
@@ -258,23 +245,22 @@ export class TicketMasterSource extends EventSource {
             date,
             priceRange,
             images,
-            classifications
+            Array.from(genreSet)
         );
     }
 
     /**
-     * Finds a list of {@link Event}s by matching the given event id.
+     * Finds a single {@link Event} by matching the given event id.
      *
-     * @param {string} eventId the TicketMaster event id
-     * @param {number} limit the maximum size of the resulting array
+     * @param {number} eventId the EventMonkey event id
      *
-     * @returns {Promise<Event[]>} a list of events
+     * @returns {Promise<Event>} the event
      */
-    findByEventId(eventId, limit) {
+    findByEventId(eventId) {
         return this.ticketMasterEventRequest_({
             id: eventId,
-            size: limit
-        }, limit);
+            size: 1
+        }, 1);
     }
 
     /**
@@ -315,52 +301,6 @@ export class TicketMasterSource extends EventSource {
 export class EventMonkeySource extends EventSource {
 
     /**
-     * Constructs a {@link Classification} for the given EventMonkey
-     * classification and {@link Genre} ids.
-     *
-     * @param classId the EventMonkey classification id
-     * @param segmentId the EventMonkey segment id
-     * @param genreId the EventMonkey genre id
-     * @param subgenreId the EventMonkey subgenre id
-     *
-     * @returns {Promise<Classification>}
-     * @private
-     */
-    async constructClassification_(classId, segmentId, genreId, subgenreId) {
-        /**
-         * Constructs a {@link Genre} for a given EventMonkey genre id. The
-         * genre name is retrieved by querying the database.
-         *
-         * @param genreId the EventMonkey genre id
-         * @returns {Promise<Genre>}
-         */
-        async function constructGenre(genreId) {
-            const rows = await Database.query(
-                `SELECT genre.name
-                 FROM Genre genre
-                 WHERE genre.id = ?`, genreId
-            );
-
-            if (!rows[0]) {
-                // no genre results
-                return undefined;
-            }
-            const { name } = rows[0];
-            return new Genre(genreId, name);
-        }
-
-        // block until all genre types are constructed (asynchronously)
-        const [segment, genre, subgenre]
-            = await Promise.all([
-                constructGenre(segmentId),
-                constructGenre(genreId),
-                constructGenre(subgenreId)
-            ]);
-
-        return new Classification(classId, segment, genre, subgenre);
-    }
-
-    /**
      * Create an event by inserting it into the database. The event id will get
      * set if the insert operation was successful, and the event will be
      * assigned to the organizer.
@@ -390,15 +330,13 @@ export class EventMonkeySource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by matching the given event id.
+     * Finds a single {@link Event} by matching the given event id.
      *
-     * @param {string|number} eventId the id to locate the event details from
-     *     the source
-     * @param {number} limit the maximum size of the resulting array
+     * @param {number} eventId the EventMonkey event id
      *
-     * @returns {Promise<Event[]>} a list of events
+     * @returns {Promise<Event>} the event
      */
-    async findByEventId(eventId, limit) {
+    async findByEventId(eventId) {
         const eventRows = await Database.query(
             `SELECT event.*
              FROM Event event
@@ -407,7 +345,7 @@ export class EventMonkeySource extends EventSource {
 
         if (!eventRows[0]) {
             // no database results for the given event id
-            return [];
+            return undefined;
         }
 
         const { event_id: eId, name, price_ranges: priceRanges, dates,
@@ -419,31 +357,23 @@ export class EventMonkeySource extends EventSource {
         const event = new Event(eId, name, description, dateTime, priceRange);
 
         // block until database results are fetched
-        const classRows = await Database.query(
-            `SELECT class.*
-             FROM Classification class
-             JOIN Event_Classification_List ecl
-               USING (class_id)
-             WHERE ecl.event_id = ?`, eventId
+        const genreRows = await Database.query(
+            `SELECT genre.genre_id, genre.name
+             FROM Event_Genre_List egl
+             INNER JOIN Genre genre
+                USING (genre_id)
+             WHERE egl.event_id = ?`, eventId
         );
 
-        // block until all classifications are constructed (asynchronously)
-        const classList = await Promise.all(
-            classRows.map(row =>
-                this.constructClassification_(
-                    row['class_id'],
-                    row['segment_id'],
-                    row['genre_id'],
-                    row['subgenre_id']
-                )
-            ));
-
-        // after all classifications are resolved, add then to the event
-        classList.forEach(classification => {
-            event.addClassification(classification);
+        // convert the resulting json row array into an array of Genre
+        const genres = genreRows.map(row => {
+            return new Genre(row['genre_id'], row['name']);
         });
 
-        return [event];
+        // now add the genres to the event
+        genres.forEach(genre => event.addGenre(genre));
+
+        return event;
     }
 
     /**
@@ -513,26 +443,20 @@ export class CompositeSource extends EventSource {
         values.length = Math.min(values.length, limit);
 
         // values is an array of arrays, so flatten it to a single array
-        return values.reduce((acc, array) => {
-            acc.push(...array);
-            return acc;
-        }, []);
+        return values.flat(1);
     }
 
     /**
-     * Finds a list of {@link Event}s by matching the given event id.
+     * Finds a single {@link Event} by matching the given event id.
      *
-     * @param {string|number} eventId the id to locate the event details from
-     *     the source
+     * @param {number} eventId the EventMonkey event id
      *
-     * @param {number} limit the maximum size of the resulting array
-     *
-     * @returns {Promise<Event[]>} a list of events
+     * @returns {Promise<Event>} the event
      */
-    findByEventId(eventId, limit) {
+    findByEventId(eventId) {
         return this.collate_(source => {
-            return source.findByEventId(eventId, limit);
-        }, limit);
+            return source.findByEventId(eventId);
+        }, 1);
     }
 
     /**
