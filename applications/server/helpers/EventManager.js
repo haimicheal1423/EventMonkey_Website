@@ -72,15 +72,10 @@ export class EventManager {
                 throw new Error(`No event source defined for: '${source}'`);
         }
 
-        const eventList = [];
-
-        // helper function to reduce line length
-        async function addEvents(promise) {
-            eventList.push(...(await promise));
-        }
+        const promises = [];
 
         if (eventId) {
-            await addEvents(eventSource.findByEventId(eventId, limit));
+            promises.push(eventSource.findByEventId(eventId, limit));
         }
 
         if (genre) {
@@ -93,16 +88,22 @@ export class EventManager {
             } else {
                 names = [genre];
             }
-            await addEvents(eventSource.findByGenre(names, limit));
+            promises.push(eventSource.findByGenre(names, limit));
         }
 
         if (organizerId) {
-            await addEvents(this.eventMonkey_.findByOrganizerId(organizerId, limit));
+            promises.push(this.eventMonkey_.findByOrganizerId(organizerId, limit));
         }
 
         if (keyword) {
-            await addEvents(eventSource.findByKeyword(keyword, limit));
+            promises.push(eventSource.findByKeyword(keyword, limit));
         }
+
+        const eventList = (await Promise.all(promises))
+            .reduce((acc, awaited) => {
+                acc.push(...awaited);
+                return acc;
+            }, []);
 
         // trim the events list to the limit
         eventList.length = Math.min(eventList.length, limit);
