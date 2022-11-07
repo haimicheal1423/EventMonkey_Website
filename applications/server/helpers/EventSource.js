@@ -325,14 +325,33 @@ export class EventMonkeySource extends EventSource {
     }
 
     /**
-     * Finds all events owned by a specific organizer.
+     * Finds all events owned by a specific user.
      *
-     * @param organizerId the id of the organizer
+     * @param userId the EventMonkey id of the user
      *
      * @returns {Promise<Event[]>}
      */
-    async findByOrganizerId(organizerId) {
-        return [];
+    async findByUserId(userId) {
+        const eventRows = await Database.query(
+            `SELECT el.event_id
+             FROM Event_List el
+             WHERE el.user_id = ?`, userId
+        );
+
+        if (!eventRows[0]) {
+            // no database results for the given organizer id
+            return [];
+        }
+
+        // extract an array of the event ids from the query result
+        const eventIds = eventRows.map(row => row['event_id']);
+
+        // find all event details asynchronously
+        return await Promise.all(
+            eventIds.map(eventId => {
+                return this.findByEventId(eventId);
+            })
+        );
     }
 
     /**

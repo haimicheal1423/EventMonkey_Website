@@ -140,7 +140,7 @@ export class Attendee extends User {
      *
      * @param {User} user
      *
-     * @return {boolean} <code>true</code> if the user id matches another user
+     * @returns {boolean} <code>true</code> if the user id matches another user
      *     in the {@link friendsList} array.
      */
     isFriend(user) {
@@ -231,7 +231,7 @@ export class Notification {
      *
      * @param {string} text the text to search for
      *
-     * @return {boolean} <code>true</code> if the text is found in the
+     * @returns {boolean} <code>true</code> if the text is found in the
      *     notification.
      */
     containsText(text) {

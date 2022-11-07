@@ -15,7 +15,7 @@ export class Database {
      *
      * @param sql the sql query to execute
      * @param [values] optional values to execute the query
-     * @return {any} the database result
+     * @returns {any} the database result
      */
     static async query(sql, values) {
         let conn;
