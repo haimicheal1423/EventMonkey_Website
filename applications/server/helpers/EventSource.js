@@ -183,25 +183,26 @@ export class TicketMasterSource extends EventSource {
              * currency type. Duplicate currency types must be reduced to one
              * object and update the current mapped value
              */
-            const rangeMap = {};
+            const rangeMap = new Map();
 
             for (const nextPriceRange of priceRanges) {
                 const { currency: currency, min: nextMin, max: nextMax }
                     = nextPriceRange;
 
-                if (rangeMap[currency]) {
-                    const { min: curMin, max: curMax } = rangeMap[currency];
+                if (rangeMap.has(currency)) {
+                    const obj = rangeMap.get(currency);
 
                     // update the price range for the mapped currency type
-                    rangeMap[currency].min = Math.min(curMin, nextMin);
-                    rangeMap[currency].max = Math.max(curMax, nextMax);
+                    obj.min = Math.min(obj.min, nextMin);
+                    obj.max = Math.max(obj.max, nextMax);
                 } else {
                     // no mapping for currency type yet
-                    rangeMap[currency] = {
-                        currency: currency,
-                        min: nextMin,
-                        max: nextMax
-                    };
+                    rangeMap.set(currency,
+                        {
+                            currency: currency,
+                            min: nextMin,
+                            max: nextMax
+                        });
                 }
             }
 
