@@ -37,7 +37,7 @@ export class EventManager {
      *     source: string,
      *     eventId: string|number,
      *     classification: Classification,
-     *     segment: Genre,
+     *     genre: Genre,
      *     organizerId: number,
      *     keyword: string
      * }} literal event search parameters
@@ -46,15 +46,14 @@ export class EventManager {
      *     or <i>'composite'</i> (by default)
      * @param [literal.eventId] the event id, which can be a number for
      *     EventMonkey sources or a string for TicketMaster sources
-     * @param [literal.classification] the classification
-     * @param [literal.segment] the segment genre
+     * @param [literal.genre] the genre
      * @param [literal.organizerId] the id of the {@link Organizer} user type
      * @param [literal.keyword] a search string
      *
      * @return {Promise<Array<Event>>} the event list of any matching events
      */
-    async search({ source = 'composite', eventId, classification, segment,
-                   organizerId, keyword }) {
+    async search({ source = 'composite', eventId, genre, organizerId,
+                     keyword }) {
         let eventSource;
         switch (source) {
             case 'ticketMaster':
@@ -81,12 +80,8 @@ export class EventManager {
             await addEvents(eventSource.findByEventId(eventId));
         }
 
-        if (classification) {
-            await addEvents(eventSource.findByClassification(classification));
-        }
-
-        if (segment) {
-            await addEvents(eventSource.findBySegment(segment));
+        if (genre) {
+            await addEvents(eventSource.findByGenre(genre));
         }
 
         if (organizerId) {

@@ -40,28 +40,14 @@ export class EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s which contain the given
-     * {@link Classification} id.
+     * Finds a list of {@link Event}s by a genre.
      *
-     * @param {number} classificationId the classification id
-     *
-     * @returns {Classification[]} a list of events
-     * @abstract
-     */
-    findByClassification(classificationId) {
-        throw new Error('Unimplemented abstract function');
-    }
-
-    /**
-     * Finds a list of {@link Event}s using a segment. A segment is the primary
-     * {@link Genre} found in a {@link Classification}.
-     *
-     * @param {Genre} segment the event segment
+     * @param {Genre} genre the event genre to search by
      *
      * @returns {Event[]} a list of events
      * @abstract
      */
-    findBySegment(segment) {
+    findByGenre(genre) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -144,12 +130,12 @@ export class TicketMasterSource extends EventSource {
     }
 
     /**
-     * Fetch an array of {@link Event}s or {@link Classification}s by sending a
-     * request to the TicketMaster api with optional parameter values.
+     * Fetch an array of {@link Event}s by sending a request to the TicketMaster
+     * api with optional parameter values.
      *
      * @param values values to append as a query string when creating the api
      *     request
-     * @return {Event[]|Classification[]}
+     * @return {Event[]}
      * @private
      */
     async ticketMasterEventRequest_(values = {}) {
@@ -280,30 +266,16 @@ export class TicketMasterSource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s which contain the given
-     * {@link Classification} id.
+     * Finds a list of {@link Event}s by a genre.
      *
-     * @param {number} classificationId the classification id
-     *
-     * @returns {Classification[]} a list of events
-     */
-    findByClassification(classificationId) {
-        return this.ticketMasterEventRequest_({
-            classificationId: classificationId
-        });
-    }
-
-    /**
-     * Finds a list of {@link Event}s using a segment. A segment is the primary
-     * {@link Genre} found in a {@link Classification}.
-     *
-     * @param {Genre} segment the event segment
+     * @param {Genre} genre the event genre to search by
      *
      * @returns {Event[]} a list of events
+     * @abstract
      */
-    findBySegment(segment) {
+    findByGenre(genre) {
         return this.ticketMasterEventRequest_({
-            segmentId: segment.id
+            classificationName: [genre.name]
         });
     }
 
@@ -442,44 +414,14 @@ export class EventMonkeySource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s which contain the given
-     * {@link Classification} id.
+     * Finds a list of {@link Event}s by a genre.
      *
-     * @param {number} classificationId the classification id
-     *
-     * @returns {Classification[]} a list of events
-     */
-    async findByClassification(classificationId) {
-        /*
-         * block until database result is fetched
-         *
-         * note: rows array is expected to be 0 or 1 element in length since all
-         *       classifications have a unique class_id
-         */
-        const classRows = await Database.query(
-            `SELECT class.*
-             FROM Classification class
-             WHERE class.class_id = ?`, classificationId
-        );
-
-        // block until classification is constructed
-        return await this.constructClassification_(
-            classRows[0]['class_id'],
-            classRows[0]['segment_id'],
-            classRows[0]['genre_id'],
-            classRows[0]['subgenre_id']
-        );
-    }
-
-    /**
-     * Finds a list of {@link Event}s using a segment. A segment is the primary
-     * {@link Genre} found in a {@link Classification}.
-     *
-     * @param {Genre} segment the event segment
+     * @param {Genre} genre the event genre to search by
      *
      * @returns {Event[]} a list of events
+     * @abstract
      */
-    async findBySegment(segment) {
+    async findByGenre(genre) {
         return [];
     }
 
@@ -553,30 +495,16 @@ export class CompositeSource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s which contain the given
-     * {@link Classification} id.
+     * Finds a list of {@link Event}s by a genre.
      *
-     * @param {number} classificationId the classification id
-     *
-     * @returns {Classification[]} a list of events
-     */
-    findByClassification(classificationId) {
-        return this.collate_(source => {
-            return source.findByClassification(classificationId);
-        });
-    }
-
-    /**
-     * Finds a list of {@link Event}s using a segment. A segment is the primary
-     * {@link Genre} found in a {@link Classification}.
-     *
-     * @param {Genre} segment the event segment
+     * @param {Genre} genre the event genre to search by
      *
      * @returns {Event[]} a list of events
+     * @abstract
      */
-    findBySegment(segment) {
+    findByGenre(genre) {
         return this.collate_(source => {
-            return source.findBySegment(segment);
+            return source.findByGenre(genre);
         });
     }
 
