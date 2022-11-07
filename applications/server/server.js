@@ -2,6 +2,7 @@ const { application } = require("express");
 const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
+const cors = require("cors");
 
 dotenv.config({path:".env-local"});
 const app = express();
@@ -9,6 +10,10 @@ const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
+app.use(cors({
+    origin:'*',
+    methods:['POST','GET','PUT','DELETE','PATCH']
+}));
 
 const userRouter = require("./routes/user");
 const eventRouter = require("./routes/event")
