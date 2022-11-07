@@ -4,7 +4,7 @@ import Event from '../models/Event.js';
 import Image from '../models/Image.js';
 import Genre from '../models/Genre.js';
 import Classification from '../models/Classification.js';
-import { query as queryDB } from '../helpers/Database.js';
+import { Database } from './Database.js';
 
 /**
  * An interface to access event details from some data source (HTTP, databases,
@@ -348,7 +348,7 @@ export class EventMonkeySource extends EventSource {
          * @return {Promise<Genre>}
          */
         async function constructGenre(genreId, apiKey) {
-            const rows = await queryDB(
+            const rows = await Database.query(
                 `SELECT genre.name
                  FROM Genre genre
                  WHERE genre.id = ?`, genreId
@@ -394,7 +394,7 @@ export class EventMonkeySource extends EventSource {
      * @returns {Event[]} a list of events
      */
     async findByEventId(eventId) {
-        const eventRows = await queryDB(
+        const eventRows = await Database.query(
             `SELECT event.*
              FROM Event event
              WHERE event.event_id = ?`, eventId
@@ -414,7 +414,7 @@ export class EventMonkeySource extends EventSource {
         const event = new Event(eId, name, description, dateTime, priceRange);
 
         // block until database results are fetched
-        const classRows = await queryDB(
+        const classRows = await Database.query(
             `SELECT class.*
              FROM Classification class
              JOIN Event_Classification_List ecl
@@ -456,7 +456,7 @@ export class EventMonkeySource extends EventSource {
          * note: rows array is expected to be 0 or 1 element in length since all
          *       classifications have a unique class_id
          */
-        const classRows = await queryDB(
+        const classRows = await Database.query(
             `SELECT class.*
              FROM Classification class
              WHERE class.class_id = ?`, classificationId
@@ -517,8 +517,8 @@ export class CompositeSource extends EventSource {
     /**
      * Collect and combine all results from multiple {@link EventSource}s.
      *
-     * @param sourceMapper a function which maps a source to an array of values
-     *     to collate
+     * @param {function(EventSource): *} sourceMapper a function which maps a
+     *     source to an array of values to collate
      *
      * @return {any[]}
      * @private

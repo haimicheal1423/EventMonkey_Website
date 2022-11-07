@@ -8,23 +8,26 @@ const pool = mariadb.createPool({
     connectionLimit: 5
 });
 
-/**
- * Queries the database with optional query values.
- *
- * @param sql the sql query to execute
- * @param [values] optional values to execute the query
- * @return {any} the database result
- */
-export async function query(sql, values) {
-    let conn;
-    try {
-        conn = await pool.getConnection();
-        return await conn.query(sql, values);
-    } catch (err) {
-        throw err;
-    } finally {
-        if (conn) {
-            await conn.end();
+export class Database {
+
+    /**
+     * Queries the database with optional query values.
+     *
+     * @param sql the sql query to execute
+     * @param [values] optional values to execute the query
+     * @return {any} the database result
+     */
+    static async query(sql, values) {
+        let conn;
+        try {
+            conn = await pool.getConnection();
+            return await conn.query(sql, values);
+        } catch (err) {
+            throw err;
+        } finally {
+            if (conn) {
+                await conn.end();
+            }
         }
     }
 }

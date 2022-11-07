@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { query as queryDB } from '../helpers/Database.js'
+import { Database } from '../helpers/Database.js'
 
 export const router = Router();
 
@@ -31,9 +31,9 @@ router.get('/', async function(req, res) {
     try {
         let rows;
         if (req.query.genre) {
-            rows = await queryDB(eventGenreSqlQuery, req.query.genre);
+            rows = await Database.query(eventGenreSqlQuery, req.query.genre);
         } else {
-            rows = await queryDB(allEventsSqlQuery);
+            rows = await Database.query(allEventsSqlQuery);
         }
         res.status(200).json(rows);
     } catch (error) {
