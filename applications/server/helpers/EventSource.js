@@ -40,14 +40,14 @@ export class EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by a genre.
+     * Finds a list of {@link Event}s by an array of genre names.
      *
-     * @param {Genre} genre the event genre to search by
+     * @param {string[]} names an array of genre names
      *
      * @returns {Event[]} a list of events
      * @abstract
      */
-    findByGenre(genre) {
+    findByGenre(names) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -214,7 +214,7 @@ export class TicketMasterSource extends EventSource {
         function constructClassification(classification) {
             // helper function for enhancing readability
             function constructGenre(genreObj) {
-                return new Genre(undefined, genreObj['name'], genreObj['id']);
+                return new Genre(genreObj['id'], genreObj['name']);
             }
 
             const segment = constructGenre(classification['segment']);
@@ -266,16 +266,16 @@ export class TicketMasterSource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by a genre.
+     * Finds a list of {@link Event}s by an array of genre names.
      *
-     * @param {Genre} genre the event genre to search by
+     * @param {string[]} names an array of genre names
      *
      * @returns {Event[]} a list of events
      * @abstract
      */
-    findByGenre(genre) {
+    findByGenre(names) {
         return this.ticketMasterEventRequest_({
-            classificationName: [genre.name]
+            classificationName: names
         });
     }
 
@@ -312,14 +312,13 @@ export class EventMonkeySource extends EventSource {
      */
     async constructClassification_(classId, segmentId, genreId, subgenreId) {
         /**
-         * Constructs a {@link Genre} for a given EventMonkey genre id. The genre
-         * name is retrieved by querying the database.
+         * Constructs a {@link Genre} for a given EventMonkey genre id. The
+         * genre name is retrieved by querying the database.
          *
          * @param genreId the EventMonkey genre id
-         * @param [apiKey] the TicketMaster api key, if any
          * @return {Promise<Genre>}
          */
-        async function constructGenre(genreId, apiKey) {
+        async function constructGenre(genreId) {
             const rows = await Database.query(
                 `SELECT genre.name
                  FROM Genre genre
@@ -331,7 +330,7 @@ export class EventMonkeySource extends EventSource {
                 return undefined;
             }
             const { name } = rows[0];
-            return new Genre(genreId, apiKey, name);
+            return new Genre(genreId, name);
         }
 
         // block until all genre types are constructed (asynchronously)
@@ -414,14 +413,14 @@ export class EventMonkeySource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by a genre.
+     * Finds a list of {@link Event}s by an array of genre names.
      *
-     * @param {Genre} genre the event genre to search by
+     * @param {string[]} names an array of genre names
      *
      * @returns {Event[]} a list of events
      * @abstract
      */
-    async findByGenre(genre) {
+    findByGenre(names) {
         return [];
     }
 
@@ -495,16 +494,16 @@ export class CompositeSource extends EventSource {
     }
 
     /**
-     * Finds a list of {@link Event}s by a genre.
+     * Finds a list of {@link Event}s by an array of genre names.
      *
-     * @param {Genre} genre the event genre to search by
+     * @param {string[]} names an array of genre names
      *
      * @returns {Event[]} a list of events
      * @abstract
      */
-    findByGenre(genre) {
+    findByGenre(names) {
         return this.collate_(source => {
-            return source.findByGenre(genre);
+            return source.findByGenre(names);
         });
     }
 

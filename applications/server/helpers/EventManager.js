@@ -3,6 +3,7 @@ import {
     EventMonkeySource,
     TicketMasterSource
 } from './EventSource.js';
+import Genre from "../models/Genre.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -37,7 +38,7 @@ export class EventManager {
      *     source: string,
      *     eventId: string|number,
      *     classification: Classification,
-     *     genre: Genre,
+     *     genre: string|Genre|Genre[],
      *     organizerId: number,
      *     keyword: string
      * }} literal event search parameters
@@ -81,7 +82,16 @@ export class EventManager {
         }
 
         if (genre) {
-            await addEvents(eventSource.findByGenre(genre));
+            let names;
+            if (Array.isArray(genre)) {
+                names = genre.map(value => value instanceof Genre ? value.name
+                                                                  : value);
+            } else if (genre instanceof Genre) {
+                names = [genre.name];
+            } else {
+                names = [genre];
+            }
+            await addEvents(eventSource.findByGenre(names));
         }
 
         if (organizerId) {
