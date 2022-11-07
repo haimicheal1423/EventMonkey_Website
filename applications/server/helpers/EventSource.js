@@ -212,11 +212,6 @@ export class TicketMasterSource extends EventSource {
             return Object.values(rangeMap);
         }
 
-        function constructImage(imageObj) {
-            const { ratio, width, height, url } = imageObj;
-            return new Image(undefined, ratio, width, height, url);
-        }
-
         // sometimes TicketMaster event properties are undefined, so try and
         // find the best information to fill in
         const description = eventObj['description']
@@ -224,13 +219,21 @@ export class TicketMasterSource extends EventSource {
             || eventObj['pleaseNote']
             || 'No description available';
 
-        const date = new Date(eventObj['dates']['start']['dateTime']);
+        const date = {
+            startDateTime: new Date(eventObj['dates']['start']['dateTime'])
+        };
+
+        if (eventObj['dates']['end']) {
+            date.endDateTime = new Date(eventObj['dates']['end']['dateTime']);
+        }
 
         // not all TicketMaster events have defined price ranges
         const priceRange = constructPriceRange(eventObj['priceRanges'] || []);
 
-        const images = eventObj['images']
-            .map(image => constructImage(image));
+        const images = eventObj['images'].map(image => {
+            const { ratio, width, height, url } = image;
+            return new Image(undefined, ratio, width, height, url);
+        });
 
         const genreSet = new Set();
 
@@ -354,7 +357,7 @@ export class EventMonkeySource extends EventSource {
         const { event_id: eId, name, price_ranges: priceRanges, dates,
                 description } = eventRows[0];
 
-        const { dateTime } = JSON.parse(dates);
+        const dateTime = JSON.parse(dates);
         const priceRange = JSON.parse(priceRanges);
 
         const event = new Event(eId, name, description, dateTime, priceRange);

@@ -12,7 +12,7 @@ export default class Event {
     /** @type {string} */
     description;
 
-    /** @type {Date} */
+    /** @type {{ startDateTime: Date, [endDateTime: Date] }} */
     date;
 
     /** @type {{currency: string, min: number, max: number}} */
@@ -28,8 +28,8 @@ export default class Event {
      * @param {number} [eventId]
      * @param {string} name
      * @param {string} description
-     * @param {Date} date
-     * @param {{currency: string, min: number, max: number}} priceRange
+     * @param {{ startDateTime: Date, [endDateTime: Date] }} date
+     * @param {{ currency: string, min: number, max: number }} priceRange
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
      */
