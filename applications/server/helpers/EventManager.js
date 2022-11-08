@@ -14,7 +14,7 @@ export class EventManager {
         this.ticketMaster_ = new TicketMasterSource();
         this.eventMonkey_ = new EventMonkeySource();
         this.composite_
-            = new CompositeSource(this.ticketMaster_, this.eventMonkey_);
+            = new CompositeSource(this.eventMonkey_, this.ticketMaster_);
     }
 
     /**
@@ -27,7 +27,7 @@ export class EventManager {
      * is composite to get events from both the TicketMaster api and the
      * EventMonkey database.
      * <br>
-     * <b>Note:</b> the {@link organizerId} will force a search using the
+     * <b>Note:</b> the {@link userId} will force a search using the
      * EventMonkey source.
      *
      * @param {{

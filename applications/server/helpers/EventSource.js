@@ -381,22 +381,52 @@ export class EventMonkeySource extends EventSource {
 
         const event = new Event(eId, name, description, dateTime, priceRange);
 
-        // block until database results are fetched
-        const genreRows = await Database.query(
-            `SELECT genre.genre_id, genre.name
-             FROM Event_Genre_List egl
-             INNER JOIN Genre genre
-                USING (genre_id)
-             WHERE egl.event_id = ?`, eventId
-        );
+        async function loadGenres() {
+            // block until database results are fetched
+            const genreRows = await Database.query(
+                `SELECT genre.genre_id, genre.name
+                 FROM Event_Genre_List egl
+                 INNER JOIN Genre genre
+                    USING (genre_id)
+                 WHERE egl.event_id = ?`, eventId
+            );
 
-        // convert the resulting json row array into an array of Genre
-        const genres = genreRows.map(row => {
-            return new Genre(row['genre_id'], row['name']);
-        });
+            // convert the resulting json row array into an array of Genre
+            const genres = genreRows.map(row => {
+                return new Genre(row['genre_id'], row['name']);
+            });
 
-        // now add the genres to the event
-        genres.forEach(genre => event.addGenre(genre));
+            // now add the genres to the event
+            genres.forEach(genre => event.addGenre(genre));
+        }
+
+        async function loadImages() {
+            // block until database results are fetched
+            const imageRows = await Database.query(
+                `SELECT image.ratio, image.width, image.height, image.url
+             FROM Event_Image_List eil
+             INNER JOIN Image image
+                USING (image_id)
+             WHERE eil.event_id = ?`, eventId
+            );
+
+            // convert the resulting json row array into an array of Genre
+            const images = imageRows.map(row => {
+                return new Image(
+                    row['image_id'],
+                    row['ratio'],
+                    row['width'],
+                    row['height'],
+                    row['url']
+                );
+            });
+
+            // now add the images to the event
+            images.forEach(image => event.addImage(image));
+        }
+
+        // load genres and images asynchronously
+        await Promise.all([loadGenres(), loadImages()])
 
         return event;
     }
