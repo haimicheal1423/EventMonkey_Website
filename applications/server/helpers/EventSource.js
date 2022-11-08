@@ -476,7 +476,32 @@ export class EventMonkeySource extends EventSource {
      * @returns {Promise<Event[]>} a list of events
      */
     async findByKeyword(searchText, limit) {
-        return [];
+        // block until database results are fetched. This query will try and
+        // match the search text with the event title, name and genre names
+        const rows = await Database.query(
+            `SELECT DISTINCT egl.event_id
+             FROM Event event
+             INNER JOIN Event_Genre_List egl
+                USING (event_id)
+             INNER JOIN Genre genre
+                USING (genre_id)
+             WHERE MATCH(event.name, event.description) AGAINST (?)
+                OR MATCH(genre.name) AGAINST (?)`,
+            [searchText, searchText]
+        );
+
+        // extract an array of the event ids from the query result
+        const eventIds = rows.map(row => row['event_id']);
+
+        // limit the event ids now before querying for event details
+        eventIds.length = Math.min(eventIds.length, limit);
+
+        // find all event details asynchronously
+        return await Promise.all(
+            eventIds.map(eventId => {
+                return this.findByEventId(eventId);
+            })
+        );
     }
 }
 
