@@ -1,5 +1,4 @@
 import { CompositeSource, EventMonkeySource, TicketMasterSource } from './EventSource.js';
-import Genre from "../models/Genre.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -34,7 +33,7 @@ export class EventManager {
      *         source: string,
      *         limit: number,
      *         eventId: number,
-     *         genre: string|Genre|Genre[],
+     *         genres: string|string[],
      *         userId: number,
      *         keyword: string
      *     }} literal event search parameters
@@ -44,13 +43,13 @@ export class EventManager {
      * @param [literal.limit = 20] the maximum size of the resulting array
      * @param [literal.eventId] the event id, which can be a number for
      *     EventMonkey sources or a string for TicketMaster sources
-     * @param [literal.genre] the genre
+     * @param [literal.genres] the genre name (or an array of names)
      * @param [literal.userId] the EventMonkey {@link User} id
      * @param [literal.keyword] a search string
      *
      * @returns {Promise<Event[]>} the event list of any matching events
      */
-    async search({ source = 'composite', limit = 20, eventId, genre, userId,
+    async search({ source = 'composite', limit = 20, eventId, genres, userId,
                    keyword }) {
         let eventSource;
         switch (source) {
@@ -73,15 +72,12 @@ export class EventManager {
             promises.push(eventSource.findByEventId(eventId));
         }
 
-        if (genre) {
+        if (genres) {
             let names;
-            if (Array.isArray(genre)) {
-                names = genre.map(value => value instanceof Genre ? value.name
-                                                                  : value);
-            } else if (genre instanceof Genre) {
-                names = [genre.name];
+            if (Array.isArray(genres)) {
+                names = genres;
             } else {
-                names = [genre];
+                names = [genres];
             }
             promises.push(eventSource.findByGenre(names, limit));
         }
