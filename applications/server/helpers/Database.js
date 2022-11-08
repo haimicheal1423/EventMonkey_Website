@@ -26,7 +26,7 @@ export class Database {
             throw err;
         } finally {
             if (conn) {
-                await conn.end();
+                await conn.release();
             }
         }
     }
