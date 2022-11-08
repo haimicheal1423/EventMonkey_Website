@@ -25,7 +25,7 @@ export default function NavbarEM() {
             height="55"
             className="logo d-inline-block align-middle"
             />{' '}
-            <h5 href="/">
+            <h5 href="/home">
               EventMonkey
             </h5>
           </Navbar.Brand>
@@ -38,8 +38,8 @@ export default function NavbarEM() {
               <Nav.Link href="/signup">Signup</Nav.Link>
       
               <NavDropdown title="User" id="basic-nav-dropdown">
-                <NavDropdown.Item href=".pages/Profile.js">Profile</NavDropdown.Item>
-                <NavDropdown.Item href=".pages/Interests.js">
+                <NavDropdown.Item href="/dashboard">Profile</NavDropdown.Item>
+                <NavDropdown.Item href="/interests">
                   Interests
                 </NavDropdown.Item>
                 <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
