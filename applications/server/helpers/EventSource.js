@@ -410,7 +410,7 @@ export class EventMonkeySource extends EventSource {
                  WHERE eil.event_id = ?`, eventId
             );
 
-            // convert the resulting json row array into an array of Genre
+            // convert the resulting json row array into an array of Image
             const images = imageRows.map(row => {
                 return new Image(
                     row['image_id'],
