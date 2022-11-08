@@ -404,10 +404,10 @@ export class EventMonkeySource extends EventSource {
             // block until database results are fetched
             const imageRows = await Database.query(
                 `SELECT image.ratio, image.width, image.height, image.url
-             FROM Event_Image_List eil
-             INNER JOIN Image image
-                USING (image_id)
-             WHERE eil.event_id = ?`, eventId
+                 FROM Event_Image_List eil
+                 INNER JOIN Image image
+                    USING (image_id)
+                 WHERE eil.event_id = ?`, eventId
             );
 
             // convert the resulting json row array into an array of Genre
