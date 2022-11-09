@@ -63,7 +63,7 @@ export class EventManager {
                 eventSource = this.composite_;
                 break;
             default:
-                throw new Error(`No event source defined for: '${source}'`);
+                throw new Error(`No event source defined for: ${source}`);
         }
 
         const promises = [];
