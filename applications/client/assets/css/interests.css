@@ -1,0 +1,186 @@
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Fredoka One", cursive;
+  font-weight: 400;
+}
+
+h1 {
+  font-weight: 400;
+  color:chocolate;
+}
+
+nav {
+  background-color: #fff59e;
+}
+
+nav .navbar-brand {
+  color:chocolate;
+}
+nav div div ul .nav-item a{
+  color:chocolate;
+}
+
+body {
+  font-family: "Fredoka One", cursive;
+  color: chocolate;
+}
+
+body nav header a {
+  color: chocolate;
+}
+
+main {
+  padding-top: 50;
+  padding-bottom: 100;
+}
+
+main .card img{
+  padding: 10;
+}
+
+main .card-container{
+  padding: 40;
+}
+
+main div .title-card{
+  width: fit-content;
+  background-color: #fff59e;
+}
+
+main div .interests {
+  color: chocolate;
+  text-align: center;
+}
+
+main .card-group .card{
+  background-color: #fff59e;
+  margin: 20px;
+  font-size: small;
+  cursor: pointer;
+  transition: transform 200 ms ease-in;
+}
+
+main .card-group .card .card-select {
+  
+}
+
+main img {
+  z-index: 1;
+}
+
+footer {
+  background-color: chocolate;
+}
+
+/* Signup Css */
+
+.signup-box {
+  width: 360px;
+  height: 750px;
+  padding: 10px;
+  margin: auto;
+  background-color: #fffce2;
+  border-radius: 3px;
+  border-color: #660000;
+}
+
+.signup-box h1 {
+  text-align: center;
+  font-size: 25px;
+}
+
+.signup-box h4 {
+  font-size: 12px;
+  text-align: center;
+}
+  
+.signup-form {
+  width: 300px;
+  margin-left: 20px;
+  padding-bottom: 100;
+}
+
+.signup-form label {
+  display: flex;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+.signup-form input {
+  width: 100%;
+  padding: 7px;
+  border: none;
+  border: 1px solid gray;
+  border-radius: 6px;
+  outline: none;
+}
+.signup-form input[type="button"] {
+  width: 300px;
+  height: 35px;
+  margin-top: 20px;
+  border: none;
+  background-color: #49c1a2;
+  color: white;
+  font-size: 18px;
+}
+.signup-form p {
+  text-align: center;
+  padding-top: 10px;
+  font-size: 14px;
+}
+
+.form-select {
+  color: chocolate;
+  margin-top: 30;
+  border: 1px solid grey;
+}
+
+/* Login Css */
+
+.login-box {
+  width: 360px;
+  height: 325px;
+  margin: auto;
+  border-radius: 3px;
+  background-color: #fffce2;
+}
+
+.login-box h1 {
+  text-align: center;
+  padding-top: 20;
+  font-size: 30;
+}
+
+.login-form {
+  width: 300px;
+  margin-left: 20px;
+}
+
+.login-form label {
+  display: flex;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 7px;
+  border: none;
+  border: 1px solid gray;
+  border-radius: 6px;
+  outline: none;
+}
+
+.login-form input[type="button"] {
+  width: 320px;
+  height: 35px;
+  margin-top: 20px;
+  border: none;
+  background-color: #49c1a2;
+  color: white;
+  font-size: 18px;
+}
+
+.login-form p {
+  padding-top: 10;
+  text-align: center;
+}

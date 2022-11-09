@@ -1,4 +1,6 @@
 
+import { Database } from "../helpers/Database.js";
+
 const express = require('express');
 const router = express.Router();
 const pool = require("../helpers/database");
@@ -9,7 +11,7 @@ const status = require("http-status");
 router.get("/", async function (req, res) {
     try {
         const sqlQuery = 'SELECT * FROM User';
-        const rows = await pool.query(sqlQuery, req.params);
+        const rows = await Database.query(sqlQuery, req.params);
         res.status(200).json(rows);
     } catch (error) {
         res.status(400).send(error.message);
@@ -18,7 +20,8 @@ router.get("/", async function (req, res) {
 router.get('/:id', async function (req, res) {
     try {
         const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
-        const rows = await pool.query(sqlQuery, req.params.id);
+
+        const rows = await Database.query(sqlQuery, req.params.id);
         res.status(200).json(rows);
     } catch (error) {
         res.status(400).send(error.message);
@@ -32,7 +35,7 @@ router.post('/register', async function (req, res) {
         const encryptedPassword = await bcrypt.hash(password, 10)
 
         const sqlQuery = 'INSERT INTO User (type, username, email, password) VALUES (?,?,?,?)';
-        const result = await pool.query(sqlQuery, [type, username, email, encryptedPassword]);
+        const result = await Database.query(sqlQuery, [type, username, email, encryptedPassword]);
 
         res.status(200).json({ userId: result.insertId });
     } catch (error) {
@@ -46,7 +49,7 @@ router.post('/login', async function (req, res, next) {
     var password = req.body.password;
 
     console.log("email: ", email + " password: ", password);
-    const results = await pool.query('SELECT * FROM User WHERE email = ?', [email]);
+    const results = await Database.query('SELECT * FROM User WHERE email = ?', [email]);
 
     console.log(results);
 
