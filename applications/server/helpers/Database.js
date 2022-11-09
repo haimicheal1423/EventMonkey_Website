@@ -13,8 +13,8 @@ export class Database {
     /**
      * Queries the database with optional query values.
      *
-     * @param sql the sql query to execute
-     * @param [values] optional values to execute the query
+     * @param {string} sql the sql query to execute
+     * @param {any|any[]} [values] optional values to execute the query
      * @returns {any} the database result
      */
     static async query(sql, values) {
@@ -30,22 +30,26 @@ export class Database {
             }
         }
     }
+
+    /**
+     * Runs a batched query.
+     *
+     * @param {string} sql the sql query to execute
+     * @param {any|any[]} values values to execute the batched query
+     * @returns {Promise<mariadb.UpsertResult>
+     *         | Promise<mariadb.UpsertResult[]>} the database result
+     */
+    static async batch(sql, values) {
+        let conn;
+        try {
+            conn = await pool.getConnection();
+            return await conn.batch(sql, values);
+        } catch (err) {
+            throw err;
+        } finally {
+            if (conn) {
+                await conn.release();
+            }
+        }
+    }
 }
-
-
-// async function asyncFunction() {
-//   let conn;
-//   try {
-//     conn = await pool.getConnection();
-//     const rows = await conn.query("SELECT name from Event");
-//     console.table(rows);
-//   } catch (err) {
-//     throw err;
-//   } finally {
-//     if (conn) {
-//       await conn.end();
-//     }
-//   }
-// }
-
-// asyncFunction();
