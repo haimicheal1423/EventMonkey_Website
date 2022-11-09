@@ -237,13 +237,15 @@ export class TicketMasterSource extends EventSource {
 
         const genreSet = new Set();
 
-        // events with multiple classifications have a lot of overlapping genres
-        // and repeated genres inside of classifications themselves
-        eventObj['classifications'].forEach(classObj => {
-            genreSet.add(classObj['segment']['name']);
-            genreSet.add(classObj['genre']['name']);
-            genreSet.add(classObj['subGenre']['name']);
-        });
+        if (eventObj['classifications']) {
+            // events with multiple classifications have a lot of overlapping
+            // genres and repeated genres inside of classifications themselves
+            eventObj['classifications'].forEach(classObj => {
+                genreSet.add(classObj['segment']['name']);
+                genreSet.add(classObj['genre']['name']);
+                genreSet.add(classObj['subGenre']['name']);
+            });
+        }
 
         const genres = Array.from(genreSet).map(genre => {
             return new Genre(undefined, genre);
@@ -313,21 +315,327 @@ export class TicketMasterSource extends EventSource {
 export class EventMonkeySource extends EventSource {
 
     /**
+     * Adds an event to the database. The images and genres inside the event
+     * object will also be added to the database if they do not exist. Event id
+     * and genre/image ids will be populated with existing database values.
+     *
+     * @param {Event} event the event to add
+     * @param {function(any): void} callback a function which will be called after the database query finishes executing
+     *
+     * @returns {Promise<void>}
+     * @private
+     */
+    async addEvent_(event, callback) {
+        const result = await Database.query(
+            `INSERT INTO Event(name, price_ranges, dates, description)
+             VALUES (?, ?, ?, ?)`,
+            [event.name,
+            JSON.stringify(event.priceRanges),
+            JSON.stringify(event.dates),
+            event.description]
+        );
+
+        if (result.affectedRows > 0) {
+            // add any new genres or images to the database, existing ones will
+            // be ignored
+            await Promise.all([
+                this.addGenres_(event.genres),
+                this.addImages_(event.images)
+            ]);
+        }
+
+        if (callback) {
+            callback(result);
+        }
+    }
+
+    /**
+     * Removes an event from the database. This will not remove any images or
+     * genres from the database, although it will remove the associations.
+     *
+     * @param event the event to remove
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
+    async removeEvent_(event) {
+        // this will also remove any genres/images in the event genre/image list
+        // tables as well as the event list table
+        return Database.query(
+            `DELETE FROM Event
+             WHERE event_id = ?`,
+            event.id
+        );
+    }
+
+    /**
+     * Associates an {@link Event} to a {@link User} by adding an entry in the
+     * <code>Event_List</code> table. The user id can be either 'attendee' or
+     * 'organizer'.
+     *
+     * @param {number} eventId the EventMonkey event id
+     * @param {number} userId the EventMonkey user id to associate with the
+     *     event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
+    async addToEventList_(eventId, userId) {
+        return Database.query(
+            `INSERT IGNORE INTO Event_List(user_id, event_id)
+             VALUES (?, ?)`,
+            [userId, eventId]
+        );
+    }
+
+    /**
+     * Removes an event from the Event_List database table. This will not
+     * remove the event itself, but will remove the association with a
+     * {@link User}.
+     *
+     * @param {Event} event the event
+     * @param {User} user the user associated with the event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
+    async removeFromEventList_(event, user) {
+        return Database.query(
+            `DELETE FROM Event_List
+             WHERE user_id = ? AND event_id = ?`,
+            [user.id, event.id]
+        );
+    }
+
+    /**
+     * Associates a {@link Genre} to an {@link Event} by adding an entry in the
+     * <code>Event_Genre_List</code> table.
+     *
+     * @param {Event} event the event
+     * @param {Genre} genre the genre to associate with the event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
+    async addGenreToEventList_(event, genre) {
+        return Database.query(
+            `INSERT IGNORE INTO Event_Genre_List(event_id, genre_id)
+             VALUES (?, ?)`,
+            [event.id, genre.id]
+        );
+    }
+
+    /**
+     * Removes a genre from the Event_Genre_List database table. This will not
+     * remove the genre itself, but will remove the association with an
+     * {@link Event}.
+     *
+     * @param {Event} event the genre's event
+     * @param {Genre} genre the genre to remove
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
+    async removeGenreFromEventList_(event, genre) {
+        return Database.query(
+            `DELETE FROM Event_Genre_List
+             WHERE event_id = ? AND  genre_id = ?`,
+            [event.id, genre.id]
+        );
+    }
+
+    /**
+     * Associates an {@link Image} to an {@link Event} by adding an entry in the
+     * <code>Event_Image_List</code> table.
+     *
+     * @param {Event} event the event
+     * @param {Image} image the image to associate with the event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
+    async addImageToEventList_(event, image) {
+        return Database.query(
+            `INSERT IGNORE INTO Event_Image_List(event_id, image_id)
+             VALUES (?, ?)`,
+            [event.id, image.id]
+        );
+    }
+
+    /**
+     * Removes an image from the Event_Image_List database table. This will not
+     * remove the image itself, but will remove the association with an
+     * {@link Event}.
+     *
+     * @param {Event} event the image's event
+     * @param {Genre} image the image to remove
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
+    async removeImageFromEventList_(event, image) {
+        return Database.query(
+            `DELETE FROM Event_Image_List
+             WHERE event_id = ? AND  image_id = ?`,
+            [event.id, image.id]
+        );
+    }
+
+    /**
+     * Adds a list of {@link Genre} objects to the database. Any existing genre
+     * in the database with the same name will be skipped. The genre id will be
+     * set by whatever the database insert id is, or the current genre id if the
+     * genre already exists.
+     *
+     * @param {Genre[]} genres the genres to add
+     *
+     * @returns {Promise<void>}
+     * @private
+     */
+    async addGenres_(genres) {
+        if (!genres || genres.length === 0) {
+            // no genres to add!
+            return;
+        }
+
+        // first, try and add all genres to the database
+        await Promise.all(
+            genres.map(async genre => {
+                const result = await Database.query(
+                    `INSERT IGNORE INTO Genre(name)
+                     VALUES (?)`,
+                    genre.name
+                );
+
+                if (result.affectedRows > 0) {
+                    // genre did not exist in the database so set this genre id
+                    genre.id = result.insertId;
+                }
+            })
+        );
+
+        // second, find all existing genre ids that did not get set from the
+        // first step
+        await Promise.all(
+            genres.filter(genre => genre.id === undefined)
+                .map(async genre => {
+                    const result = await Database.query(
+                        `SELECT genre.genre_id
+                         FROM Genre genre
+                         WHERE genre.name = ?`,
+                        genre.name
+                    );
+
+                    if (result[0]) {
+                        // genre was found, so set the genre id
+                        genre.id = result[0]["genre_id"];
+                    }
+                })
+        );
+
+        // TODO: batched inserts require creative solution to map inserted ids
+        //       to genres
+        // await Database.batch(
+        //     `INSERT IGNORE INTO Genre(name)
+        //      VALUES (?)`,
+        //     genres.map(genre => [genre.name])
+        // );
+    }
+
+    /**
+     * Adds a list of {@link Image} objects to the database. Any existing image
+     * in the database with the same url will be skipped. The image id will be
+     * set by whatever the database insert id is, or the current image id if the
+     * image already exists.
+     *
+     * @param {Image[]} images the images to add
+     *
+     * @returns {Promise<void>}
+     * @private
+     */
+    async addImages_(images) {
+        if (!images || images.length === 0) {
+            // no images to add!
+            return;
+        }
+
+        // first, try and add all images to the database
+        await Promise.all(
+            images.map(async image => {
+                const result = await Database.query(
+                    `INSERT IGNORE INTO Image(ratio, width, height, url)
+                     VALUES (?, ?, ?, ?)`,
+                    [image.ratio, image.width, image.height, image.url]
+                );
+
+                if (result.affectedRows > 0) {
+                    // image did not exist in the database so set this image id
+                    image.id = result.insertId;
+                }
+            })
+        );
+
+        // second, find all existing image ids that did not get set from the
+        // first step
+        await Promise.all(
+            images.filter(image => image.id === undefined)
+                .map(async image => {
+                    const result = await Database.query(
+                        `SELECT image.image_id
+                         FROM Image image
+                         WHERE image.url = ?`,
+                        image.url
+                    );
+
+                    if (result[0]) {
+                        // image was found, so set the image id
+                        image.id = result[0]["image_id"];
+                    }
+                })
+        );
+
+        // TODO: batched inserts require creative solution to map inserted ids
+        //       to images
+        // const result = await Database.batch(
+        //     `INSERT IGNORE INTO Image(ratio, width, height, url)
+        //      VALUES (?, ?, ?, ?)`,
+        //     images.map(img => [img.ratio, img.width, img.height, img.url])
+        // );
+    }
+
+    /**
      * Create an event by inserting it into the database. The event id will get
      * set if the insert operation was successful, and the event will be
      * assigned to the organizer.
      *
-     * @param {Organizer} organizer the owner of this event
+     * @param {number} organizerId the EventMonkey user id of the event owner
      * @param {Event} event the event to insert into the database
      *
      * @returns {Promise<void>}
      */
-    async createEvent(organizer, event) {
-        // insert event details to database
-        // if successful
-        //   set event id
-        //   add event to organizer event list
-        // return event?
+    async createEvent(organizerId, event) {
+        // add the event to the Event table, and set the event id to the
+        // generated id
+        await this.addEvent_(event, result => {
+            if (result.affectedRows > 0) {
+                // set the event id to the generated database id
+                event.id = result.insertId;
+            }
+        });
+
+        if (!event.id) {
+            // event was not added to the database
+            return;
+        }
+
+        // once the event is added to the table, add the event to the organizer
+        // event list, add the genres to the event genres list, and add the
+        // images to the event images list asynchronously
+        await Promise.all([
+            this.addToEventList_(event.id, organizerId),
+            event.genres.map(genre => this.addGenreToEventList_(event, genre)),
+            event.images.map(image => this.addImageToEventList_(event, image))
+        ]);
     }
 
     /**

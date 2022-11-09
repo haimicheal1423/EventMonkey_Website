@@ -1,43 +1,8 @@
-import express, {Router} from "express";
-import { Database } from "../helpers/Database.js";
-import {EventManager} from "../helpers/EventManager.js";
-export const router =  Router();
+import { Router } from 'express';
 
+import { EventManager } from "../helpers/EventManager.js";
 
-// router.get("/", async function(req, res){
-//     try{
-//         const rows = await Database.query(allEventsSqlQuery);
-//         res.status(200).json(rows);
-//     } catch (error){
-//         res.status(400).send(error.message);
-//     }
-// });
-// router.get("/:id", async function(req, res){
-//     try{
-//         const sqlQuery = "SELECT event_id, name, dates FROM Event WHERE event_id=?";
-//         const rows = await pool.query(sqlQuery, req.params.id);
-//         res.status(200).json(rows);
-//     } catch (error){
-//         res.status(400).send(error.message);
-//     }
-// });
-
-// router.get("/:genre", async function(req, res, next){
-//     try{
-//         const rows = await pool.query(eventGenreSqlQuery, req.params.genre);
-//         if (rows && rows.length > 0) {
-//         res.status(200).json(rows);
-//         }
-//     } catch (error){
-//         res.status(400).send(error.message);
-//     }
-// });
-
-// router.post("/", async(req, res)=>{
-//     let emp = req.body;
-
-
-// })
+export const router = Router();
 
 const eventManager = new EventManager();
 
@@ -77,8 +42,33 @@ router.get('/', async function(req, res) {
     }
 });
 
-router.get('/create', async function(req, res) {
-    res.status(200);
+router.post('/create', async function(req, res) {
+    try {
+        if (!req.query.userId) {
+            res.status(400).send('No user id found');
+            return;
+        }
+
+        const userId = req.query.userId;
+        const name = req.body.name;
+        const description = req.body.description;
+        const dates = req.body.dates;
+        const priceRanges = req.body.priceRanges;
+        const genres = req.body.genres;
+        const images = req.body.images;
+
+        const eventId = await eventManager.createEvent(
+            userId,
+            name,
+            description,
+            dates,
+            priceRanges,
+            genres,
+            images
+        );
+
+        res.status(200).json({ eventId });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
 });
-
-
