@@ -1,15 +1,10 @@
-
 import { Database } from "../helpers/Database.js";
 import express, {Router} from "express";
 import bcrypt from "bcrypt";
 import status from "http-status";
 
-import { Router } from "express";
-import bcrypt from "bcrypt";
-import status from "http-status";
 
 export const router = Router();
-
 router.get("/", async function (req, res) {
     try {
         const sqlQuery = 'SELECT * FROM User';

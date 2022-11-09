@@ -25,7 +25,7 @@ export default function BannerEM() {
                     onClick={() => navigate(`/event/${searchText}`)}>Search</MDBBtn> {' '}
                 <MDBBtn
                     color='success'
-                    onClick={() => navigate(`/event`)}>View All Events</MDBBtn>
+                    onClick={() => navigate(`/event`)}>View All Events</MDBBtn>{' '}
             </form>
             <img
                 src="./eventmonkey-nobg.png"

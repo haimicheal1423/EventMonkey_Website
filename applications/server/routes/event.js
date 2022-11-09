@@ -1,10 +1,20 @@
 import { Router } from 'express';
-
+import { Database } from "../helpers/Database.js";
 import { EventManager } from "../helpers/EventManager.js";
-
 export const router = Router();
 
+
 const eventManager = new EventManager();
+
+router.get('/', async function(req,res){
+    try {
+        const sqlQuery = 'SELECT * FROM Event';
+        const rows = await Database.query(sqlQuery, req.params.id);
+        res.status(200).json(rows);
+    } catch (error) {
+        res.status(400).send(error.message)
+    }
+});
 
 router.get('/', async function(req, res) {
     try {
