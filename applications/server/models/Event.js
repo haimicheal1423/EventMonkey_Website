@@ -13,7 +13,7 @@ export default class Event {
     description;
 
     /** @type {{ startDateTime: Date, [endDateTime: Date] }} */
-    date;
+    dates;
 
     /** @type {{currency: string, min: number, max: number}[]} */
     priceRanges;
@@ -28,17 +28,17 @@ export default class Event {
      * @param {number} [eventId]
      * @param {string} name
      * @param {string} description
-     * @param {{ startDateTime: Date, [endDateTime: Date] }} date
+     * @param {{ startDateTime: Date, [endDateTime: Date] }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
      */
-    constructor(eventId, name, description, date, priceRanges, images = [],
+    constructor(eventId, name, description, dates, priceRanges, images = [],
                 genres = []) {
         this.id = eventId;
         this.name = name;
         this.description = description;
-        this.date = date;
+        this.dates = dates;
         this.priceRanges = priceRanges;
         this.images = images;
         this.genres = genres;

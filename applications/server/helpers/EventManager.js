@@ -1,4 +1,5 @@
 import { CompositeSource, EventMonkeySource, TicketMasterSource } from './EventSource.js';
+import Event from "../models/Event.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -97,5 +98,39 @@ export class EventManager {
         eventList.length = Math.min(eventList.length, limit);
 
         return eventList;
+    }
+
+    /**
+     * Creates an {@link Event} object and stores it in the database.
+     *
+     * @param {number} organizerId
+     * @param {string} name
+     * @param {string} description
+     * @param {{ startDateTime: Date, [endDateTime: Date] }} dates
+     * @param {{ currency: string, min: number, max: number }[]} priceRanges
+     * @param {Image[]} images
+     * @param {Genre[]} genres
+     * @return {Promise<number|undefined>} a promise for the generated event id
+     */
+    async createEvent(organizerId, name, description, dates,
+                      priceRanges, genres, images) {
+
+        // TODO: this data needs to be verified to be in the correct format.
+        //       Verify if the user id is an Organizer user type who owns this
+        //       event
+
+        const event = new Event(
+            undefined,
+            name,
+            description,
+            dates,
+            priceRanges,
+            images,
+            genres
+        );
+
+        await this.eventMonkey_.createEvent(organizerId, event);
+
+        return Number(event.id);
     }
 }
