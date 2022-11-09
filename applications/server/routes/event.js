@@ -41,9 +41,9 @@ router.get("/", async function(req, res){
 //     }
 // });
 
-router.get("/:genre", async function(req, res, next){
+router.get("/:id", async function(req, res, next){
     try{
-        const rows = await pool.query(eventGenreSqlQuery, req.params.genre);
+        const rows = await pool.query(allEventsSqlQuery, req.params.id);
         if (rows && rows.length > 0) {
         res.status(200).json(rows);
         }
