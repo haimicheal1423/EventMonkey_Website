@@ -1,12 +1,11 @@
 
 import { Database } from "../helpers/Database.js";
+import express, {Router} from "express";
+import bcrypt from "bcrypt";
+import status from "http-status";
 
-const express = require('express');
-const router = express.Router();
-const pool = require("../helpers/database");
-const bcrypt = require("bcrypt");
+export const router = Router();
 
-const status = require("http-status");
 
 router.get("/", async function (req, res) {
     try {
@@ -78,4 +77,3 @@ router.post('/login', async function (req, res, next) {
 
 })
 
-module.exports = router;

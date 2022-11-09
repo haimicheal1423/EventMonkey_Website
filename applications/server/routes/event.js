@@ -1,7 +1,7 @@
-<<<<<<< HEAD
-const express = require("express");
-const router = express.Router();
-const pool = require("../helpers/database");
+import express, {Router} from "express";
+import { Database } from "../helpers/Database.js";
+import {EventManager} from "../helpers/EventManager.js";
+export const router =  Router();
 
 const eventGenreSqlQuery =
   `select event.*, class.*
@@ -26,7 +26,7 @@ const allEventsSqlQuery =
 
 router.get("/", async function(req, res){
     try{
-        const rows = await pool.query(allEventsSqlQuery);
+        const rows = await Database.query(allEventsSqlQuery);
         res.status(200).json(rows);
     } catch (error){
         res.status(400).send(error.message);
@@ -42,30 +42,22 @@ router.get("/", async function(req, res){
 //     }
 // });
 
-router.get("/:genre", async function(req, res, next){
-    try{
-        const rows = await pool.query(eventGenreSqlQuery, req.params.genre);
-        if (rows && rows.length > 0) {
-        res.status(200).json(rows);
-        }
-    } catch (error){
-        res.status(400).send(error.message);
-    }
-});
+// router.get("/:genre", async function(req, res, next){
+//     try{
+//         const rows = await pool.query(eventGenreSqlQuery, req.params.genre);
+//         if (rows && rows.length > 0) {
+//         res.status(200).json(rows);
+//         }
+//     } catch (error){
+//         res.status(400).send(error.message);
+//     }
+// });
 
 // router.post("/", async(req, res)=>{
 //     let emp = req.body;
 
 
 // })
-
-module.exports = router;
-=======
-import { Router } from 'express';
-
-import { EventManager } from "../helpers/EventManager.js";
-
-export const router = Router();
 
 const eventManager = new EventManager();
 
@@ -108,4 +100,5 @@ router.get('/', async function(req, res) {
 router.get('/create', async function(req, res) {
     res.status(200);
 });
->>>>>>> origin/devBranch
+
+

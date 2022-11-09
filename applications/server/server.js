@@ -17,8 +17,8 @@ app.use(cors({
     methods:['POST','GET','PUT','DELETE','PATCH']
 }));
 
-const userRouter = require("./routes/user");
-const eventRouter = require("./routes/event")
+// const userRouter = require("./routes/user");
+// const eventRouter = require("./routes/event")
 
 app.use('/users', userRouter);
 app.use('/events', eventRouter);
