@@ -7,7 +7,7 @@ function Event() {
     const [events, setEvents] = useState([])
     const getAllEvents = () => {
         if(genre){
-            Axios.get(`http://localhost:4000/events/${genre}`).then((response) => {
+            Axios.get(`http://localhost:4000/events`, { params: { genre } }).then((response) => {
                 setEvents(response.data);
             });
         }else{
