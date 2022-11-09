@@ -3,35 +3,15 @@ import { Database } from "../helpers/Database.js";
 import {EventManager} from "../helpers/EventManager.js";
 export const router =  Router();
 
-const eventGenreSqlQuery =
-  `select event.*, class.*
-   from Genre genre
-   join Classification class
-   on genre.id = class.segment_id or genre.id = class.genre_id or genre.id = class.subgenre_id
-   join Event_Classification_List ec
-   using (class_id)
-   join Event event
-   using (event_id)
-   where genre.name = ?`;
 
-const allEventsSqlQuery =
-  `select event.*, class.*
-   from Genre genre
-   join Classification class
-   join Event_Classification_List ec
-   using (class_id)
-   join Event event
-   using (event_id)
-   group by event_id`;
-
-router.get("/", async function(req, res){
-    try{
-        const rows = await Database.query(allEventsSqlQuery);
-        res.status(200).json(rows);
-    } catch (error){
-        res.status(400).send(error.message);
-    }
-});
+// router.get("/", async function(req, res){
+//     try{
+//         const rows = await Database.query(allEventsSqlQuery);
+//         res.status(200).json(rows);
+//     } catch (error){
+//         res.status(400).send(error.message);
+//     }
+// });
 // router.get("/:id", async function(req, res){
 //     try{
 //         const sqlQuery = "SELECT event_id, name, dates FROM Event WHERE event_id=?";
