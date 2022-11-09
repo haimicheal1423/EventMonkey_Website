@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import status from "http-status";
 
 
-
+export const router = Router();
 router.get("/", async function (req, res) {
     try {
         const sqlQuery = 'SELECT * FROM User';
