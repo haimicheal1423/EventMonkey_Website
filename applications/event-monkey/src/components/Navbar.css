@@ -1,0 +1,12 @@
+.navbar{
+    background-color: #fff59e;
+}
+
+.navbar-brand h5{
+    display: inline-block;
+    color:chocolate;
+}
+
+#basic-navbar-nav a{
+    color:chocolate;
+}

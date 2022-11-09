@@ -1,0 +1,28 @@
+.bannerTitle {
+    color: chocolate;
+    padding-right: 150px;
+}
+
+.banner {
+    padding-top: 40px;
+}
+
+.banner img {
+    max-width: 80%;
+    height: auto;
+    padding-left: 170px;
+}
+
+.bannerForm {
+    padding-left: 170px;
+    padding-bottom: 20px;
+}
+
+.bannerForm input{
+    max-width: 450px;
+}
+
+/* Search Button Text */
+.ripple {
+    color:white;
+}

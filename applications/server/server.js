@@ -1,28 +1,27 @@
-const { application } = require("express");
-const express = require("express");
-const path = require("path");
-const dotenv = require("dotenv");
+import express from 'express';
+import cors from 'cors';
+import { config as loadDotEnv } from 'dotenv';
+import { router as userRouter } from './routes/user.js'
+import { router as eventRouter } from './routes/event.js'
 
-dotenv.config({path:".env-local"});
+loadDotEnv({ path: `.env-local` });
+
 const app = express();
-const PORT = process.env.PORT || 4000;
 
+app.use(cors());
 app.use(express.json());
+
 app.use(express.urlencoded({extended:false}));
+app.use(cors({
+    origin:'*',
+    methods:['POST','GET','PUT','DELETE','PATCH']
+}));
 
-const userRouter = require("./routes/user");
-const eventRouter = require("./routes/event")
+// const userRouter = require("./routes/user");
+// const eventRouter = require("./routes/event")
 
+app.use('/users', userRouter);
+app.use('/events', eventRouter);
 
-app.use("/users", userRouter);
-app.use("/events", eventRouter);
-
-// //set static folder
-// const homePage = path.join(__dirname, "../client/home.html");
-// // home
-// app.get("/", (req, res)=>{
-//     res.sendFile(homePage);
-// });
-
-
-app.listen(PORT, () =>  console.log(`Server started on port ${PORT}`));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
