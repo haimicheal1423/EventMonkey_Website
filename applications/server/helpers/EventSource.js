@@ -237,13 +237,15 @@ export class TicketMasterSource extends EventSource {
 
         const genreSet = new Set();
 
-        // events with multiple classifications have a lot of overlapping genres
-        // and repeated genres inside of classifications themselves
-        eventObj['classifications'].forEach(classObj => {
-            genreSet.add(classObj['segment']['name']);
-            genreSet.add(classObj['genre']['name']);
-            genreSet.add(classObj['subGenre']['name']);
-        });
+        if (eventObj['classifications']) {
+            // events with multiple classifications have a lot of overlapping
+            // genres and repeated genres inside of classifications themselves
+            eventObj['classifications'].forEach(classObj => {
+                genreSet.add(classObj['segment']['name']);
+                genreSet.add(classObj['genre']['name']);
+                genreSet.add(classObj['subGenre']['name']);
+            });
+        }
 
         const genres = Array.from(genreSet).map(genre => {
             return new Genre(undefined, genre);
