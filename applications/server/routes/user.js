@@ -1,4 +1,8 @@
+
 import { Database } from "../helpers/Database.js";
+import express, {Router} from "express";
+import bcrypt from "bcrypt";
+import status from "http-status";
 
 import { Router } from "express";
 import bcrypt from "bcrypt";
@@ -18,6 +22,7 @@ router.get("/", async function (req, res) {
 router.get('/:id', async function (req, res) {
     try {
         const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
+
         const rows = await Database.query(sqlQuery, req.params.id);
         res.status(200).json(rows);
     } catch (error) {
@@ -74,3 +79,4 @@ router.post('/login', async function (req, res, next) {
         });
 
 })
+
