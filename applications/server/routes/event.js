@@ -4,42 +4,18 @@ import {EventManager} from "../helpers/EventManager.js";
 export const router =  Router();
 
 
-// router.get("/", async function(req, res){
-//     try{
-//         const rows = await Database.query(allEventsSqlQuery);
-//         res.status(200).json(rows);
-//     } catch (error){
-//         res.status(400).send(error.message);
-//     }
-// });
-// router.get("/:id", async function(req, res){
-//     try{
-//         const sqlQuery = "SELECT event_id, name, dates FROM Event WHERE event_id=?";
-//         const rows = await pool.query(sqlQuery, req.params.id);
-//         res.status(200).json(rows);
-//     } catch (error){
-//         res.status(400).send(error.message);
-//     }
-// });
-
-// router.get("/:genre", async function(req, res, next){
-//     try{
-//         const rows = await pool.query(eventGenreSqlQuery, req.params.genre);
-//         if (rows && rows.length > 0) {
-//         res.status(200).json(rows);
-//         }
-//     } catch (error){
-//         res.status(400).send(error.message);
-//     }
-// });
-
-// router.post("/", async(req, res)=>{
-//     let emp = req.body;
-
-
-// })
 
 const eventManager = new EventManager();
+
+router.get('/', async function(req,res){
+    try {
+        const sqlQuery = 'SELECT * FROM Event';
+        const rows = await Database.query(sqlQuery, req.params.id);
+        res.status(200).json(rows);
+    } catch (error) {
+        res.status(400).send(error.message)
+    }
+});
 
 router.get('/', async function(req, res) {
     try {
