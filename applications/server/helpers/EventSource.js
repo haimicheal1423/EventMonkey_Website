@@ -312,6 +312,17 @@ export class TicketMasterSource extends EventSource {
  */
 export class EventMonkeySource extends EventSource {
 
+    /**
+     * Adds an event to the database. The images and genres inside the event
+     * object will also be added to the database if they do not exist. Event id
+     * and genre/image ids will be populated with existing database values.
+     *
+     * @param {Event} event the event to add
+     * @param {function(any): void} callback a function which will be called after the database query finishes executing
+     *
+     * @returns {Promise<void>}
+     * @private
+     */
     async addEvent_(event, callback) {
         const result = await Database.query(
             `INSERT INTO Event(name, price_ranges, dates, description)
@@ -336,6 +347,15 @@ export class EventMonkeySource extends EventSource {
         }
     }
 
+    /**
+     * Removes an event from the database. This will not remove any images or
+     * genres from the database, although it will remove the associations.
+     *
+     * @param event the event to remove
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
     async removeEvent_(event) {
         // this will also remove any genres/images in the event genre/image list
         // tables as well as the event list table
@@ -346,6 +366,18 @@ export class EventMonkeySource extends EventSource {
         );
     }
 
+    /**
+     * Associates an {@link Event} to a {@link User} by adding an entry in the
+     * <code>Event_List</code> table. The user id can be either 'attendee' or
+     * 'organizer'.
+     *
+     * @param {number} eventId the EventMonkey event id
+     * @param {number} userId the EventMonkey user id to associate with the
+     *     event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
     async addToEventList_(eventId, userId) {
         return Database.query(
             `INSERT IGNORE INTO Event_List(user_id, event_id)
@@ -354,6 +386,17 @@ export class EventMonkeySource extends EventSource {
         );
     }
 
+    /**
+     * Removes an event from the Event_List database table. This will not
+     * remove the event itself, but will remove the association with a
+     * {@link User}.
+     *
+     * @param {Event} event the event
+     * @param {User} user the user associated with the event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
     async removeFromEventList_(event, user) {
         return Database.query(
             `DELETE FROM Event_List
@@ -362,6 +405,16 @@ export class EventMonkeySource extends EventSource {
         );
     }
 
+    /**
+     * Associates a {@link Genre} to an {@link Event} by adding an entry in the
+     * <code>Event_Genre_List</code> table.
+     *
+     * @param {Event} event the event
+     * @param {Genre} genre the genre to associate with the event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
     async addGenreToEventList_(event, genre) {
         return Database.query(
             `INSERT IGNORE INTO Event_Genre_List(event_id, genre_id)
@@ -370,6 +423,17 @@ export class EventMonkeySource extends EventSource {
         );
     }
 
+    /**
+     * Removes a genre from the Event_Genre_List database table. This will not
+     * remove the genre itself, but will remove the association with an
+     * {@link Event}.
+     *
+     * @param {Event} event the genre's event
+     * @param {Genre} genre the genre to remove
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
     async removeGenreFromEventList_(event, genre) {
         return Database.query(
             `DELETE FROM Event_Genre_List
@@ -378,6 +442,16 @@ export class EventMonkeySource extends EventSource {
         );
     }
 
+    /**
+     * Associates an {@link Image} to an {@link Event} by adding an entry in the
+     * <code>Event_Image_List</code> table.
+     *
+     * @param {Event} event the event
+     * @param {Image} image the image to associate with the event
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
     async addImageToEventList_(event, image) {
         return Database.query(
             `INSERT IGNORE INTO Event_Image_List(event_id, image_id)
@@ -386,6 +460,17 @@ export class EventMonkeySource extends EventSource {
         );
     }
 
+    /**
+     * Removes an image from the Event_Image_List database table. This will not
+     * remove the image itself, but will remove the association with an
+     * {@link Event}.
+     *
+     * @param {Event} event the image's event
+     * @param {Genre} image the image to remove
+     *
+     * @returns {Promise<*>}
+     * @private
+     */
     async removeImageFromEventList_(event, image) {
         return Database.query(
             `DELETE FROM Event_Image_List
@@ -394,6 +479,17 @@ export class EventMonkeySource extends EventSource {
         );
     }
 
+    /**
+     * Adds a list of {@link Genre} objects to the database. Any existing genre
+     * in the database with the same name will be skipped. The genre id will be
+     * set by whatever the database insert id is, or the current genre id if the
+     * genre already exists.
+     *
+     * @param {Genre[]} genres the genres to add
+     *
+     * @returns {Promise<void>}
+     * @private
+     */
     async addGenres_(genres) {
         if (!genres || genres.length === 0) {
             // no genres to add!
@@ -444,6 +540,17 @@ export class EventMonkeySource extends EventSource {
         // );
     }
 
+    /**
+     * Adds a list of {@link Image} objects to the database. Any existing image
+     * in the database with the same url will be skipped. The image id will be
+     * set by whatever the database insert id is, or the current image id if the
+     * image already exists.
+     *
+     * @param {Image[]} images the images to add
+     *
+     * @returns {Promise<void>}
+     * @private
+     */
     async addImages_(images) {
         if (!images || images.length === 0) {
             // no images to add!
