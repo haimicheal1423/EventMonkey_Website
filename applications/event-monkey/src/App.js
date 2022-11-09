@@ -11,7 +11,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Interests from './pages/Interests'
 import AboutUs from './pages/AboutUs'
-import Events from './pages/Events'
+import Event from './pages/Event'
 
 
 
@@ -29,8 +29,7 @@ function App() {
           <Route path="/interests" element={<Interests />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/event" element={<Events />} />
-
+          <Route path="/event" element={<Event />} />
         </Routes>
         <hr></hr>
       <FooterEM/>

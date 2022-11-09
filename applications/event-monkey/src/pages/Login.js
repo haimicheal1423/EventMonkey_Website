@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, Link } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Axios from 'axios';
 
@@ -13,8 +14,8 @@ function Login() {
     const  handleSubmit = (e) => {
         e.preventDefault();
         if(email && password){
-            Axios.post(`http://eventmonkey.xyz:4000/users/login`,{email,password}).then((response) => {
-                navigate('/user/dashboard');
+            Axios.post(`http://localhost:4000/users/login`,{email,password}).then((response) => {
+                navigate('/dashboard');
                 localStorage.setItem('token',true);
             }).catch(e => {
                 alert(JSON.stringify(e.response.data));
@@ -26,12 +27,13 @@ function Login() {
 
     useEffect(() => {
         if(localStorage.getItem('token') === true ){
-            navigate('/user/dashboard');
+            navigate('/dashboard');
         }
     },[localStorage.getItem('token')])
 
     return (
         <Container>
+            <Card style={{padding:40, margin:40}}>
         <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="formBasicEmail">
                 <Form.Label>Email address</Form.Label>
@@ -46,6 +48,7 @@ function Login() {
                 Submit
             </Button>
         </Form>
+        </Card>
         </Container>
     );
 }

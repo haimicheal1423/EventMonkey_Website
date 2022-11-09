@@ -17,8 +17,8 @@ export default function NavbarEM() {
     <>
       <Navbar expand="lg" className="shadow border-bottom border-warning">
         <Container>
-          <Navbar.Brand href="home.html">
-            <img 
+          <Navbar.Brand href="/home">
+            <img
             src="./eventmonkey500.png"
             alt=""
             width="55"
@@ -36,7 +36,8 @@ export default function NavbarEM() {
               <Nav.Link href="/aboutus">About Us</Nav.Link>
               <Nav.Link href="/login">Login</Nav.Link>
               <Nav.Link href="/signup">Signup</Nav.Link>
-      
+              <Nav.Link href="/event">Event</Nav.Link>
+
               <NavDropdown title="User" id="basic-nav-dropdown">
                 <NavDropdown.Item href="/dashboard">Profile</NavDropdown.Item>
                 <NavDropdown.Item href="/interests">
@@ -59,6 +60,6 @@ export default function NavbarEM() {
 function CustomLink ({href, children, ...props}) {
   return (
     <Nav.Link href={href}>{children}</Nav.Link>
-    
-  ) 
+
+  )
 }
