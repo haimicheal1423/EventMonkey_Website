@@ -15,8 +15,8 @@ export default class Event {
     /** @type {{ startDateTime: Date, [endDateTime: Date] }} */
     date;
 
-    /** @type {{currency: string, min: number, max: number}} */
-    priceRange;
+    /** @type {{currency: string, min: number, max: number}[]} */
+    priceRanges;
 
     /** @type {Image[]} */
     images;
@@ -29,17 +29,17 @@ export default class Event {
      * @param {string} name
      * @param {string} description
      * @param {{ startDateTime: Date, [endDateTime: Date] }} date
-     * @param {{ currency: string, min: number, max: number }} priceRange
+     * @param {{ currency: string, min: number, max: number }[]} priceRanges
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
      */
-    constructor(eventId, name, description, date, priceRange, images = [],
+    constructor(eventId, name, description, date, priceRanges, images = [],
                 genres = []) {
         this.id = eventId;
         this.name = name;
         this.description = description;
         this.date = date;
-        this.priceRange = priceRange;
+        this.priceRanges = priceRanges;
         this.images = images;
         this.genres = genres;
     }
@@ -92,10 +92,18 @@ export default class Event {
      * @param {number} [max=min] the maximum price
      */
     setPriceRange(currency, min, max = min) {
-        this.priceRange = {
-            currency: currency,
-            min: min,
-            max: max
-        };
+        let found = false;
+        for (const priceRange of this.priceRanges) {
+            if (priceRange.currency !== currency) {
+                continue;
+            }
+            priceRange.min = min;
+            priceRange.max = max;
+            found = true;
+        }
+
+        if (!found) {
+            this.priceRanges.push({ currency, min, max });
+        }
     }
 }
