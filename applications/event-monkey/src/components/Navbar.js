@@ -17,15 +17,15 @@ export default function NavbarEM() {
     <>
       <Navbar expand="lg" className="shadow border-bottom border-warning">
         <Container>
-          <Navbar.Brand href="home.html">
-            <img 
+          <Navbar.Brand href="/home">
+            <img
             src="./eventmonkey500.png"
             alt=""
             width="55"
             height="55"
             className="logo d-inline-block align-middle"
             />{' '}
-            <h5 href="/">
+            <h5 href="/home">
               EventMonkey
             </h5>
           </Navbar.Brand>
@@ -36,10 +36,11 @@ export default function NavbarEM() {
               <Nav.Link href="/aboutus">About Us</Nav.Link>
               <Nav.Link href="/login">Login</Nav.Link>
               <Nav.Link href="/signup">Signup</Nav.Link>
-      
+              <Nav.Link href="/event">Event</Nav.Link>
+
               <NavDropdown title="User" id="basic-nav-dropdown">
-                <NavDropdown.Item href=".pages/Profile.js">Profile</NavDropdown.Item>
-                <NavDropdown.Item href=".pages/Interests.js">
+                <NavDropdown.Item href="/dashboard">Profile</NavDropdown.Item>
+                <NavDropdown.Item href="/interests">
                   Interests
                 </NavDropdown.Item>
                 <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
@@ -59,6 +60,6 @@ export default function NavbarEM() {
 function CustomLink ({href, children, ...props}) {
   return (
     <Nav.Link href={href}>{children}</Nav.Link>
-    
-  ) 
+
+  )
 }

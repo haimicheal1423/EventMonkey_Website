@@ -8,27 +8,31 @@ import FooterEM from './components/Footer.js';
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import Profile from './pages/Profile'
+import Dashboard from './pages/Dashboard'
 import Interests from './pages/Interests'
 import AboutUs from './pages/AboutUs'
+import Event from './pages/Event'
+
 
 
 function App() {
   return (
+
     <>
-        <NavbarEM/>
+      <NavbarEM/>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route exact path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/aboutus" element={<AboutUs />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/interests" element={<Interests />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/event" element={<Event />} />
         </Routes>
         <hr></hr>
-        <FooterEM/>
+      <FooterEM/>
       </div>
     </>
   );
