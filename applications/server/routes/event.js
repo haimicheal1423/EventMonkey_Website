@@ -1,9 +1,17 @@
+<<<<<<< HEAD
 import express, {Router} from "express";
 import { Database } from "../helpers/Database.js";
 import {EventManager} from "../helpers/EventManager.js";
 export const router =  Router();
 
 
+=======
+import { Router } from 'express';
+
+import { EventManager } from "../helpers/EventManager.js";
+
+export const router = Router();
+>>>>>>> d85e5926cebcadb040ffa44638413236dd4f7412
 
 const eventManager = new EventManager();
 
@@ -53,8 +61,33 @@ router.get('/', async function(req, res) {
     }
 });
 
-router.get('/create', async function(req, res) {
-    res.status(200);
+router.post('/create', async function(req, res) {
+    try {
+        if (!req.query.userId) {
+            res.status(400).send('No user id found');
+            return;
+        }
+
+        const userId = req.query.userId;
+        const name = req.body.name;
+        const description = req.body.description;
+        const dates = req.body.dates;
+        const priceRanges = req.body.priceRanges;
+        const genres = req.body.genres;
+        const images = req.body.images;
+
+        const eventId = await eventManager.createEvent(
+            userId,
+            name,
+            description,
+            dates,
+            priceRanges,
+            genres,
+            images
+        );
+
+        res.status(200).json({ eventId });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
 });
-
-
