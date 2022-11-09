@@ -187,7 +187,7 @@ export class TicketMasterSource extends EventSource {
             const rangeMap = new Map();
 
             for (const nextPriceRange of priceRanges) {
-                const { currency: currency, min: nextMin, max: nextMax }
+                const { currency, min: nextMin, max: nextMax }
                     = nextPriceRange;
 
                 if (rangeMap.has(currency)) {
@@ -237,10 +237,16 @@ export class TicketMasterSource extends EventSource {
 
         const genreSet = new Set();
 
-        eventObj['genres'].forEach(classObj => {
-            genreSet.add(new Genre(undefined, classObj['segment']['name']));
-            genreSet.add(new Genre(undefined, classObj['genre']['name']));
-            genreSet.add(new Genre(undefined, classObj['subGenre']['name']));
+        // events with multiple classifications have a lot of overlapping genres
+        // and repeated genres inside of classifications themselves
+        eventObj['classifications'].forEach(classObj => {
+            genreSet.add(classObj['segment']['name']);
+            genreSet.add(classObj['genre']['name']);
+            genreSet.add(classObj['subGenre']['name']);
+        });
+
+        const genres = Array.from(genreSet).map(genre => {
+            return new Genre(undefined, genre);
         });
 
         return new Event(
@@ -250,7 +256,7 @@ export class TicketMasterSource extends EventSource {
             date,
             priceRange,
             images,
-            Array.from(genreSet)
+            genres
         );
     }
 
@@ -335,7 +341,8 @@ export class EventMonkeySource extends EventSource {
         const eventRows = await Database.query(
             `SELECT el.event_id
              FROM Event_List el
-             WHERE el.user_id = ?`, userId
+             WHERE el.user_id = ?`,
+            userId
         );
 
         if (!eventRows[0]) {
@@ -365,7 +372,8 @@ export class EventMonkeySource extends EventSource {
         const eventRows = await Database.query(
             `SELECT event.*
              FROM Event event
-             WHERE event.event_id = ?`, eventId
+             WHERE event.event_id = ?`,
+            eventId
         );
 
         if (!eventRows[0]) {
@@ -388,7 +396,8 @@ export class EventMonkeySource extends EventSource {
                  FROM Event_Genre_List egl
                  INNER JOIN Genre genre
                     USING (genre_id)
-                 WHERE egl.event_id = ?`, eventId
+                 WHERE egl.event_id = ?`,
+                eventId
             );
 
             // convert the resulting json row array into an array of Genre
