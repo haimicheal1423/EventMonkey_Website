@@ -73,20 +73,6 @@ export class EventSource {
 export class TicketMasterSource extends EventSource {
 
     /**
-     * The base URL for TicketMaster's Event resource
-     * @private
-     * @type {string}
-     */
-    static eventURL_ = 'https://app.ticketmaster.com/discovery/v2/events';
-
-    /**
-     * The TicketMaster api key
-     * @private
-     * @type {string}
-     */
-    static apiKey_ = 'GizI5muMuL6p9HaGh2FkmyHz9Hv3WMfW';
-
-    /**
      * Fetches a response from a URL. Query parameters can be added to the base
      * URL by populating key-value pairs in the <code>values</code> object. For
      * example,
@@ -146,8 +132,8 @@ export class TicketMasterSource extends EventSource {
         // make an api request using the events url and api key, then spread out
         // the optional query parameters
         const response = await this.apiRequest_(
-            TicketMasterSource.eventURL_,
-            { apikey: TicketMasterSource.apiKey_, ...values }
+            'https://app.ticketmaster.com/discovery/v2/events',
+            { apikey: process.env.TICKETMASTER_API_KEY, ...values }
         );
 
         const json = await response.json()
