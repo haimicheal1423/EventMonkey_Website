@@ -1,10 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import { config as loadDotEnv } from 'dotenv';
+
 import { router as userRouter } from './routes/user.js'
 import { router as eventRouter } from './routes/event.js'
-
-loadDotEnv({ path: `.env-prod` });
 
 const app = express();
 
@@ -16,9 +14,6 @@ app.use(cors({
     origin:'*',
     methods:['POST','GET','PUT','DELETE','PATCH']
 }));
-
-// const userRouter = require("./routes/user");
-// const eventRouter = require("./routes/event")
 
 app.use('/users', userRouter);
 app.use('/events', eventRouter);

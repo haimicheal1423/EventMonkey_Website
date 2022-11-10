@@ -21,7 +21,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "prod": "node -r dotenv/config server.js dotenv_config_path=.env-prod",
+    "local": "node -r dotenv/config server.js dotenv_config_path=.env-local",
     "client": "cd ../react-client/web && npm start",
     "dev": "concurrently \"nodemon server.js\" \" npm run client\""
   },
