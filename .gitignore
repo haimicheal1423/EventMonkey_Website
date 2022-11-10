@@ -1,10 +1,10 @@
-<<<<<<< HEAD
-.DS_Store
+# vs code files
+*.DS_Store
 .vscode
-=======
+
 # intellij files
 /.idea
-*.DS_Store
 *.iml
->>>>>>> origin
+
+# node
 node_modules/
