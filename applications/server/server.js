@@ -4,7 +4,7 @@ import { config as loadDotEnv } from 'dotenv';
 import { router as userRouter } from './routes/user.js'
 import { router as eventRouter } from './routes/event.js'
 
-loadDotEnv({ path: `.env-local` });
+loadDotEnv({ path: `.env-prod` });
 
 const app = express();
 
