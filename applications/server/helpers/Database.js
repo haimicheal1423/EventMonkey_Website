@@ -1,11 +1,12 @@
 import mariadb from 'mariadb';
 
 const pool = mariadb.createPool({
-    host: 'eventmonkey.xyz',
-    user: 'dev',
-    password: 'csc648',
-    database: 'dev',
-    connectionLimit: 5
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    connectionLimit: process.env.DB_CONN_LIMIT || 10,
 });
 
 export class Database {
@@ -15,7 +16,7 @@ export class Database {
      *
      * @param {string} sql the sql query to execute
      * @param {any|any[]} [values] optional values to execute the query
-     * @returns {any} the database result
+     * @returns {Promise<any>} the database result
      */
     static async query(sql, values) {
         let conn;

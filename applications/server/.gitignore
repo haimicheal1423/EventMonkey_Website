@@ -1,0 +1,3 @@
+# evnironment settings should not be version controlled
+.env-local
+.env-prod
