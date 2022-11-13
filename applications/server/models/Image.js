@@ -4,7 +4,10 @@
  */
 export default class Image {
 
-    /** @type {number} */
+    /**
+     * The EventMonkey image id.
+     * @type {number}
+     */
     id;
 
     /**
@@ -13,10 +16,16 @@ export default class Image {
      */
     ratio;
 
-    /** @type {number} */
+    /**
+     * The image width.
+     *  @type {number}
+     */
     width;
 
-    /** @type {number} */
+    /**
+     * The image height.
+     * @type {number}
+     */
     height;
 
     /**
@@ -26,17 +35,43 @@ export default class Image {
     url;
 
     /**
-     * @param {number} id
-     * @param {string} ratio
-     * @param {number} width image width
-     * @param {number} height image height
+     * A static factory function to create an image with an initially undefined
+     * id.
+     *
+     * @param {string} ratio the image aspect ratio
+     * @param {number} width the image width
+     * @param {number} height the image height
      * @param {string} url the location to the actual image resource
+     *
+     * @returns {Image}
      */
-    constructor(id, ratio, width, height, url) {
-        this.id = id;
-        this.ratio = ratio;
-        this.width = width;
-        this.height = height;
-        this.url = url;
+    static create(ratio, width, height, url) {
+        const image = new Image();
+        image.ratio = ratio;
+        image.width = width;
+        image.height = height;
+        image.url = url;
+        return image;
+    }
+
+    /**
+     * A static factory function to create an image with an initially undefined
+     * id.
+     *
+     * @param {string} id the EventMonkey image id
+     * @param {string} ratio the image aspect ratio
+     * @param {number} width the image width
+     * @param {number} height the image height
+     * @param {string} url the location to the actual image resource
+     *
+     * @returns {Image}
+     */
+    static createWithId(id, ratio, width, height, url) {
+        const image = new Image();
+        image.ratio = ratio;
+        image.width = width;
+        image.height = height;
+        image.url = url;
+        return image;
     }
 }

@@ -220,7 +220,7 @@ export class TicketMasterSource extends EventSource {
 
         const images = eventObj['images'].map(image => {
             const { ratio, width, height, url } = image;
-            return new Image(undefined, ratio, width, height, url);
+            return Image.create(ratio, width, height, url);
         });
 
         // a set to ensure genre names are unique
@@ -242,8 +242,8 @@ export class TicketMasterSource extends EventSource {
             });
         }
 
-        const genres = Array.from(genreSet).map(genre => {
-            return new Genre(undefined, genre);
+        const genres = Array.from(genreSet).map(name => {
+            return Genre.create(name);
         });
 
         const event = new Event(
@@ -728,7 +728,7 @@ export class EventMonkeySource extends EventSource {
 
             // convert the resulting json row array into an array of Genre
             const genres = genreRows.map(row => {
-                return new Genre(row['genre_id'], row['name']);
+                return Genre.createWithId(row['genre_id'], row['name']);
             });
 
             // now add the genres to the event
@@ -747,7 +747,7 @@ export class EventMonkeySource extends EventSource {
 
             // convert the resulting json row array into an array of Image
             const images = imageRows.map(row => {
-                return new Image(
+                return Image.createWithId(
                     row['image_id'],
                     row['ratio'],
                     row['width'],
