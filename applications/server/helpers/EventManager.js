@@ -1,4 +1,4 @@
-import { CompositeSource, EventMonkeySource, TicketMasterSource } from './EventSource.js';
+import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
 import Event from "../models/Event.js";
 
 /**
@@ -13,8 +13,11 @@ export class EventManager {
     constructor() {
         this.ticketMaster_ = new TicketMasterSource();
         this.eventMonkey_ = new EventMonkeySource();
-        this.composite_
-            = new CompositeSource(this.eventMonkey_, this.ticketMaster_);
+
+        this.composite_ = new CompositeSource(
+            this.eventMonkey_,
+            this.ticketMaster_
+        );
     }
 
     /**
@@ -106,13 +109,14 @@ export class EventManager {
      * @param {number} organizerId
      * @param {string} name
      * @param {string} description
+     * @param {string} location
      * @param {{ startDateTime: Date, [endDateTime: Date] }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
      * @param {Image[]} images
      * @param {Genre[]} genres
      * @return {Promise<number|undefined>} a promise for the generated event id
      */
-    async createEvent(organizerId, name, description, dates,
+    async createEvent(organizerId, name, description, location, dates,
                       priceRanges, genres, images) {
 
         // TODO: this data needs to be verified to be in the correct format.
@@ -123,6 +127,7 @@ export class EventManager {
             undefined,
             name,
             description,
+            location,
             dates,
             priceRanges,
             images,

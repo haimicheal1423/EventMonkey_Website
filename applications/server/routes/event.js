@@ -62,6 +62,7 @@ router.post('/create', async function(req, res) {
         const userId = req.query.userId;
         const name = req.body.name;
         const description = req.body.description;
+        const location = req.body.location;
         const dates = req.body.dates;
         const priceRanges = req.body.priceRanges;
         const genres = req.body.genres;
@@ -71,6 +72,7 @@ router.post('/create', async function(req, res) {
             userId,
             name,
             description,
+            location,
             dates,
             priceRanges,
             genres,

@@ -1,4 +1,3 @@
-
 import fetch from 'node-fetch';
 
 import Event from '../models/Event.js';
@@ -206,6 +205,8 @@ export class TicketMasterSource extends EventSource {
             || eventObj['pleaseNote']
             || 'No description available';
 
+        const location = 'No location available';
+
         const date = {
             startDateTime: new Date(eventObj['dates']['start']['dateTime'])
         };
@@ -248,6 +249,7 @@ export class TicketMasterSource extends EventSource {
             eventObj['id'],
             eventObj['name'],
             description,
+            location,
             date,
             priceRange,
             images,
@@ -262,7 +264,7 @@ export class TicketMasterSource extends EventSource {
      *
      * @returns {Promise<Event>} the event
      */
-    findByEventId(eventId) {
+    async findByEventId(eventId) {
         return this.ticketMasterEventRequest_({
             id: eventId,
             size: 1
@@ -278,7 +280,7 @@ export class TicketMasterSource extends EventSource {
      *
      * @returns {Promise<Event[]>} a list of events
      */
-    findByGenre(names, limit) {
+    async findByGenre(names, limit) {
         return this.ticketMasterEventRequest_({
             classificationName: names,
             size: limit
@@ -293,7 +295,7 @@ export class TicketMasterSource extends EventSource {
      *
      * @returns {Promise<Event[]>} a list of events
      */
-    findByKeyword(searchText, limit) {
+    async findByKeyword(searchText, limit) {
         return this.ticketMasterEventRequest_({
             keyword: searchText,
             size: limit
@@ -320,12 +322,14 @@ export class EventMonkeySource extends EventSource {
      */
     async addEvent_(event, callback) {
         const result = await Database.query(
-            `INSERT INTO Event(name, price_ranges, dates, description)
-             VALUES (?, ?, ?, ?)`,
-            [event.name,
-            JSON.stringify(event.priceRanges),
-            JSON.stringify(event.dates),
-            event.description]
+            `INSERT INTO Event(name, description, location, dates, price_ranges)
+             VALUES (?, ?, ?, ?, ?)`, [
+                event.name,
+                event.description,
+                event.location,
+                JSON.stringify(event.priceRanges),
+                JSON.stringify(event.dates)
+            ]
         );
 
         if (result.affectedRows > 0) {
@@ -682,13 +686,26 @@ export class EventMonkeySource extends EventSource {
             return undefined;
         }
 
-        const { event_id: eId, name, price_ranges: priceRanges, dates,
-                description } = eventRows[0];
+        const {
+            event_id: eId,
+            name,
+            description,
+            location,
+            dates,
+            price_ranges: priceRanges
+        } = eventRows[0];
 
         const dateTime = JSON.parse(dates);
         const priceRange = JSON.parse(priceRanges);
 
-        const event = new Event(eId, name, description, dateTime, priceRange);
+        const event = new Event(
+            eId,
+            name,
+            description,
+            location,
+            dateTime,
+            priceRange
+        );
 
         async function loadGenres() {
             // block until database results are fetched
