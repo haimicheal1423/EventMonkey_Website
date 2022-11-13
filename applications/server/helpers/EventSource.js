@@ -863,26 +863,26 @@ export class CompositeSource extends EventSource {
      * Collect and combine all results from multiple {@link EventSource}s.
      *
      * @param {function(EventSource): any} sourceMapper a function which maps a
-     *     source to an array of values to collate
+     *     source to an array of values to accumulate
      *
      * @param {number} limit the maximum size of the resulting array
      *
      * @returns {Promise<any[]>} a promise for a list of results
      * @private
      */
-    async collate_(sourceMapper, limit) {
-        /** @type {any[][]} */
-        const values = await Promise.all(
+    async accumulate_(sourceMapper, limit) {
+        /** @type {any[]} */
+        const values = (await Promise.all(
             this.sources_.map(source => {
                 return sourceMapper(source);
             })
-        );
+        )).flat(1); // flattens any[][] to any[]
 
         // trim the values list to the limit
         values.length = Math.min(values.length, limit);
 
         // values is an array of arrays, so flatten it to a single array
-        return values.flat(1);
+        return values;
     }
 
     /**
@@ -893,7 +893,7 @@ export class CompositeSource extends EventSource {
      * @returns {Promise<Event>} the event
      */
     findByEventId(eventId) {
-        return this.collate_(source => {
+        return this.accumulate_(source => {
             return source.findByEventId(eventId);
         }, 1);
     }
@@ -908,7 +908,7 @@ export class CompositeSource extends EventSource {
      * @returns {Promise<Event[]>} a list of events
      */
     findByGenre(names, limit) {
-        return this.collate_(source => {
+        return this.accumulate_(source => {
             return source.findByGenre(names, limit);
         }, limit);
     }
@@ -923,7 +923,7 @@ export class CompositeSource extends EventSource {
      * @returns {Promise<Event[]>} a list of events
      */
     findByKeyword(searchText, limit) {
-        return this.collate_(source => {
+        return this.accumulate_(source => {
             return source.findByKeyword(searchText, limit);
         }, limit);
     }
