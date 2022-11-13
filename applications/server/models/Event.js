@@ -7,6 +7,9 @@ export default class Event {
     id;
 
     /** @type {string} */
+    source;
+
+    /** @type {string} */
     name;
 
     /** @type {string} */
@@ -28,7 +31,7 @@ export default class Event {
     genres;
 
     /**
-     * @param {number} [eventId]
+     * @param {string} source
      * @param {string} name
      * @param {string} description
      * @param {string} location
@@ -37,9 +40,9 @@ export default class Event {
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
      */
-    constructor(eventId, name, description, location, dates, priceRanges,
+    constructor(source, name, description, location, dates, priceRanges,
                 images = [], genres = []) {
-        this.id = eventId;
+        this.source = source;
         this.name = name;
         this.description = description;
         this.location = location;
@@ -110,5 +113,23 @@ export default class Event {
         if (!found) {
             this.priceRanges.push({ currency, min, max });
         }
+    }
+}
+
+/**
+ * A container for event ids and a source which specifies where the data is
+ * stored.
+ */
+export class EventList {
+
+    /** @type {string} */
+    source;
+
+    /** @type {number[]|string[]} */
+    eventIds;
+
+    constructor(source, eventIds) {
+        this.source = source;
+        this.eventIds = eventIds;
     }
 }

@@ -1,3 +1,5 @@
+import { EventList } from "./Event.js";
+
 /**
  * The {@link Attendee} user type who can search and add Events to their
  * favorites list to attend.
@@ -36,7 +38,7 @@ export class User {
     /** @type {Image} */
     profileImage;
 
-    /** @type {Event[]} */
+    /** @type {EventList[]} */
     eventList;
 
     /**
@@ -46,7 +48,7 @@ export class User {
      * @param {string} password
      * @param {string} username
      * @param {Image} profileImage
-     * @param {Event[]} eventList
+     * @param {EventList[]} eventList
      */
     constructor(userId, type, email, password, username, profileImage,
                 eventList) {
@@ -68,18 +70,28 @@ export class User {
      * @param {Event} event the event to add
      */
     addEvent(event) {
-        this.eventList.push(event);
+        for (const sourceList of this.eventList) {
+            if (sourceList.source === event.source) {
+                sourceList.eventIds.push(event.id);
+                break;
+            }
+        }
     }
 
     /**
-     * Remove every occurrence of the given event from the
-     * {@link eventList} array.
+     * Remove the first occurrence of the given event from the
+     * {@link eventList} array by id.
      *
-     * @param {Event} event the event to filter out of the array (by event id)
+     * @param {Event} event the event to remove (matching by event id)
      */
     removeEvent(event) {
-        this.eventList = this.eventList
-            .filter(elem => elem.id === event.id);
+        for (const sourceList of this.eventList) {
+            if (sourceList.source === event.source) {
+                const index = sourceList.eventIds.indexOf(event.id);
+                sourceList.eventIds.splice(index, 1);
+                break;
+            }
+        }
     }
 }
 
@@ -95,7 +107,7 @@ export class Attendee extends User {
      * @param {string} password
      * @param {string} username
      * @param {Image} profileImage
-     * @param {Event[]} [eventList]
+     * @param {EventList[]} [eventList]
      */
     constructor(userId, email, password, username, profileImage,
                 eventList = []) {
@@ -116,7 +128,7 @@ export class Organizer extends User {
      * @param {string} password
      * @param {string} username
      * @param {Image} profileImage
-     * @param {Event[]} [eventList]
+     * @param {EventList[]} [eventList]
      */
     constructor(userId, email, password, username, profileImage,
                 eventList = []) {

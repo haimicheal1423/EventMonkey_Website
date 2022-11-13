@@ -124,7 +124,8 @@ export class EventManager {
         //       event
 
         const event = new Event(
-            undefined,
+            // all created events belong to EventMonkey source
+            'eventMonkey',
             name,
             description,
             location,

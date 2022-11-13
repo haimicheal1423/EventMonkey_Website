@@ -246,8 +246,9 @@ export class TicketMasterSource extends EventSource {
             return new Genre(undefined, genre);
         });
 
-        return new Event(
-            eventObj['id'],
+        const event = new Event(
+            // all events fetched from this source belong to TicketMaster
+            'ticketMaster',
             eventObj['name'],
             description,
             location,
@@ -256,6 +257,9 @@ export class TicketMasterSource extends EventSource {
             images,
             genres
         );
+
+        event.id = eventObj['id'];
+        return event;
     }
 
     /**
@@ -688,7 +692,6 @@ export class EventMonkeySource extends EventSource {
         }
 
         const {
-            event_id: eId,
             name,
             description,
             location,
@@ -700,13 +703,17 @@ export class EventMonkeySource extends EventSource {
         const priceRange = JSON.parse(priceRanges);
 
         const event = new Event(
-            eId,
+            // all event details stored in the database belong to EventMonkey
+            'eventMonkey',
             name,
             description,
             location,
             dateTime,
             priceRange
         );
+
+        // guaranteed to match the parameter eventId
+        event.id = eventId;
 
         async function loadGenres() {
             // block until database results are fetched
