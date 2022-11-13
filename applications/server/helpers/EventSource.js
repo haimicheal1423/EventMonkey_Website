@@ -73,22 +73,22 @@ export class TicketMasterSource extends EventSource {
 
     /**
      * Fetches a response from a URL. Query parameters can be added to the base
-     * URL by populating key-value pairs in the <code>values</code> object. For
+     * URL by populating key-value pairs in the `values` object. For
      * example,
-     * <br>
-     * <code>
+     *
+     * ```
      *     apiRequest_('http://api.request.com', {
      *         apikey: 'someApiKey',
      *         key1: val1,
      *         key2: val2
      *     })
-     * </code>
-     * <br>
+     * ```
+     *
      * would result in fetching from the URL:
-     * <br>
-     * <code>
+     *
+     * ```
      *     'http://api.request.com?apikey=someApiKey&key1=val1&key2=val2'
-     * </code>
+     * ```
      *
      * @param {string} baseUrl the URL to a specific api resource
      * @param {Object} values optional query parameters to attach to the base
@@ -223,6 +223,7 @@ export class TicketMasterSource extends EventSource {
             return new Image(undefined, ratio, width, height, url);
         });
 
+        // a set to ensure genre names are unique
         const genreSet = new Set();
 
         if (eventObj['classifications']) {
@@ -367,7 +368,7 @@ export class EventMonkeySource extends EventSource {
 
     /**
      * Associates an {@link Event} to a {@link User} by adding an entry in the
-     * <code>Event_List</code> table. The user id can be either 'attendee' or
+     * `Event_List` table. The user id can be either 'attendee' or
      * 'organizer'.
      *
      * @param {number} eventId the EventMonkey event id
@@ -406,7 +407,7 @@ export class EventMonkeySource extends EventSource {
 
     /**
      * Associates a {@link Genre} to an {@link Event} by adding an entry in the
-     * <code>Event_Genre_List</code> table.
+     * `Event_Genre_List` table.
      *
      * @param {Event} event the event
      * @param {Genre} genre the genre to associate with the event
@@ -443,7 +444,7 @@ export class EventMonkeySource extends EventSource {
 
     /**
      * Associates an {@link Image} to an {@link Event} by adding an entry in the
-     * <code>Event_Image_List</code> table.
+     * `Event_Image_List` table.
      *
      * @param {Event} event the event
      * @param {Image} image the image to associate with the event
