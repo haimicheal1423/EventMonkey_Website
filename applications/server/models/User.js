@@ -101,6 +101,9 @@ export class User {
  */
 export class Attendee extends User {
 
+    /** @type {Genre[]} */
+    interests;
+
     /**
      * @param {number} userId
      * @param {string} email
@@ -111,8 +114,8 @@ export class Attendee extends User {
      */
     constructor(userId, email, password, username, profileImage,
                 eventList = []) {
-        super(userId, TYPE_ATTENDEE, email, password, username,
-              profileImage, eventList);
+        super(userId, TYPE_ATTENDEE, email, password, username, profileImage,
+              eventList);
     }
 }
 
@@ -132,8 +135,8 @@ export class Organizer extends User {
      */
     constructor(userId, email, password, username, profileImage,
                 eventList = []) {
-        super(userId, TYPE_ORGANIZER, email, password, username,
-              profileImage, eventList);
+        super(userId, TYPE_ORGANIZER, email, password, username, profileImage,
+              eventList);
     }
 
     /**
