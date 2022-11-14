@@ -1,7 +1,19 @@
 /**
+ * The source type for events created and stored in the EventMonkey database.
+ * @type {string}
+ */
+export const SOURCE_EVENT_MONKEY = 'eventMonkey';
+
+/**
+ * The source type for events created and stored through TicketMaster.
+ * @type {string}
+ */
+export const SOURCE_TICKET_MASTER = 'ticketMaster';
+
+/**
  * The Event data type is a container which holds event details.
  */
-export default class Event {
+export class Event {
 
     /** @type {number} */
     id;

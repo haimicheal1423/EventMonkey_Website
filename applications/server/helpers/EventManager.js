@@ -1,5 +1,5 @@
 import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
-import Event from "../models/Event.js";
+import { SOURCE_EVENT_MONKEY, Event } from "../models/Event.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -125,7 +125,7 @@ export class EventManager {
 
         const event = new Event(
             // all created events belong to EventMonkey source
-            'eventMonkey',
+            SOURCE_EVENT_MONKEY,
             name,
             description,
             location,

@@ -1,7 +1,7 @@
 /**
  * The Genre data type holds the name and the EventMonkey genre id.
  */
-export default class Genre {
+export class Genre {
 
     /**
      * The EventMonkey genre id.

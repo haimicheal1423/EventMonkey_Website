@@ -1,4 +1,4 @@
-import { EventList } from "./Event.js";
+import { SOURCE_EVENT_MONKEY, EventList } from "./Event.js";
 
 /**
  * The {@link Attendee} user type who can search and add Events to their
@@ -134,5 +134,21 @@ export class Organizer extends User {
                 eventList = []) {
         super(userId, TYPE_ORGANIZER, email, password, username,
               profileImage, eventList);
+    }
+
+    /**
+     * Add an event to the {@link eventList} array. The {@link Event.source}
+     * must be {@link SOURCE_EVENT_MONKEY} since organizers can only own events
+     * created and stored in the EventMonkey database.
+     *
+     * @param {Event} event the event to add
+     *
+     * @throws {Error} when event source is not {@link SOURCE_EVENT_MONKEY}
+     */
+    addEvent(event) {
+        if (event.source !== SOURCE_EVENT_MONKEY) {
+            throw new Error(`Expected eventMonkey source, got ${event.source}`);
+        }
+        super.addEvent(event);
     }
 }

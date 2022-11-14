@@ -2,7 +2,7 @@
  * An Image object holds meta-data to an image resource. The actual image data
  * is fetched through the url.
  */
-export default class Image {
+export class Image {
 
     /**
      * The EventMonkey image id.

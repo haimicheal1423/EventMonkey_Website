@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
 
-import Event from '../models/Event.js';
-import Image from '../models/Image.js';
-import Genre from '../models/Genre.js';
+import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from '../models/Event.js';
+import { Image } from '../models/Image.js';
+import { Genre } from '../models/Genre.js';
 import { Database } from './Database.js';
 
 /**
@@ -248,7 +248,7 @@ export class TicketMasterSource extends EventSource {
 
         const event = new Event(
             // all events fetched from this source belong to TicketMaster
-            'ticketMaster',
+            SOURCE_TICKET_MASTER,
             eventObj['name'],
             description,
             location,
@@ -704,7 +704,7 @@ export class EventMonkeySource extends EventSource {
 
         const event = new Event(
             // all event details stored in the database belong to EventMonkey
-            'eventMonkey',
+            SOURCE_EVENT_MONKEY,
             name,
             description,
             location,
