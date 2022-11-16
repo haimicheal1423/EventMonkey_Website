@@ -110,6 +110,21 @@ export class EventManager {
     }
 
     /**
+     * Gets an array of all events stored in the EventMonkey database.
+     *
+     * @returns {Promise<Event[]>}
+     */
+    async getAllEvents() {
+        const eventIds = await this.datasource_.getAllEventIds();
+
+        return await Promise.all(
+            eventIds.map(eventId => {
+                return this.eventMonkey_.findByEventId(eventId);
+            })
+        );
+    }
+
+    /**
      * Finds a list of events associated with a user. If the user is an
      * {@link Organizer}, the events are all created and owned by that user. If
      * the user is an {@link Attendee}, the event list is that user's favorite
@@ -314,5 +329,41 @@ export class EventManager {
         });
 
         return { eventId: Number(event.id) };
+    }
+
+    /**
+     * Deletes a user owned event from the database.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} eventId the EventMonkey event id
+     *
+     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     *     'success' if the event was successfully deleted
+     */
+    async deleteEvent(userId, eventId) {
+        const userDetails = await this.datasource_.getUserDetails(userId);
+
+        if (!userDetails) {
+            return { message: `User(${userId}) does not exist` };
+        }
+
+        if (userDetails.type !== TYPE_ORGANIZER) {
+            return { message: `User(${userId}) is not an organizer` };
+        }
+
+        // only EventMonkey source events can be deleted, so only search in the
+        // EventMonkey source list
+        const eventIds = await this.datasource_.getEventMonkeyList(userId);
+
+        // test if the requested event id is found in the user's event id list
+        if (!eventIds.some(otherId => eventId === otherId)) {
+            return {
+                message: `User(${userId}) does not own Event(${eventId})`
+            };
+        }
+
+        await this.datasource_.removeEventDetails(eventId);
+
+        return { message: 'success' };
     }
 }
