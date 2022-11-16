@@ -129,6 +129,116 @@ export class Event {
             this.priceRanges.push({ currency, min, max });
         }
     }
+
+    static verifyName(name) {
+        if (!name) {
+            throw new Error('Event name required');
+        }
+
+        // mariadb tinytext is 255 chars max
+        if (name.length > 255) {
+            throw new Error('Event name must be less than 255 characters');
+        }
+    }
+
+    static verifyLocation(location) {
+        if (!location) {
+            throw new Error('Event location required');
+        }
+
+        // mariadb tinytext is 255 chars max
+        if (location.length > 255) {
+            throw new Error('Event name must be less than 255 characters');
+        }
+    }
+
+    static verifyDescription(description) {
+        if (description) {
+            // mariadb text is 65535 chars max
+            if (description.length > 65535) {
+                throw new Error('Event description must be less than 65535'
+                              + ' characters');
+            }
+        }
+    }
+
+    static verifyDates(dates) {
+        if (!dates) {
+            throw new Error('Event dates required');
+        }
+
+        if (!dates['startDateTime']) {
+            throw new Error('Start date time required');
+        }
+
+        if (JSON.stringify(dates).length > 65535) {
+            throw new Error('Event dates text must be less than 65535'
+                          + ' characters');
+        }
+    }
+
+    static verifyPriceRanges(priceRanges) {
+        if (priceRanges) {
+            if (!Array.isArray(priceRanges)) {
+                throw new Error('Event price ranges must be an array');
+            }
+
+            if (!priceRanges['currency']) {
+                throw new Error('Missing currency in price range');
+            }
+
+            if (!priceRanges['min']) {
+                throw new Error('Missing min price in price range');
+            }
+
+            if (JSON.stringify(priceRanges).length > 65535) {
+                throw new Error('Event price ranges text must be less than'
+                              + ' 65535 characters');
+            }
+        }
+    }
+
+    static verifyGenres(genres) {
+        if (!genres) {
+            // genres are optional
+            return;
+        }
+
+        if (!Array.isArray(genres)) {
+            throw new Error('Event genres must be an array');
+        }
+
+        genres.forEach(genre => {
+            Genre.verifyGenre(genre);
+
+            if (genre.name.length > 255) {
+                throw new Error('Image ratio must be less than 255 characters');
+            }
+        });
+    }
+
+    static verifyImages(images) {
+        if (!images) {
+            // images are optional
+            return;
+        }
+
+        if (!Array.isArray(images)) {
+            throw new Error('Event images must be an array');
+        }
+
+        images.forEach(image => {
+            Image.verifyImage(image);
+
+            if (image.ratio.length > 255) {
+                throw new Error('Image ratio must be less than 255 characters');
+            }
+
+            if (image.url.length > 255) {
+                throw new Error('Image url must be less than 255 characters');
+            }
+        });
+    }
 }
 
 /**

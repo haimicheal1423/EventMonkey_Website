@@ -43,4 +43,13 @@ export class Genre {
         genre.name = name;
         return genre;
     }
+
+    static verifyGenre(genre) {
+        if (!genre) {
+            throw new Error('Genre undefined');
+        }
+        if (!genre.name) {
+            throw new Error('Genre name undefined');
+        }
+    }
 }

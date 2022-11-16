@@ -261,6 +261,17 @@ export class EventManager {
             return { message: `User(${userId}) is not an organizer` };
         }
 
+        // TODO: consider user JOI npm package for schema validation:
+        //       https://joi.dev/api/?v=17.7.0
+
+        Event.verifyName(name);
+        Event.verifyDescription(description);
+        Event.verifyLocation(location);
+        Event.verifyDates(dates);
+        Event.verifyPriceRanges(priceRanges);
+        Event.verifyGenres(genres);
+        Event.verifyImages(images);
+
         const event = new Event(
             // all created events belong to EventMonkey source
             SOURCE_EVENT_MONKEY,

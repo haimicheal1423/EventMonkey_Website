@@ -74,4 +74,26 @@ export class Image {
         image.url = url;
         return image;
     }
+
+    static verifyImage(image) {
+        if (!image) {
+            throw new Error('Image undefined')
+        }
+
+        if (image['ratio']) {
+            throw new Error('Image missing ratio')
+        }
+
+        if (image['width']) {
+            throw new Error('Image missing width')
+        }
+
+        if (image['height']) {
+            throw new Error('Image missing height')
+        }
+
+        if (image['url']) {
+            throw new Error('Image missing url')
+        }
+    }
 }
