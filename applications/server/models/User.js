@@ -109,7 +109,7 @@ export class Attendee extends User {
      * @param {string} email
      * @param {string} password
      * @param {string} username
-     * @param {Image} profileImage
+     * @param {Image} [profileImage]
      * @param {EventList[]} [eventList]
      */
     constructor(userId, email, password, username, profileImage,
@@ -130,7 +130,7 @@ export class Organizer extends User {
      * @param {string} email
      * @param {string} password
      * @param {string} username
-     * @param {Image} profileImage
+     * @param {Image} [profileImage]
      * @param {EventList[]} [eventList]
      */
     constructor(userId, email, password, username, profileImage,

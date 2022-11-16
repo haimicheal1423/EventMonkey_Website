@@ -58,7 +58,7 @@ export class Image {
      * A static factory function to create an image with an initially undefined
      * id.
      *
-     * @param {string} id the EventMonkey image id
+     * @param {number} id the EventMonkey image id
      * @param {string} ratio the image aspect ratio
      * @param {number} width the image width
      * @param {number} height the image height

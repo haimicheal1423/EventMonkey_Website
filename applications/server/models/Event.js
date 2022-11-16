@@ -1,3 +1,6 @@
+import { Image } from "./Image.js";
+import { Genre } from "./Genre.js";
+
 /**
  * The source type for events created and stored in the EventMonkey database.
  * @type {string}
@@ -30,7 +33,7 @@ export class Event {
     /** @type {string} */
     location;
 
-    /** @type {{ startDateTime: Date, [endDateTime: Date] }} */
+    /** @type {{ startDateTime: Date, [endDateTime]: Date }} */
     dates;
 
     /** @type {{currency: string, min: number, max: number}[]} */
@@ -47,7 +50,7 @@ export class Event {
      * @param {string} name
      * @param {string} description
      * @param {string} location
-     * @param {{ startDateTime: Date, [endDateTime: Date] }} dates
+     * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
@@ -140,6 +143,10 @@ export class EventList {
     /** @type {number[]|string[]} */
     eventIds;
 
+    /**
+     * @param {string} source
+     * @param {number[]|string[]} eventIds
+     */
     constructor(source, eventIds) {
         this.source = source;
         this.eventIds = eventIds;

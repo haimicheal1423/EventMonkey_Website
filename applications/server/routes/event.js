@@ -36,10 +36,6 @@ router.get('/', async function(req, res) {
             searchRequest.genre = req.query.genre;
         }
 
-        if (req.query.userId) {
-            searchRequest.userId = req.query.userId;
-        }
-
         if (req.query.keyword) {
             searchRequest.keyword = req.query.keyword;
         }
