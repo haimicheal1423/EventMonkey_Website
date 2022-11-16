@@ -1,22 +1,29 @@
 import { Router } from 'express';
-import { Database } from "../helpers/Database.js";
-import { EventManager } from "../helpers/EventManager.js";
-export const router = Router();
+import status from "http-status";
 
+import { EventManager } from "../helpers/EventManager.js";
+
+export const router = Router();
 
 const eventManager = new EventManager();
 
-router.get('/', async function(req,res){
-    try {
-        const sqlQuery = 'SELECT * FROM Event';
-        const rows = await Database.query(sqlQuery, req.params.id);
-        res.status(200).json(rows);
-    } catch (error) {
-        res.status(400).send(error.message)
-    }
-});
+router.get('/', getAllEventMonkeyEvents);
+router.get('/search', searchEvent);
+router.get('/user/:userId', getEventsByUserId);
+router.post('/user/:userId/create', createEvent);
+router.delete('/user/:userId/event/:eventId/delete', deleteEvent);
 
-router.get('/', async function(req, res) {
+async function getAllEventMonkeyEvents(req, res) {
+    try {
+        const events = await eventManager.getAllEvents();
+        res.status(status.OK).json(events);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function searchEvent(req, res) {
     try {
         const searchRequest = {};
 
@@ -42,41 +49,61 @@ router.get('/', async function(req, res) {
 
         const result = await eventManager.search(searchRequest);
 
-        res.status(200).json(result);
+        res.status(status.OK).json(result);
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
     }
-});
+}
 
-router.post('/create', async function(req, res) {
+async function getEventsByUserId(req, res) {
     try {
-        if (!req.query.userId) {
-            res.status(400).send('No user id found');
-            return;
-        }
+        const result = await eventManager.findEventsByUserId(req.params.userId);
+        res.status(status.OK).json(result);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
 
-        const userId = req.query.userId;
-        const name = req.body.name;
-        const description = req.body.description;
-        const location = req.body.location;
-        const dates = req.body.dates;
-        const priceRanges = req.body.priceRanges;
-        const genres = req.body.genres;
-        const images = req.body.images;
-
-        const eventId = await eventManager.createEvent(
-            userId,
-            name,
-            description,
-            location,
-            dates,
-            priceRanges,
-            genres,
-            images
+async function createEvent(req, res) {
+    try {
+        const result = await eventManager.createEvent(
+            req.params.userId,
+            req.body.name,
+            req.body.description,
+            req.body.location,
+            req.body.dates,
+            req.body.priceRanges,
+            req.body.genres,
+            req.body.images
         );
 
-        res.status(200).json({ eventId });
+        if (result.eventId) {
+            res.status(status.OK).json(result);
+        } else if (result.message) {
+            res.status(status.BAD_REQUEST).json(result);
+        }
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
     }
-});
+}
+
+async function deleteEvent(req, res) {
+    try {
+        const userId = Number(req.params.userId);
+        const eventId = Number(req.params.eventId);
+
+        const result = await eventManager.deleteEvent(userId, eventId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
