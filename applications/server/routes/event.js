@@ -83,6 +83,9 @@ async function createEvent(req, res) {
             res.status(status.OK).json(result);
         } else if (result.message) {
             res.status(status.BAD_REQUEST).json(result);
+        } else {
+            res.status(status.BAD_REQUEST)
+                .json({ message: 'Failed to create event, with no errors!' });
         }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
