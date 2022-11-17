@@ -339,15 +339,7 @@ export class DataSource {
 
 export class EventMonkeyDataSource extends DataSource {
 
-    /**
-     * Gets all the event ids from the backing data source.
-     *
-     * @returns {Promise<number[]>}
-     */
-    async getAllEventIds() {
-        const result = await Database.query('SELECT event_id FROM Event');
-        return result.map(row => row['event_id']);
-    }
+    /* ********** USERS ********** */
 
     /**
      * Adds user details to the database.
@@ -370,124 +362,6 @@ export class EventMonkeyDataSource extends DataSource {
         );
 
         return result.insertId;
-    }
-
-    /**
-     * Adds event details to the database.
-     *
-     * @param {Event} event the event to add
-     *
-     * @returns {Promise<number>} the id of the database record
-     */
-    async addEventDetails(event) {
-        // helper function to transform undefined fields into null values
-        const nullable = value => value === undefined ? null : value;
-
-        // insert event details to the Event table
-        const result = await Database.query(
-            `INSERT INTO Event(name, description, location, dates, price_ranges)
-             VALUES (?, ?, ?, ?, ?)`, [
-                event.name,
-                nullable(event.description),
-                event.location,
-                nullable(JSON.stringify(event.dates)),
-                nullable(JSON.stringify(event.priceRanges))
-            ]
-        );
-
-        return result.insertId;
-    }
-
-    /**
-     * Removes event details from the database.
-     *
-     * @param {number} eventId the EventMonkey event id
-     *
-     * @returns {Promise<void>}
-     */
-    async removeEventDetails(eventId) {
-        // deleting the event id from the database will also cascade to deleting
-        // events in the Event_Genre_List, Event_Image_List, User_EM_Event_List,
-        // and User_TM_Event_List tables
-        await Database.query(
-            `DELETE FROM Event
-             WHERE event_id = ?`,
-            eventId
-        );
-    }
-
-    /**
-     * Adds associations between an event and an array of genres to the
-     * database. If any of the genres do not exist in the database, they will
-     * be added.
-     *
-     * @param {number} eventId the EventMonkey event id
-     * @param {Genre[]} genres an array of genres
-     *
-     * @returns {Promise<Map<string, number>>} a map from genre name to the
-     *     database's genre id
-     */
-    async addGenresToEvent(eventId, genres) {
-        if (genres.length === 0) {
-            // no genres to insert
-            return new Map();
-        }
-
-        // add all genres to ensure they exist in the database
-        const genreNameToId = await this.addGenreBatch_(genres);
-
-        // transform the map to an array of genre ids
-        const genreIds = [];
-        genreNameToId.forEach(genreId => {
-            genreIds.push(genreId);
-        });
-
-        // the genres are guaranteed to exist at this point, so create an
-        // association between the event and the genre
-        await Database.batch(
-            `INSERT IGNORE INTO Event_Genre_List(event_id, genre_id)
-             VALUES (?, ?)`,
-            genreIds.map(genreId => [eventId, genreId])
-        );
-
-        return genreNameToId;
-    }
-
-    /**
-     * Adds associations between an event and an array of images to the
-     * database. If any of the images do not exist in the database, they
-     * will be added.
-     *
-     * @param {number} eventId the EventMonkey event id
-     * @param {Image[]} images an array of images
-     *
-     * @returns {Promise<Map<string, number>>} a map from image url to the
-     *     database's image id
-     */
-    async addImagesToEvent(eventId, images) {
-        if (images.length === 0) {
-            // no images to insert
-            return new Map();
-        }
-
-        // add all images to ensure they exist in the database
-        const imageUrlToId = await this.addImageBatch_(images);
-
-        // transform the map to an array of image ids
-        const imageIds = [];
-        imageUrlToId.forEach(imageId => {
-            imageIds.push(imageId);
-        });
-
-        // the images are guaranteed to exist at this point, so create an
-        // association between the event and the genre
-        await Database.batch(
-            `INSERT IGNORE INTO Event_Image_List(event_id, image_id)
-             VALUES (?, ?)`,
-            imageIds.map(imageId => [eventId, imageId])
-        );
-
-        return imageUrlToId;
     }
 
     /**
@@ -629,6 +503,43 @@ export class EventMonkeyDataSource extends DataSource {
     }
 
     /**
+     * Gets the user details from the backing data source.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<{
+     *         type: string,
+     *         email: string,
+     *         password: string,
+     *         username: string,
+     *         profileImageId: number
+     *     }>}
+     */
+    async getUserDetails(userId) {
+        const result = await Database.query(
+            `SELECT type, email, password, username, profile_image
+             FROM User WHERE user_id = ?`,
+            userId
+        );
+
+        let type = undefined;
+        let email = undefined;
+        let password = undefined;
+        let username = undefined;
+        let profileImageId = undefined;
+
+        if (result[0]) {
+            type = result[0]['type'];
+            email = result[0]['email'];
+            password = result[0]['password'];
+            username = result[0]['username'];
+            profileImageId = result[0]['profile_image'];
+        }
+
+        return { type, email, password, username, profileImageId };
+    }
+
+    /**
      * Gets the event ids stored in a user's EventMonkey event list.
      *
      * @param {number} userId
@@ -669,40 +580,155 @@ export class EventMonkeyDataSource extends DataSource {
     }
 
     /**
-     * Gets the user details from the backing data source.
+     * Gets the genre list that the user has added as their interests.
      *
      * @param {number} userId the EventMonkey user id
      *
-     * @returns {Promise<{
-     *         type: string,
-     *         email: string,
-     *         password: string,
-     *         username: string,
-     *         profileImageId: number
-     *     }>}
+     * @returns {Promise<Genre[]>}
      */
-    async getUserDetails(userId) {
+    async getInterestList(userId) {
         const result = await Database.query(
-            `SELECT type, email, password, username, profile_image
-             FROM User WHERE user_id = ?`,
+            `SELECT ail.genre_id, genre.name
+             FROM Attendee_Interest_List ail
+             INNER JOIN Genre genre
+                USING (genre_id)
+             WHERE ail.user_id = ?`,
             userId
         );
 
-        let type = undefined;
-        let email = undefined;
-        let password = undefined;
-        let username = undefined;
-        let profileImageId = undefined;
+        return result.map(row => {
+            return Genre.createWithId(row['genre_id'], row['name']);
+        });
+    }
 
-        if (result[0]) {
-            type = result[0]['type'];
-            email = result[0]['email'];
-            password = result[0]['password'];
-            username = result[0]['username'];
-            profileImageId = result[0]['profile_image'];
+    /* ********** EVENTS ********** */
+
+    /**
+     * Gets all the event ids from the backing data source.
+     *
+     * @returns {Promise<number[]>}
+     */
+    async getAllEventIds() {
+        const result = await Database.query('SELECT event_id FROM Event');
+        return result.map(row => row['event_id']);
+    }
+
+    /**
+     * Adds event details to the database.
+     *
+     * @param {Event} event the event to add
+     *
+     * @returns {Promise<number>} the id of the database record
+     */
+    async addEventDetails(event) {
+        // helper function to transform undefined fields into null values
+        const nullable = value => value === undefined ? null : value;
+
+        // insert event details to the Event table
+        const result = await Database.query(
+            `INSERT INTO Event(name, description, location, dates, price_ranges)
+             VALUES (?, ?, ?, ?, ?)`, [
+                event.name,
+                nullable(event.description),
+                event.location,
+                nullable(JSON.stringify(event.dates)),
+                nullable(JSON.stringify(event.priceRanges))
+            ]
+        );
+
+        return result.insertId;
+    }
+
+    /**
+     * Removes event details from the database.
+     *
+     * @param {number} eventId the EventMonkey event id
+     *
+     * @returns {Promise<void>}
+     */
+    async removeEventDetails(eventId) {
+        // deleting the event id from the database will also cascade to deleting
+        // events in the Event_Genre_List, Event_Image_List, User_EM_Event_List,
+        // and User_TM_Event_List tables
+        await Database.query(
+            `DELETE FROM Event
+             WHERE event_id = ?`,
+            eventId
+        );
+    }
+
+    /**
+     * Adds associations between an event and an array of genres to the
+     * database. If any of the genres do not exist in the database, they will
+     * be added.
+     *
+     * @param {number} eventId the EventMonkey event id
+     * @param {Genre[]} genres an array of genres
+     *
+     * @returns {Promise<Map<string, number>>} a map from genre name to the
+     *     database's genre id
+     */
+    async addGenresToEvent(eventId, genres) {
+        if (genres.length === 0) {
+            // no genres to insert
+            return new Map();
         }
 
-        return { type, email, password, username, profileImageId };
+        // add all genres to ensure they exist in the database
+        const genreNameToId = await this.addGenreBatch_(genres);
+
+        // transform the map to an array of genre ids
+        const genreIds = [];
+        genreNameToId.forEach(genreId => {
+            genreIds.push(genreId);
+        });
+
+        // the genres are guaranteed to exist at this point, so create an
+        // association between the event and the genre
+        await Database.batch(
+            `INSERT IGNORE INTO Event_Genre_List(event_id, genre_id)
+             VALUES (?, ?)`,
+            genreIds.map(genreId => [eventId, genreId])
+        );
+
+        return genreNameToId;
+    }
+
+    /**
+     * Adds associations between an event and an array of images to the
+     * database. If any of the images do not exist in the database, they
+     * will be added.
+     *
+     * @param {number} eventId the EventMonkey event id
+     * @param {Image[]} images an array of images
+     *
+     * @returns {Promise<Map<string, number>>} a map from image url to the
+     *     database's image id
+     */
+    async addImagesToEvent(eventId, images) {
+        if (images.length === 0) {
+            // no images to insert
+            return new Map();
+        }
+
+        // add all images to ensure they exist in the database
+        const imageUrlToId = await this.addImageBatch_(images);
+
+        // transform the map to an array of image ids
+        const imageIds = [];
+        imageUrlToId.forEach(imageId => {
+            imageIds.push(imageId);
+        });
+
+        // the images are guaranteed to exist at this point, so create an
+        // association between the event and the genre
+        await Database.batch(
+            `INSERT IGNORE INTO Event_Image_List(event_id, image_id)
+             VALUES (?, ?)`,
+            imageIds.map(imageId => [eventId, imageId])
+        );
+
+        return imageUrlToId;
     }
 
     /**
@@ -859,28 +885,6 @@ export class EventMonkeyDataSource extends DataSource {
 
         // extract an array of the event ids from the query result
         return result.map(row => row['event_id']);
-    }
-
-    /**
-     * Gets the genre list that the user has added as their interests.
-     *
-     * @param {number} userId the EventMonkey user id
-     *
-     * @returns {Promise<Genre[]>}
-     */
-    async getInterestList(userId) {
-        const result = await Database.query(
-            `SELECT ail.genre_id, genre.name
-             FROM Attendee_Interest_List ail
-             INNER JOIN Genre genre
-                USING (genre_id)
-             WHERE ail.user_id = ?`,
-            userId
-        );
-
-        return result.map(row => {
-            return Genre.createWithId(row['genre_id'], row['name']);
-        });
     }
 
     /**
