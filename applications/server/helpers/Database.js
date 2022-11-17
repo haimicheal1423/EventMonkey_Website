@@ -58,6 +58,9 @@ export class Database {
     }
 }
 
+/**
+ * A data source provides an api to manage data related to users and events.
+ */
 export class DataSource {
 
     constructor() {
@@ -109,12 +112,12 @@ export class DataSource {
      * Adds an association between a TicketMaster event and the user to the
      * backing data source.
      *
-     * @param {number} user the id of the data source's user record
-     * @param {number} event the id of the data source's event record
+     * @param {number} userId the id of the data source's user record
+     * @param {string} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source added a record
      */
-    async addToTicketMasterList(user, event) {
+    async addToTicketMasterList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -123,7 +126,7 @@ export class DataSource {
      * backing data source.
      *
      * @param {number} userId the id of the data source's user record
-     * @param {number} eventId the id of the data source's event record
+     * @param {string} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source removed a record
      */
@@ -533,7 +536,7 @@ export class EventMonkeyDataSource extends DataSource {
      * database.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number} eventId the EventMonkey event id
+     * @param {string} eventId the EventMonkey event id
      *
      * @returns {Promise<boolean>} `true` if the database added a record
      */
@@ -556,7 +559,7 @@ export class EventMonkeyDataSource extends DataSource {
      * database.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number} eventId the EventMonkey event id
+     * @param {string} eventId the EventMonkey event id
      *
      * @returns {Promise<boolean>} `true` if the database removed a record
      */
