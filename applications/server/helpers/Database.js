@@ -335,6 +335,28 @@ export class DataSource {
     async getEventIdsWithKeyword(searchText) {
         throw new Error('Unimplemented abstract function');
     }
+
+    /**
+     * Adds a genre with the given name to the backing data source.
+     *
+     * @param {string} name the genre name
+     *
+     * @returns {Promise<Genre>} the constructed genre object with the id
+     */
+    async addGenre(name) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Adds a list of genres using the given names to the backing data source.
+     *
+     * @param {string[]} names the genre name
+     *
+     * @returns {Promise<Genre[]>} the constructed genre objects with their id
+     */
+    async addGenreList(names) {
+        throw new Error('Unimplemented abstract function');
+    }
 }
 
 export class EventMonkeyDataSource extends DataSource {
@@ -675,7 +697,8 @@ export class EventMonkeyDataSource extends DataSource {
         }
 
         // add all genres to ensure they exist in the database
-        const genreNameToId = await this.addGenreBatch_(genres);
+        const genreNames = genres.map(genre => genre.name);
+        const genreNameToId = await this.addGenreBatch_(genreNames);
 
         // transform the map to an array of genre ids
         const genreIds = [];
@@ -888,18 +911,67 @@ export class EventMonkeyDataSource extends DataSource {
     }
 
     /**
+     * Adds a genre with the given name to the backing data source.
+     *
+     * @param {string} name the genre name
+     *
+     * @returns {Promise<Genre>} the constructed genre object with the id
+     */
+    async addGenre(name) {
+        // insert the genre name to the database. If the genre name already
+        // exists, this insert will be ignored
+        const result = await Database.query(
+            `INSERT IGNORE INTO Genre(name)
+             VALUES (?)`,
+            name
+        );
+
+        if (result.affectedRows < 1) {
+            // no genre was inserted
+            return undefined;
+        }
+
+        return Genre.createWithId(result.insertId, name);
+    }
+
+    /**
+     * Adds a list of genres using the given names to the backing data source.
+     *
+     * @param {string[]} names the genre name
+     *
+     * @returns {Promise<Genre[]>} the constructed genre objects with their id
+     */
+    async addGenreList(names) {
+        if (names.length === 0) {
+            return [];
+        }
+
+        if (names.length === 1) {
+            return [await this.addGenre(names[0])];
+        }
+
+        const nameToId = await this.addGenreBatch_(names);
+
+        // create an array of Genre objects with the id and name
+        const genres = [];
+        nameToId.forEach((id, name) => {
+            genres.push(Genre.createWithId(id, name));
+        });
+
+        return genres;
+    }
+
+    /**
      * Add multiple genres to the database all at once. This is preferable to
      * flooding the database pool connections by instead batching all inserts
      * into one query call.
      *
-     * @param {Genre[]} genres an array of genres to add
+     * @param {string[]} names an array of genre names to add
      *
      * @returns {Promise<Map<string, number>>} the genre name to id map
      * @private
      */
-    async addGenreBatch_(genres) {
-        const names = genres.map(genre => genre.name);
-
+    async addGenreBatch_(names) {
         // batch insert the list of genre names to the database. Any existing
         // genres with the same name will be ignored
         await Database.batch(
