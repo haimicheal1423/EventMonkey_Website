@@ -183,18 +183,17 @@ export class TicketMasterSource extends EventSource {
                     obj.max = Math.max(obj.max, nextMax);
                 } else {
                     // no mapping for currency type yet
-                    rangeMap.set(currency,
-                        {
-                            currency: currency,
-                            min: nextMin,
-                            max: nextMax
-                        });
+                    rangeMap.set(currency, {
+                        currency: currency,
+                        min: nextMin,
+                        max: nextMax
+                    });
                 }
             }
 
             // the 'currency' keys can be dropped and only keep the values array
             // of price ranges, each with a unique currency type
-            return Object.values(rangeMap);
+            return Array.from(rangeMap.values());
         }
 
         // sometimes TicketMaster event properties are undefined, so try and
@@ -332,7 +331,7 @@ export class EventMonkeySource extends EventSource {
      * @returns {Promise<Event>} the event
      */
     async findByEventId(eventId) {
-        const { name, description, location, dates, priceRange }
+        const { name, description, location, dates, priceRanges }
             = await this.datasource_.getEventDetails(eventId);
 
         const event = new Event(
@@ -342,7 +341,7 @@ export class EventMonkeySource extends EventSource {
             description,
             location,
             dates,
-            priceRange
+            priceRanges
         );
 
         // guaranteed to match the parameter eventId
