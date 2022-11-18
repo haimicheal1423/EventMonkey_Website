@@ -1,7 +1,8 @@
 import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
 import { EventMonkeyDataSource } from './Database.js';
 import { SOURCE_EVENT_MONKEY, Event } from "../models/Event.js";
-import { TYPE_ORGANIZER } from "../models/User.js";
+import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
+import { Genre } from "../models/Genre.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -248,6 +249,127 @@ export class EventManager {
     }
 
     /**
+     * Checks if a user is of the given type. If the user does not exist or if
+     * the type does not match, then a failure message will be returned.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {string} userType the type of user
+     *
+     * @returns {Promise<{message: string}|undefined>} a message if the user
+     *     does not exist or if the type does not match, or undefined if success
+     * @private
+     */
+    async checkUserType_(userId, userType) {
+        const userDetails = await this.datasource_.getUserDetails(userId);
+
+        if (!userDetails) {
+            return { message: `User(${userId}) does not exist` };
+        }
+
+        if (userDetails.type !== userType) {
+            return { message: `User(${userId}) is not type ${userType}` };
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Adds an event to the attendees favorites list. The user id must point to
+     * a record of an Attendee user type.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number|string} eventId the EventMonkey or TicketMaster event id
+     *
+     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     *     'success' if the event was successfully added to favorites
+     */
+    async addToFavorites(userId, eventId) {
+        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
+
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        const event = await this.composite_.findByEventId(eventId);
+
+        await this.addEventToList_(userId, event);
+
+        return { message: 'success' };
+    }
+
+    /**
+     * Removes an event from the attendees favorites list. The user id must
+     * point to a record of an Attendee user type.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number|string} eventId the EventMonkey or TicketMaster event id
+     *
+     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     *     'success' if the event was successfully removed from favorites
+     */
+    async removeFromFavorites(userId, eventId) {
+        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
+
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        const event = await this.composite_.findByEventId(eventId);
+
+        await this.removeEventFromList_(userId, event);
+
+        return { message: 'success' };
+    }
+
+    /**
+     * Adds an event to the attendees favorites list. The user id must point to
+     * a record of an Attendee user type.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} genreId the genre id to add to interests
+     *
+     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     *     'success' if the genre was added to interests
+     */
+    async addToInterests(userId, genreId) {
+        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
+
+         if (failMessage) {
+             // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        await this.datasource_.addToInterests(userId, genreId);
+
+        return { message: 'success' };
+    }
+
+    /**
+     * Removes an event from the attendees favorites list. The user id must
+     * point to a record of an Attendee user type.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} genreId the genre id to remove from interests
+     *
+     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     *     'success' if the genre was successfully removed from interests
+     */
+    async removeFromInterests(userId, genreId) {
+        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
+
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        await this.datasource_.removeFromInterests(userId, genreId);
+
+        return { message: 'success' };
+    }
+
+    /**
      * Create an event by inserting it into the database. The event id will get
      * set if the insert operation was successful, and the event will be
      * assigned to the organizer.
@@ -266,14 +388,11 @@ export class EventManager {
      */
     async createEvent(userId, name, description, location, dates, priceRanges,
                       genres, images) {
-        const userDetails = await this.datasource_.getUserDetails(userId);
+        const failMessage = await this.checkUserType_(userId, TYPE_ORGANIZER);
 
-        if (!userDetails) {
-            return { message: `User(${userId}) does not exist` };
-        }
-
-        if (userDetails.type !== TYPE_ORGANIZER) {
-            return { message: `User(${userId}) is not an organizer` };
+        if (failMessage) {
+            // user is not organizer type
+            return { message: failMessage.message };
         }
 
         // TODO: consider user JOI npm package for schema validation:
@@ -341,14 +460,11 @@ export class EventManager {
      *     'success' if the event was successfully deleted
      */
     async deleteEvent(userId, eventId) {
-        const userDetails = await this.datasource_.getUserDetails(userId);
+        const failMessage = await this.checkUserType_(userId, TYPE_ORGANIZER);
 
-        if (!userDetails) {
-            return { message: `User(${userId}) does not exist` };
-        }
-
-        if (userDetails.type !== TYPE_ORGANIZER) {
-            return { message: `User(${userId}) is not an organizer` };
+        if (failMessage) {
+            // user is not organizer type
+            return { message: failMessage.message };
         }
 
         // only EventMonkey source events can be deleted, so only search in the

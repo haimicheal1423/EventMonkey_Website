@@ -11,7 +11,14 @@ router.get('/', getAllEventMonkeyEvents);
 router.get('/search', searchEvent);
 router.get('/user/:userId', getEventsByUserId);
 router.post('/user/:userId/create', createEvent);
-router.delete('/user/:userId/event/:eventId/delete', deleteEvent);
+router.delete('/user/:userId/delete/:eventId', deleteEvent);
+
+// TODO: Maybe these belong in the User route instead
+router.put('/user/:userId/add_favorites/:eventId', addToFavorites);
+router.delete('/user/:userId/remove_favorites/:eventId', removeFromFavorites);
+
+router.put('/user/:userId/add_interests/:genreId', addToInterests);
+router.delete('/user/:userId/remove_interests/:genreId', removeFromInterests);
 
 async function getAllEventMonkeyEvents(req, res) {
     try {
@@ -107,6 +114,74 @@ async function deleteEvent(req, res) {
         }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function addToFavorites(req, res) {
+    try {
+        const userId = Number(req.params.userId);
+        const eventId = req.params.eventId;
+        const result = await eventManager.addToFavorites(userId, eventId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function removeFromFavorites(req, res) {
+    try {
+        const userId = Number(req.params.userId);
+        const eventId = req.params.eventId;
+        const result = await eventManager.removeFromFavorites(userId, eventId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function addToInterests(req, res) {
+    try {
+        const userId = Number(req.params.userId);
+        const genreId = Number(req.params.genreId);
+        const result = await eventManager.addToInterests(userId, genreId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function removeFromInterests(req, res) {
+    try {
+        const userId = Number(req.params.userId);
+        const genreId = Number(req.params.genreId);
+        const result = await eventManager.removeFromInterests(userId, genreId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
         console.error(error);
     }
 }

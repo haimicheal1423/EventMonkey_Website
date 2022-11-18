@@ -138,11 +138,11 @@ export class DataSource {
      * Adds one or more genres to the user's interest list.
      *
      * @param {number} userId the id of the data source's user record
-     * @param {...Genre} genres the genres to add as interests
+     * @param {number} genreId the genre id to add to interests
      *
      * @returns {Promise<void>}
      */
-    async addInterest(userId, ...genres) {
+    async addToInterests(userId, genreId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -150,11 +150,11 @@ export class DataSource {
      * Removes one or more genres from the user's interest list.
      *
      * @param {number} userId the id of the data source's user record
-     * @param {...Genre} genres the genres to remove from interests
+     * @param {number} genreId the genre id to remove from interests
      *
      * @returns {Promise<void>}
      */
-    async removeInterest(userId, ...genres) {
+    async removeFromInterests(userId, genreId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -472,25 +472,15 @@ export class EventMonkeyDataSource extends DataSource {
      * Adds one or more genres to the user's interest list.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {...Genre} genres the genres to add as interests
+     * @param {number} genreId the genre id to add to interests
      *
      * @returns {Promise<void>}
      */
-    async addInterest(userId, ...genres) {
-        // ensures all the genres exist in the database
-        const nameToId = await this.addGenreBatch_(genres);
-
-        // create a genre id array instead of mutating the genre objects
-        const genreIds = [];
-        genres.forEach(genre => {
-            genreIds.push(nameToId.get(genre.name));
-        });
-
-        // batch insert all the genre ids to the user's interest list
-        await Database.batch(
+    async addToInterests(userId, genreId) {
+        await Database.query(
             `INSERT IGNORE INTO Attendee_Interest_List(user_id, genre_id)
              VALUES (?, ?)`,
-            genreIds.map(genreId => [userId, genreId])
+            [userId, genreId]
         );
     }
 
@@ -498,29 +488,15 @@ export class EventMonkeyDataSource extends DataSource {
      * Removes one or more genres from the user's interest list.
      *
      * @param {number} userId the id of the data source's user record
-     * @param {...Genre} genres the genres to remove from interests
+     * @param {number} genreId the genre id to remove from interests
      *
      * @returns {Promise<void>}
      */
-    async removeInterest(userId, ...genres) {
-        const names = genres.map(genre => genre.name);
-
-        // find all the genre ids which match any name in the genres array
-        const result = await Database.query(
-            `SELECT genre.genre_id
-             FROM Genre genre
-             WHERE JSON_CONTAINS(LOWER(?), JSON_QUOTE(LOWER(genre.name)))`,
-            JSON.stringify(names)
-        );
-
-        // extract a genre id array from the database result
-        const genreIds = result.map(row => row['genre_id']);
-
-        // batch delete all existing genre ids found from the genre names
-        await Database.batch(
+    async removeFromInterests(userId, genreId) {
+        await Database.query(
             `DELETE FROM Attendee_Interest_List
              WHERE user_id = ? AND genre_id = ?`,
-            genreIds.map(genreId => [userId, genreId])
+            [userId, genreId]
         );
     }
 
