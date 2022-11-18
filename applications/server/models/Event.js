@@ -18,7 +18,7 @@ export const SOURCE_TICKET_MASTER = 'ticketMaster';
  */
 export class Event {
 
-    /** @type {number} */
+    /** @type {number|string} */
     id;
 
     /** @type {string} */
