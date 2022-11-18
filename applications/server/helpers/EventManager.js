@@ -201,7 +201,7 @@ export class EventManager {
      *     `'ticketMaster'`
      * @private
      */
-    async addEventToList(userId, event) {
+    async addEventToList_(userId, event) {
         const {
             addToEventMonkeyList,
             addToTicketMasterList
@@ -231,7 +231,7 @@ export class EventManager {
      *     `'ticketMaster'`
      * @private
      */
-    async removeEventFromList(userId, event) {
+    async removeEventFromList_(userId, event) {
         const {
             removeFromEventMonkeyList,
             removeFromTicketMasterList
@@ -315,7 +315,7 @@ export class EventManager {
         const [genreNameToId, imageUrlToId] = await Promise.all([
             this.datasource_.addGenresToEvent(event.id, event.genres),
             this.datasource_.addImagesToEvent(event.id, event.images),
-            this.addEventToList(userId, event)
+            this.addEventToList_(userId, event)
         ]);
 
         // set the event genre ids with the database record ids
