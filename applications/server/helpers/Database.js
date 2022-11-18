@@ -735,7 +735,8 @@ export class EventMonkeyDataSource extends DataSource {
      *
      * @param {number} eventId the id of the data source's event record
      *
-     * @returns {Promise<{
+     * @returns {Promise<
+     *     undefined | {
      *         name: string,
      *         description: string,
      *         location: string,
@@ -751,25 +752,21 @@ export class EventMonkeyDataSource extends DataSource {
             eventId
         );
 
-        let name = undefined;
-        let description = undefined;
-        let location = undefined;
-        let dates = undefined;
+        if (!result[0]) {
+            return undefined;
+        }
+
+        const name = result[0]['name'];
+        const description = result[0]['description'];
+        const location = result[0]['location'];
+        const dates = JSON.parse(result[0]['dates']);
         let priceRanges = [];
 
-        if (result[0]) {
-            name = result[0]['name'];
-            description = result[0]['description'];
-            location = result[0]['location'];
+        const priceRangesText = result[0]['price_ranges'];
 
-            dates = JSON.parse(result[0]['dates']);
-
-            const priceRangesText = result[0]['price_ranges'];
-
-            // price ranges is nullable, so make sure it exists before reading
-            if (priceRangesText) {
-                priceRanges = JSON.parse(priceRangesText);
-            }
+        // price ranges is nullable, so make sure it exists before reading
+        if (priceRangesText) {
+            priceRanges = JSON.parse(priceRangesText);
         }
 
         return {

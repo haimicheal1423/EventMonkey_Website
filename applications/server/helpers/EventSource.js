@@ -343,17 +343,20 @@ export class EventMonkeySource extends EventSource {
      * @returns {Promise<Event>} the event
      */
     async findByEventId(eventId) {
-        const { name, description, location, dates, priceRanges }
-            = await this.datasource_.getEventDetails(eventId);
+        const eventDetails = await this.datasource_.getEventDetails(eventId);
+
+        if (!eventDetails) {
+            return undefined;
+        }
 
         const event = new Event(
             // all event details stored in the database belong to EventMonkey
             SOURCE_EVENT_MONKEY,
-            name,
-            description,
-            location,
-            dates,
-            priceRanges
+            eventDetails.name,
+            eventDetails.description,
+            eventDetails.location,
+            eventDetails.dates,
+            eventDetails.priceRanges
         );
 
         // guaranteed to match the parameter eventId
@@ -395,9 +398,13 @@ export class EventMonkeySource extends EventSource {
         eventIds.length = Math.min(eventIds.length, limit);
 
         // construct all events by event id asynchronously
-        return await Promise.all(
-            eventIds.map(eventId => this.findByEventId(eventId))
+        const events = await Promise.all(
+            eventIds.map(eventId => {
+                return this.findByEventId(eventId);
+            })
         );
+
+        return events.filter(event => event !== undefined);
     }
 
     /**
@@ -417,9 +424,13 @@ export class EventMonkeySource extends EventSource {
         eventIds.length = Math.min(eventIds.length, limit);
 
         // construct all events by event id asynchronously
-        return await Promise.all(
-            eventIds.map(eventId => this.findByEventId(eventId))
+        const events = await Promise.all(
+            eventIds.map(eventId => {
+                return this.findByEventId(eventId);
+            })
         );
+
+        return events.filter(event => event !== undefined);
     }
 }
 
@@ -475,10 +486,23 @@ export class CompositeSource extends EventSource {
      *
      * @returns {Promise<Event>} the event
      */
-    findByEventId(eventId) {
-        return this.accumulate_(source => {
+    async findByEventId(eventId) {
+        const events = await this.accumulate_(source => {
             return source.findByEventId(eventId);
         }, 1);
+
+        const array = events.filter(event => event !== undefined);
+
+        if (array.length === 0) {
+            return undefined;
+        }
+
+        if (array.length > 1) {
+            console.warn(`Multiple events found using id(${eventId})`
+                       + `: names(${array.map(event => event.name)})`);
+        }
+
+        return array[0];
     }
 
     /**

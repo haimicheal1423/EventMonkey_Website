@@ -101,8 +101,11 @@ export class EventManager {
             promises.push(eventSource.findByKeyword(keyword, limit));
         }
 
-        // flatten the resolved array of event lists into one array
-        const eventList = (await Promise.all(promises)).flat(1);
+        // flatten the resolved array of event lists into one array, then filter
+        // out any undefined (event not found) results
+        const eventList = (await Promise.all(promises))
+                            .flat(1)
+                            .filter(event => event !== undefined);
 
         // trim the events list to the limit
         eventList.length = Math.min(eventList.length, limit);
@@ -118,11 +121,13 @@ export class EventManager {
     async getAllEvents() {
         const eventIds = await this.datasource_.getAllEventIds();
 
-        return await Promise.all(
+        const events = await Promise.all(
             eventIds.map(eventId => {
                 return this.eventMonkey_.findByEventId(eventId);
             })
         );
+
+        return events.filter(event => event !== undefined);
     }
 
     /**
@@ -160,11 +165,13 @@ export class EventManager {
         const eventIds = await this.datasource_.getEventMonkeyList(userId);
 
         // find and construct all EventMonkey event objects
-        return await Promise.all(
+        const events = await Promise.all(
             eventIds.map(eventId => {
                 return this.eventMonkey_.findByEventId(eventId);
             })
         );
+
+        return events.filter(event => event !== undefined);
     }
 
     /**
@@ -181,11 +188,13 @@ export class EventManager {
         const eventIds = await this.datasource_.getTicketMasterList(userId);
 
         // find and construct all TicketMaster event objects
-        return await Promise.all(
+        const events = await Promise.all(
             eventIds.map(eventId => {
                 return this.ticketMaster_.findByEventId(eventId);
             })
         );
+
+        return events.filter(event => event !== undefined);
     }
 
     /**
@@ -207,6 +216,8 @@ export class EventManager {
             addToEventMonkeyList,
             addToTicketMasterList
         } = this.datasource_;
+
+        console.log(event);
 
         switch (event.source) {
             case 'eventMonkey':
@@ -293,6 +304,10 @@ export class EventManager {
 
         const event = await this.composite_.findByEventId(eventId);
 
+        if (!event) {
+            return { message: `Event(${eventId}) does not exist` };
+        }
+
         await this.addEventToList_(userId, event);
 
         return { message: 'success' };
@@ -317,6 +332,10 @@ export class EventManager {
         }
 
         const event = await this.composite_.findByEventId(eventId);
+
+        if (!event) {
+            return { message: `Event(${eventId}) does not exist` };
+        }
 
         await this.removeEventFromList_(userId, event);
 
