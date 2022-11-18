@@ -10,15 +10,16 @@ const eventManager = new EventManager();
 router.get('/', getAllEventMonkeyEvents);
 router.get('/search', searchEvent);
 router.get('/user/:userId', getEventsByUserId);
+
 router.post('/user/:userId/create', createEvent);
 router.delete('/user/:userId/delete/:eventId', deleteEvent);
 
 // TODO: Maybe these belong in the User route instead
-router.put('/user/:userId/add_favorites/:eventId', addToFavorites);
-router.delete('/user/:userId/remove_favorites/:eventId', removeFromFavorites);
+router.put('/user/:userId/add_favorite/:eventId', addToFavorites);
+router.delete('/user/:userId/remove_favorite/:eventId', removeFromFavorites);
 
-router.put('/user/:userId/add_interests/:genreId', addToInterests);
-router.delete('/user/:userId/remove_interests/:genreId', removeFromInterests);
+router.put('/user/:userId/add_interest/:genreId', addToInterests);
+router.delete('/user/:userId/remove_interest/:genreId', removeFromInterests);
 
 async function getAllEventMonkeyEvents(req, res) {
     try {
