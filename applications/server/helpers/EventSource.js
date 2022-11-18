@@ -163,7 +163,19 @@ export class TicketMasterSource extends EventSource {
      * @private
      */
     constructEvent_(eventObj) {
-        function constructPriceRange(priceRanges) {
+        const constructLocation = eventObj => {
+            if (eventObj['_embedded'] && eventObj['_embedded']['venues']) {
+                return eventObj['_embedded']['venues'].map(venue => {
+                    const name = venue['name'];
+                    const city = venue['city']['name'];
+                    const stateCode = venue['state']['stateCode'];
+                    return `${name} ── ${city}, ${stateCode}`;
+                })[0]; // only get the first venue address
+            }
+            return 'No location available';
+        };
+
+        const constructPriceRange = priceRanges => {
             /*
              * a map to keep track of possible price ranges with the same
              * currency type. Duplicate currency types must be reduced to one
@@ -194,7 +206,7 @@ export class TicketMasterSource extends EventSource {
             // the 'currency' keys can be dropped and only keep the values array
             // of price ranges, each with a unique currency type
             return Array.from(rangeMap.values());
-        }
+        };
 
         // sometimes TicketMaster event properties are undefined, so try and
         // find the best information to fill in
@@ -203,7 +215,7 @@ export class TicketMasterSource extends EventSource {
             || eventObj['pleaseNote']
             || 'No description available';
 
-        const location = 'No location available';
+        const location = constructLocation(eventObj);
 
         const date = {
             startDateTime: new Date(eventObj['dates']['start']['dateTime'])
