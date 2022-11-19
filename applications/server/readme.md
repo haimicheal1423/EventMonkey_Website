@@ -55,7 +55,7 @@ TICKETMASTER_API_KEY = 7elxdku9GGG5k8j0Xm8KWdANDgecHMV0
 
 EventMonkey uses [MariaDB](https://mariadb.com/) which is a relational database management system. Listed below are all the SQL table definitions required to run this server.
 
-```mariadb
+```sql
 CREATE TABLE `User`
 (
     `user_id`       INT AUTO_INCREMENT,
@@ -71,7 +71,7 @@ CREATE TABLE `User`
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE `Event`
 (
     `event_id`     INT AUTO_INCREMENT,
@@ -87,7 +87,7 @@ CREATE TABLE `Event`
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE Genre
 (
     `genre_id` INT AUTO_INCREMENT,
@@ -99,7 +99,7 @@ CREATE TABLE Genre
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE Image
 (
     `image_id` INT AUTO_INCREMENT,
@@ -114,7 +114,7 @@ CREATE TABLE Image
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE Event_Genre_List
 (
     `event_id` INT,
@@ -133,7 +133,7 @@ CREATE TABLE Event_Genre_List
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE Event_Image_List
 (
     `event_id` INT,
@@ -151,7 +151,7 @@ CREATE TABLE Event_Image_List
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE Attendee_Interest_List
 (
     `user_id`  INT,
@@ -169,7 +169,7 @@ CREATE TABLE Attendee_Interest_List
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE User_EM_Event_List
 (
     `user_id`  INT,
@@ -187,7 +187,7 @@ CREATE TABLE User_EM_Event_List
 );
 ```
 
-```mariadb
+```sql
 CREATE TABLE User_TM_Event_List
 (
     `user_id`  INT,
