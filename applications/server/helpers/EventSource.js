@@ -168,8 +168,13 @@ export class TicketMasterSource extends EventSource {
                 return eventObj['_embedded']['venues'].map(venue => {
                     const name = venue['name'];
                     const city = venue['city']['name'];
-                    const stateCode = venue['state']['stateCode'];
-                    return `${name} ── ${city}, ${stateCode}`;
+                    if (venue['state']) {
+                        const stateCode = venue['state']['stateCode'];
+                        return `${name} ─ ${city}, ${stateCode}`;
+                    } else {
+                        const countryCode = venue['country']['countryCode'];
+                        return `${name} ─ ${city}, ${countryCode}`;
+                    }
                 })[0]; // only get the first venue address
             }
             return 'No location available';
