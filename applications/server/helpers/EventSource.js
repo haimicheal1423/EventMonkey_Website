@@ -164,20 +164,26 @@ export class TicketMasterSource extends EventSource {
      */
     constructEvent_(eventObj) {
         const constructLocation = eventObj => {
-            if (eventObj['_embedded'] && eventObj['_embedded']['venues']) {
-                return eventObj['_embedded']['venues'].map(venue => {
-                    const name = venue['name'];
-                    const city = venue['city']['name'];
-                    if (venue['state']) {
-                        const stateCode = venue['state']['stateCode'];
-                        return `${name} ─ ${city}, ${stateCode}`;
-                    } else {
-                        const countryCode = venue['country']['countryCode'];
-                        return `${name} ─ ${city}, ${countryCode}`;
-                    }
-                })[0]; // only get the first venue address
+            if (!eventObj['_embedded'] || !eventObj['_embedded']['venues']) {
+                return 'No location available';
             }
-            return 'No location available';
+
+            const extractVenueLocation = venue => {
+                const name = venue['name'];
+                const city = venue['city']['name'];
+
+                if (venue['state']) {
+                    const stateCode = venue['state']['stateCode'];
+                    return `${name} ─ ${city}, ${stateCode}`;
+                } else {
+                    const countryCode = venue['country']['countryCode'];
+                    return `${name} ─ ${city}, ${countryCode}`;
+                }
+            };
+
+            // only get the first venue address
+            return eventObj['_embedded']['venues']
+                    .map(extractVenueLocation)[0];
         };
 
         const constructPriceRange = priceRanges => {
