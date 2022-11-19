@@ -217,8 +217,6 @@ export class EventManager {
             addToTicketMasterList
         } = this.datasource_;
 
-        console.log(event);
-
         switch (event.source) {
             case 'eventMonkey':
                 return addToEventMonkeyList(userId, event.id);

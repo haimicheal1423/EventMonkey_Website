@@ -456,10 +456,10 @@ export class CompositeSource extends EventSource {
     /**
      * Collect and combine all results from multiple {@link EventSource}s.
      *
-     * @param {function(EventSource): any} sourceMapper a function which maps a
-     *     source to an array of values to accumulate
+     * @param {function(EventSource): Promise<any>} sourceMapper a function
+     *     which maps a source to an array of values to accumulate
      *
-     * @param {number} limit the maximum size of the resulting array
+     * @param {number} [limit] the maximum size of the resulting array
      *
      * @returns {Promise<any[]>} a promise for a list of results
      * @private
@@ -472,8 +472,10 @@ export class CompositeSource extends EventSource {
             })
         )).flat(1); // flattens any[][] to any[]
 
-        // trim the values list to the limit
-        values.length = Math.min(values.length, limit);
+        if (limit) {
+            // trim the values list to the limit
+            values.length = Math.min(values.length, limit);
+        }
 
         // values is an array of arrays, so flatten it to a single array
         return values;
@@ -489,7 +491,7 @@ export class CompositeSource extends EventSource {
     async findByEventId(eventId) {
         const events = await this.accumulate_(source => {
             return source.findByEventId(eventId);
-        }, 1);
+        });
 
         const array = events.filter(event => event !== undefined);
 
