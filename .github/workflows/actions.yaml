@@ -8,8 +8,10 @@ jobs:
       - name: Install modules
         run: npm ci
       - name: Running tests
-        working-directory: applications/server/tests/
+        working-directory: ./
         run:
           node --experimental-vm-modules node_modules/jest/bin/jest.js
       - name: Jest Coverage Comment
         uses: MishaKav/jest-coverage-comment@main
+
+# working-directory: applications/server/tests/
