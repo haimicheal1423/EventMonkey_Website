@@ -10,6 +10,7 @@ jobs:
       - name: Running tests
         working-directory: applications/server/tests/
         run:
-          npx jest --coverage --coverageReporters json-summary
+          npx jest --experimental-vm-modules --coverage --coverageReporters json-summary
+#          npx jest --coverage --coverageReporters json-summary
       - name: Jest Coverage Comment
         uses: MishaKav/jest-coverage-comment@main

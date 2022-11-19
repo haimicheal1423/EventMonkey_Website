@@ -4,7 +4,7 @@
   "description": "<h1 align='center'>\r CSC648-01-fall22-team02 Repository",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "repository": {
     "type": "git",
