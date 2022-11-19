@@ -18,6 +18,7 @@ router.delete('/user/:userId/delete/:eventId', deleteEvent);
 router.put('/user/:userId/add_favorite/:eventId', addToFavorites);
 router.delete('/user/:userId/remove_favorite/:eventId', removeFromFavorites);
 
+router.get('/user/:userId/interests', getInterests);
 router.put('/user/:userId/add_interest/:genreId', addToInterests);
 router.delete('/user/:userId/remove_interest/:genreId', removeFromInterests);
 
@@ -143,6 +144,22 @@ async function removeFromFavorites(req, res) {
         const result = await eventManager.removeFromFavorites(userId, eventId);
 
         if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function getInterests(req, res) {
+    try {
+        const userId = Number(req.params.userId);
+        const result = await eventManager.getInterests(userId);
+
+        if (!result.message) {
             res.status(status.OK).json(result);
         } else {
             res.status(status.BAD_REQUEST).json(result);

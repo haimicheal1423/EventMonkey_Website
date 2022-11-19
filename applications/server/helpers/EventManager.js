@@ -1,6 +1,10 @@
-import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
+import {
+    CompositeSource,
+    EventMonkeySource,
+    TicketMasterSource
+} from './EventSource.js';
 import { EventMonkeyDataSource } from './Database.js';
-import { SOURCE_EVENT_MONKEY, Event } from "../models/Event.js";
+import { Event, SOURCE_EVENT_MONKEY } from "../models/Event.js";
 import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
 import { Genre } from "../models/Genre.js";
 
@@ -338,6 +342,26 @@ export class EventManager {
         await this.removeEventFromList_(userId, event);
 
         return { message: 'success' };
+    }
+
+    /**
+     * Gets the genre list that the user has added as their interests
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<{message: string} | Genre[]>} a failure message if the
+     *     user is not an {@link TYPE_ATTENDEE} user type, or the array of
+     *     genres in the interests list
+     */
+    async getInterests(userId) {
+        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
+
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        return await this.datasource_.getInterestList(userId);
     }
 
     /**
