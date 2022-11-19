@@ -10,7 +10,7 @@ jobs:
       - name: Running tests
         working-directory: ./
         run:
-          node --experimental-vm-modules node_modules/jest/bin/jest.js
+          node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --coverageReporters json-summary
       - name: Jest Coverage Comment
         uses: MishaKav/jest-coverage-comment@main
 

@@ -22,8 +22,8 @@
     "text-summary"
   ],
   "devDependencies": {
-    "@babel/preset-env": "^7.20.2",
-    "jest": "^29.3.1"
+    "jest": "^29.3.1",
+    "@jest/globals": "^29.3.1"
   },
   "type": "module"
 }
