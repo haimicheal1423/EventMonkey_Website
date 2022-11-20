@@ -8,22 +8,47 @@ const eventManager = new EventManager(emDBSource);
 
 export const router = Router();
 
-const eventManager = new EventManager();
+router.get('/',
+    (req, res) => getAllEventMonkeyEvents(req, res)
+);
 
-router.get('/', getAllEventMonkeyEvents);
-router.get('/search', searchEvent);
-router.get('/user/:userId', getEventsByUserId);
+router.get('/search',
+    (req, res) => searchEvent(req, res)
+);
 
-router.post('/user/:userId/create', createEvent);
-router.delete('/user/:userId/delete/:eventId', deleteEvent);
+router.get('/user/:userId',
+    (req, res) => getEventsByUserId(req, res)
+);
+
+router.post('/user/:userId/create',
+    (req, res) => createEvent(req, res)
+);
+
+router.delete('/user/:userId/delete/:eventId',
+    (req, res) => deleteEvent(req, res)
+);
 
 // TODO: Maybe these belong in the User route instead
-router.put('/user/:userId/add_favorite/:eventId', addToFavorites);
-router.delete('/user/:userId/remove_favorite/:eventId', removeFromFavorites);
 
-router.get('/user/:userId/interests', getInterests);
-router.put('/user/:userId/add_interest/:genreId', addToInterests);
-router.delete('/user/:userId/remove_interest/:genreId', removeFromInterests);
+router.get('/user/:userId/interests',
+    (req, res) => getInterests(req, res)
+);
+
+router.put('/user/:userId/add_interest/:genreId',
+    (req, res) => addToInterests(req, res)
+);
+
+router.delete('/user/:userId/remove_interest/:genreId',
+    (req, res) => removeFromInterests(req, res)
+);
+
+router.put('/user/:userId/add_favorite/:eventId',
+    (req, res) => addToFavorites(req, res)
+);
+
+router.delete('/user/:userId/remove_favorite/:eventId',
+    (req, res) => removeFromFavorites(req, res)
+);
 
 async function getAllEventMonkeyEvents(req, res) {
     try {
@@ -39,24 +64,24 @@ async function searchEvent(req, res) {
     try {
         const searchRequest = {};
 
-        if (req.query.source) {
-            searchRequest.source = req.query.source;
+        if (req.query['source']) {
+            searchRequest.source = req.query['source'];
         }
 
-        if (req.query.limit) {
-            searchRequest.limit = req.query.limit;
+        if (req.query['limit']) {
+            searchRequest.limit = req.query['limit'];
         }
 
-        if (req.query.eventId) {
-            searchRequest.eventId = req.query.eventId;
+        if (req.query['eventId']) {
+            searchRequest.eventId = req.query['eventId'];
         }
 
-        if (req.query.genre) {
-            searchRequest.genre = req.query.genre;
+        if (req.query['genre']) {
+            searchRequest.genre = req.query['genre'];
         }
 
-        if (req.query.keyword) {
-            searchRequest.keyword = req.query.keyword;
+        if (req.query['keyword']) {
+            searchRequest.keyword = req.query['keyword'];
         }
 
         const result = await eventManager.search(searchRequest);
@@ -70,7 +95,8 @@ async function searchEvent(req, res) {
 
 async function getEventsByUserId(req, res) {
     try {
-        const result = await eventManager.findEventsByUserId(req.params.userId);
+        const userId = Number(req.params['userId']);
+        const result = await eventManager.findEventsByUserId(userId);
         res.status(status.OK).json(result);
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
@@ -80,15 +106,17 @@ async function getEventsByUserId(req, res) {
 
 async function createEvent(req, res) {
     try {
+        const userId = Number(req.params['userId']);
+
         const result = await eventManager.createEvent(
-            req.params.userId,
-            req.body.name,
-            req.body.description,
-            req.body.location,
-            req.body.dates,
-            req.body.priceRanges,
-            req.body.genres,
-            req.body.images
+            userId,
+            req.body['name'],
+            req.body['description'],
+            req.body['location'],
+            req.body['dates'],
+            req.body['priceRanges'],
+            req.body['genres'],
+            req.body['images']
         );
 
         if (result.eventId) {
@@ -96,8 +124,9 @@ async function createEvent(req, res) {
         } else if (result.message) {
             res.status(status.BAD_REQUEST).json(result);
         } else {
-            res.status(status.BAD_REQUEST)
-                .json({ message: 'Failed to create event, with no errors!' });
+            res.status(status.BAD_REQUEST).json({
+                message: 'Failed to create event, with no errors!'
+            });
         }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
@@ -107,8 +136,8 @@ async function createEvent(req, res) {
 
 async function deleteEvent(req, res) {
     try {
-        const userId = Number(req.params.userId);
-        const eventId = Number(req.params.eventId);
+        const userId = Number(req.params['userId']);
+        const eventId = Number(req.params['eventId']);
 
         const result = await eventManager.deleteEvent(userId, eventId);
 
@@ -125,8 +154,11 @@ async function deleteEvent(req, res) {
 
 async function addToFavorites(req, res) {
     try {
-        const userId = Number(req.params.userId);
-        const eventId = req.params.eventId;
+        const userId = Number(req.params['userId']);
+
+        // ticket master ids can be strings, so no Number cast
+        const eventId = req.params['eventId'];
+
         const result = await eventManager.addToFavorites(userId, eventId);
 
         if (result.message === 'success') {
@@ -142,8 +174,11 @@ async function addToFavorites(req, res) {
 
 async function removeFromFavorites(req, res) {
     try {
-        const userId = Number(req.params.userId);
-        const eventId = req.params.eventId;
+        const userId = Number(req.params['userId']);
+
+        // ticket master ids can be strings, so no Number cast
+        const eventId = req.params['eventId'];
+
         const result = await eventManager.removeFromFavorites(userId, eventId);
 
         if (result.message === 'success') {
@@ -159,7 +194,8 @@ async function removeFromFavorites(req, res) {
 
 async function getInterests(req, res) {
     try {
-        const userId = Number(req.params.userId);
+        const userId = Number(req.params['userId']);
+
         const result = await eventManager.getInterests(userId);
 
         if (!result.message) {
@@ -175,8 +211,9 @@ async function getInterests(req, res) {
 
 async function addToInterests(req, res) {
     try {
-        const userId = Number(req.params.userId);
-        const genreId = Number(req.params.genreId);
+        const userId = Number(req.params["userId"]);
+        const genreId = Number(req.params['genreId']);
+
         const result = await eventManager.addToInterests(userId, genreId);
 
         if (result.message === 'success') {
@@ -192,8 +229,9 @@ async function addToInterests(req, res) {
 
 async function removeFromInterests(req, res) {
     try {
-        const userId = Number(req.params.userId);
-        const genreId = Number(req.params.genreId);
+        const userId = Number(req.params['userId']);
+        const genreId = Number(req.params['genreId']);
+
         const result = await eventManager.removeFromInterests(userId, genreId);
 
         if (result.message === 'success') {

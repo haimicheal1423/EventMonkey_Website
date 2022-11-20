@@ -73,6 +73,44 @@ export class DataSource {
     /* ********** USERS ********** */
 
     /**
+     * Tests if an email already exists in the backing data source.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<boolean>} `true` if the email is unique
+     * @abstract
+     */
+    async isEmailUnique(email) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Tests if a username already exists in the backing data source.
+     *
+     * @param {string} username the username to check
+     *
+     * @returns {Promise<boolean>} `true` if the username is unique
+     * @abstract
+     */
+    async isUsernameUnique(username) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets the login details (email, password, username) using the given email
+     * from the backing data source.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<{email: string, password: string, username: string}>}
+     *     the login details
+     * @abstract
+     */
+    async getLoginDetails(email) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
      * Adds user details to the backing data source.
      *
      * @param {User} user the user to add
@@ -381,11 +419,102 @@ export class DataSource {
     async addGenreList(names) {
         throw new Error('Unimplemented abstract function');
     }
+
+    /**
+     * Gets an {@link Image} from the backing data source.
+     *
+     * @param {number} imageId the id of the data source's image record
+     *
+     * @returns {Promise<Image>} the constructed image object with an id
+     * @abstract
+     */
+    async getImage(imageId) {
+        throw new Error('Unimplemented abstract function');
+    }
 }
 
 export class EventMonkeyDataSource extends DataSource {
 
     /* ********** USERS ********** */
+
+    /**
+     * Tests if an email already exists in the database.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<boolean>} `true` if the email is unique
+     */
+    async isEmailUnique(email) {
+        const result = await Database.query(
+            `SELECT COUNT(*) AS count
+             FROM User
+             WHERE email = ?
+             GROUP BY email`,
+            email
+        );
+
+        if (!result[0]) {
+            // no results, no matching emails
+            return true;
+        }
+
+        return result[0]['count'] === 0n;
+    }
+
+    /**
+     * Tests if a username already exists in the database.
+     *
+     * @param {string} username the username to check
+     *
+     * @returns {Promise<boolean>} `true` if the username is unique
+     */
+    async isUsernameUnique(username) {
+        const result = await Database.query(
+            `SELECT COUNT(*) AS count
+             FROM User
+             WHERE username = ?
+             GROUP BY username`,
+            username
+        );
+
+        if (!result[0]) {
+            // no results, no matching usernames
+            return true;
+        }
+
+        return result[0]['count'] === 0n;
+    }
+
+    /**
+     * Gets the login details (email, password, username) using the given email
+     * from the database.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<{email: string, password: string, username: string}>}
+     *     the login details
+     */
+    async getLoginDetails(email) {
+        const result = await Database.query(
+            `SELECT email, password, username
+             FROM User
+             WHERE email = ?`,
+            email
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        const password = result[0]['password'];
+        const username = result[0]['username'];
+
+        return {
+            email,
+            password,
+            username
+        };
+    }
 
     /**
      * Adds user details to the database.
@@ -957,6 +1086,32 @@ export class EventMonkeyDataSource extends DataSource {
         });
 
         return genres;
+    }
+
+    /**
+     * Gets an {@link Image} from the EventMonkey database.
+     *
+     * @param {number} imageId the EventMonkey image id
+     *
+     * @returns {Promise<Image>} the constructed image object with an id
+     */
+    async getImage(imageId) {
+        const result = await Database.query(
+            `SELECT ratio, width, height, url
+             FROM Image
+             WHERE image_id = ?`,
+            imageId
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        const ratio = result[0]['ratio'];
+        const width = result[0]['width'];
+        const height = result[0]['height'];
+        const url = result[0]['url'];
+        return Image.createWithId(imageId, ratio, width, height, url);
     }
 
     /**
