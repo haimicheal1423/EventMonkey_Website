@@ -1,0 +1,36 @@
+h4 {
+    text-align: center;
+    font-size: 30px;
+}
+
+.login-card {
+    padding: 40px;
+    background-color: beige;
+    border-width: 2px;
+    border-color: chocolate;
+    color: chocolate;
+    text-align: left;
+    width: 350px;
+}
+
+.login-container {
+    margin:auto;
+    width: 350px;
+    padding: 50px
+}
+
+.login-card input {
+    border-color: chocolate;
+    color:chocolate;
+}
+
+.login-card button {
+    color: white;
+    width: 266px;
+    cursor:pointer;
+}
+
+button:hover {
+    background-color: white;
+}
+

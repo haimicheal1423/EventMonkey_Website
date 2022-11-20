@@ -6,11 +6,16 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/esm/Container';
 import Row from 'react-bootstrap/Row';
+import Modal from '../components/Modal'
+
 
 function Event() {
     const columnsPerRow = 4;
     const { genre } = useParams()
     const [events, setEvents] = useState([])
+    const [showevents, setShowEvents] = useState([true])
+    const [showModal, setShowModal] = useState(false)
+
     const getAllEvents = () => {
         if (genre) {
             Axios.get(`http://localhost:4000/events/${genre}`).then((response) => {
@@ -26,6 +31,10 @@ function Event() {
     useEffect(() => {
         getAllEvents();
     }, []);
+
+    const handleClose = () => {
+        setShowModal(false)
+    }
 
     return (
         <Container>

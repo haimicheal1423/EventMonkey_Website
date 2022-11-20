@@ -20,6 +20,7 @@
     "mariadb": "^3.0.1"
   },
   "scripts": {
+    
     "test": "echo \"Error: no test specified\" && exit 1",
     "prod": "node -r dotenv/config server.js dotenv_config_path=.env-prod",
     "local": "node -r dotenv/config server.js dotenv_config_path=.env-local",
