@@ -60,6 +60,7 @@ export class Database {
 
 /**
  * A data source provides an api to manage data related to users and events.
+ * @abstract
  */
 export class DataSource {
 
@@ -72,11 +73,50 @@ export class DataSource {
     /* ********** USERS ********** */
 
     /**
+     * Tests if an email already exists in the backing data source.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<boolean>} `true` if the email is unique
+     * @abstract
+     */
+    async isEmailUnique(email) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Tests if a username already exists in the backing data source.
+     *
+     * @param {string} username the username to check
+     *
+     * @returns {Promise<boolean>} `true` if the username is unique
+     * @abstract
+     */
+    async isUsernameUnique(username) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets the login details (email, password, username) using the given email
+     * from the backing data source.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<{email: string, password: string, username: string}>}
+     *     the login details
+     * @abstract
+     */
+    async getLoginDetails(email) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
      * Adds user details to the backing data source.
      *
      * @param {User} user the user to add
      *
      * @returns {Promise<number>} the id of the data source record
+     * @abstract
      */
     async addUserDetails(user) {
         throw new Error('Unimplemented abstract function');
@@ -90,6 +130,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source added a record
+     * @abstract
      */
     async addToEventMonkeyList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -103,6 +144,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source removed a record
+     * @abstract
      */
     async removeFromEventMonkeyList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -116,6 +158,7 @@ export class DataSource {
      * @param {string} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source added a record
+     * @abstract
      */
     async addToTicketMasterList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -129,6 +172,7 @@ export class DataSource {
      * @param {string} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source removed a record
+     * @abstract
      */
     async removeFromTicketMasterList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -141,6 +185,7 @@ export class DataSource {
      * @param {number} genreId the genre id to add to interests
      *
      * @returns {Promise<void>}
+     * @abstract
      */
     async addToInterests(userId, genreId) {
         throw new Error('Unimplemented abstract function');
@@ -153,6 +198,7 @@ export class DataSource {
      * @param {number} genreId the genre id to remove from interests
      *
      * @returns {Promise<void>}
+     * @abstract
      */
     async removeFromInterests(userId, genreId) {
         throw new Error('Unimplemented abstract function');
@@ -170,6 +216,7 @@ export class DataSource {
      *         username: string,
      *         profileImageId: number
      *     }>}
+     * @abstract
      */
     async getUserDetails(userId) {
         throw new Error('Unimplemented abstract function');
@@ -181,6 +228,7 @@ export class DataSource {
      * @param {number} userId
      *
      * @returns {Promise<number[]>} an array of event ids
+     * @abstract
      */
     async getEventMonkeyList(userId) {
         throw new Error('Unimplemented abstract function');
@@ -192,6 +240,7 @@ export class DataSource {
      * @param {number} userId
      *
      * @returns {Promise<number[]>} an array of event ids
+     * @abstract
      */
     async getTicketMasterList(userId) {
         throw new Error('Unimplemented abstract function');
@@ -203,6 +252,7 @@ export class DataSource {
      * @param {number} userId the id of the data source's user record
      *
      * @returns {Promise<Genre[]>}
+     * @abstract
      */
     async getInterestList(userId) {
         throw new Error('Unimplemented abstract function');
@@ -214,6 +264,7 @@ export class DataSource {
      * Gets all the event ids from the backing data source.
      *
      * @returns {Promise<number[]>}
+     * @abstract
      */
     async getAllEventIds() {
         throw new Error('Unimplemented abstract function');
@@ -225,6 +276,7 @@ export class DataSource {
      * @param {Event} event the event to add
      *
      * @returns {Promise<number>} the id of the data source record
+     * @abstract
      */
     async addEventDetails(event) {
         throw new Error('Unimplemented abstract function');
@@ -236,6 +288,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<void>}
+     * @abstract
      */
     async removeEventDetails(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -251,6 +304,7 @@ export class DataSource {
      *
      * @returns {Promise<Map<string, number>>} a map from genre name to the
      *     database's genre id
+     * @abstract
      */
     async addGenresToEvent(eventId, genres) {
         throw new Error('Unimplemented abstract function');
@@ -266,6 +320,7 @@ export class DataSource {
      *
      * @returns {Promise<Map<string, number>>} a map from image url to the
      *     database's image id
+     * @abstract
      */
     async addImagesToEvent(eventId, images) {
         throw new Error('Unimplemented abstract function');
@@ -283,6 +338,7 @@ export class DataSource {
      *         dates: { startDateTime: Date, [endDateTime]: Date },
      *         priceRanges: { currency: string, min: number, max: number }[],
      *     }>}
+     * @abstract
      */
     async getEventDetails(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -295,6 +351,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<Genre[]>}
+     * @abstract
      */
     async getEventGenres(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -307,6 +364,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<Image[]>}
+     * @abstract
      */
     async getEventImages(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -319,6 +377,7 @@ export class DataSource {
      * @param {string[]} names the genre names to collect events by
      *
      * @returns {Promise<number[]>} an array of event ids
+     * @abstract
      */
     async getEventIdsWithGenres(names) {
         throw new Error('Unimplemented abstract function');
@@ -331,6 +390,7 @@ export class DataSource {
      * @param {string} searchText the text to search for in the event details
      *
      * @returns {Promise<number[]>} the event ids
+     * @abstract
      */
     async getEventIdsWithKeyword(searchText) {
         throw new Error('Unimplemented abstract function');
@@ -342,6 +402,7 @@ export class DataSource {
      * @param {string} name the genre name
      *
      * @returns {Promise<Genre>} the constructed genre object with the id
+     * @abstract
      */
     async addGenre(name) {
         throw new Error('Unimplemented abstract function');
@@ -353,8 +414,21 @@ export class DataSource {
      * @param {string[]} names the genre name
      *
      * @returns {Promise<Genre[]>} the constructed genre objects with their id
+     * @abstract
      */
     async addGenreList(names) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets an {@link Image} from the backing data source.
+     *
+     * @param {number} imageId the id of the data source's image record
+     *
+     * @returns {Promise<Image>} the constructed image object with an id
+     * @abstract
+     */
+    async getImage(imageId) {
         throw new Error('Unimplemented abstract function');
     }
 }
@@ -362,6 +436,85 @@ export class DataSource {
 export class EventMonkeyDataSource extends DataSource {
 
     /* ********** USERS ********** */
+
+    /**
+     * Tests if an email already exists in the database.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<boolean>} `true` if the email is unique
+     */
+    async isEmailUnique(email) {
+        const result = await Database.query(
+            `SELECT COUNT(*) AS count
+             FROM User
+             WHERE email = ?
+             GROUP BY email`,
+            email
+        );
+
+        if (!result[0]) {
+            // no results, no matching emails
+            return true;
+        }
+
+        return result[0]['count'] === 0n;
+    }
+
+    /**
+     * Tests if a username already exists in the database.
+     *
+     * @param {string} username the username to check
+     *
+     * @returns {Promise<boolean>} `true` if the username is unique
+     */
+    async isUsernameUnique(username) {
+        const result = await Database.query(
+            `SELECT COUNT(*) AS count
+             FROM User
+             WHERE username = ?
+             GROUP BY username`,
+            username
+        );
+
+        if (!result[0]) {
+            // no results, no matching usernames
+            return true;
+        }
+
+        return result[0]['count'] === 0n;
+    }
+
+    /**
+     * Gets the login details (email, password, username) using the given email
+     * from the database.
+     *
+     * @param {string} email the email to check
+     *
+     * @returns {Promise<{email: string, password: string, username: string}>}
+     *     the login details
+     */
+    async getLoginDetails(email) {
+        const result = await Database.query(
+            `SELECT email, password, username
+             FROM User
+             WHERE email = ?`,
+            email
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        const password = result[0]['password'];
+        const username = result[0]['username'];
+
+        return {
+            email,
+            password,
+            username
+        };
+    }
 
     /**
      * Adds user details to the database.
@@ -936,6 +1089,32 @@ export class EventMonkeyDataSource extends DataSource {
     }
 
     /**
+     * Gets an {@link Image} from the EventMonkey database.
+     *
+     * @param {number} imageId the EventMonkey image id
+     *
+     * @returns {Promise<Image>} the constructed image object with an id
+     */
+    async getImage(imageId) {
+        const result = await Database.query(
+            `SELECT ratio, width, height, url
+             FROM Image
+             WHERE image_id = ?`,
+            imageId
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        const ratio = result[0]['ratio'];
+        const width = result[0]['width'];
+        const height = result[0]['height'];
+        const url = result[0]['url'];
+        return Image.createWithId(imageId, ratio, width, height, url);
+    }
+
+    /**
      * Add multiple genres to the database all at once. This is preferable to
      * flooding the database pool connections by instead batching all inserts
      * into one query call.
@@ -1013,3 +1192,10 @@ export class EventMonkeyDataSource extends DataSource {
         return imageMap;
     }
 }
+
+/**
+ * A singleton for the EventMonkey using a backing database data source.
+ *
+ * @type {EventMonkeyDataSource}
+ */
+export const emDBSource = new EventMonkeyDataSource();

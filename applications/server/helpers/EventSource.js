@@ -335,15 +335,19 @@ export class TicketMasterSource extends EventSource {
  */
 export class EventMonkeySource extends EventSource {
 
-    /** @type {DataSource} */
-    datasource_;
+    /**
+     * @private
+     * @const
+     * @type {DataSource}
+     */
+    dataSource_;
 
     /**
      * @param {DataSource} datasource
      */
     constructor(datasource) {
         super();
-        this.datasource_ = datasource;
+        this.dataSource_ = datasource;
     }
 
     /**
@@ -354,7 +358,7 @@ export class EventMonkeySource extends EventSource {
      * @returns {Promise<Event>} the event
      */
     async findByEventId(eventId) {
-        const eventDetails = await this.datasource_.getEventDetails(eventId);
+        const eventDetails = await this.dataSource_.getEventDetails(eventId);
 
         if (!eventDetails) {
             return undefined;
@@ -374,14 +378,14 @@ export class EventMonkeySource extends EventSource {
         event.id = eventId;
 
         const loadGenres = async () => {
-            const genres = await this.datasource_.getEventGenres(eventId);
+            const genres = await this.dataSource_.getEventGenres(eventId);
 
             // now add the genres to the event
             genres.forEach(genre => event.addGenre(genre));
         };
 
         const loadImages = async () => {
-            const images = await this.datasource_.getEventImages(eventId);
+            const images = await this.dataSource_.getEventImages(eventId);
 
             // now add the images to the event
             images.forEach(image => event.addImage(image));
@@ -403,7 +407,7 @@ export class EventMonkeySource extends EventSource {
      * @returns {Promise<Event[]>} a list of events
      */
     async findByGenre(names, limit) {
-        const eventIds = await this.datasource_.getEventIdsWithGenres(names);
+        const eventIds = await this.dataSource_.getEventIdsWithGenres(names);
 
         // limit the event ids now before querying for event details
         eventIds.length = Math.min(eventIds.length, limit);
@@ -428,7 +432,7 @@ export class EventMonkeySource extends EventSource {
      */
     async findByKeyword(searchText, limit) {
         // destruct function to reduce line length
-        const { getEventIdsWithKeyword } = this.datasource_;
+        const { getEventIdsWithKeyword } = this.dataSource_;
         const eventIds = await getEventIdsWithKeyword(searchText);
 
         // limit the event ids now before querying for event details
@@ -451,7 +455,11 @@ export class EventMonkeySource extends EventSource {
  */
 export class CompositeSource extends EventSource {
 
-    /** @type {EventSource[]} */
+    /**
+     * @private
+     * @const
+     * @type {EventSource[]}
+     */
     sources_;
 
     /**
@@ -511,6 +519,7 @@ export class CompositeSource extends EventSource {
         }
 
         if (array.length > 1) {
+            // is this even possible?
             console.warn(`Multiple events found using id(${eventId})`
                        + `: names(${array.map(event => event.name)})`);
         }

@@ -1,7 +1,7 @@
-import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
-import { EventMonkeyDataSource } from './Database.js';
+import { CompositeSource, EventMonkeySource, TicketMasterSource } from './EventSource.js';
+import { DataSource } from './Database.js';
+import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from "../models/Event.js";
 import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
-import { SOURCE_EVENT_MONKEY, Event } from "../models/Event.js";
 import { Genre } from "../models/Genre.js";
 
 /**
@@ -10,25 +10,42 @@ import { Genre } from "../models/Genre.js";
  */
 export class EventManager {
 
-    /** @type {EventMonkeyDataSource} */
-    datasource_;
+    /**
+     * @private
+     * @const
+     * @type {DataSource}
+     */
+    dataSource_;
 
-    /** @type {TicketMasterSource} */
+    /**
+     * @private
+     * @const
+     * @type {TicketMasterSource}
+     */
     ticketMaster_;
 
-    /** @type {EventMonkeySource} */
+    /**
+     * @private
+     * @const
+     * @type {EventMonkeySource}
+     */
     eventMonkey_;
 
-    /** @type {CompositeSource} */
+    /**
+     * @private
+     * @const
+     * @type {CompositeSource}
+     */
     composite_;
 
-    constructor() {
-        this.ticketMaster_ = new TicketMasterSource();
+    /**
+     * @param {DataSource} dataSource
+     */
+    constructor(dataSource) {
+        this.dataSource_ = dataSource;
 
-        // TODO: add this as a constructor parameter so it can be used for
-        //       accessing user details in the database elsewhere
-        this.datasource_ = new EventMonkeyDataSource();
-        this.eventMonkey_ = new EventMonkeySource(this.datasource_);
+        this.ticketMaster_ = new TicketMasterSource();
+        this.eventMonkey_ = new EventMonkeySource(this.dataSource_);
 
         this.composite_ = new CompositeSource(
             this.eventMonkey_,
@@ -67,14 +84,14 @@ export class EventManager {
     async search({ source = 'composite', limit = 20, eventId, genres,
                    keyword }) {
         let eventSource;
-        switch (source) {
-            case 'ticketMaster':
-                eventSource = this.ticketMaster_;
-                break;
-            case 'eventMonkey':
+        switch (source.toUpperCase()) {
+            case SOURCE_EVENT_MONKEY:
                 eventSource = this.eventMonkey_;
                 break;
-            case 'composite':
+            case SOURCE_TICKET_MASTER:
+                eventSource = this.ticketMaster_;
+                break;
+            case 'COMPOSITE':
                 eventSource = this.composite_;
                 break;
             default:
@@ -119,7 +136,7 @@ export class EventManager {
      * @returns {Promise<Event[]>}
      */
     async getAllEvents() {
-        const eventIds = await this.datasource_.getAllEventIds();
+        const eventIds = await this.dataSource_.getAllEventIds();
 
         const events = await Promise.all(
             eventIds.map(eventId => {
@@ -162,7 +179,7 @@ export class EventManager {
      */
     async eventMonkeyEventList_(userId) {
         // get the user's EventMonkey event ids
-        const eventIds = await this.datasource_.getEventMonkeyList(userId);
+        const eventIds = await this.dataSource_.getEventMonkeyList(userId);
 
         // find and construct all EventMonkey event objects
         const events = await Promise.all(
@@ -185,7 +202,7 @@ export class EventManager {
      */
     async ticketMasterEventList_(userId) {
         // get the user's TicketMaster event ids
-        const eventIds = await this.datasource_.getTicketMasterList(userId);
+        const eventIds = await this.dataSource_.getTicketMasterList(userId);
 
         // find and construct all TicketMaster event objects
         const events = await Promise.all(
@@ -215,12 +232,12 @@ export class EventManager {
         const {
             addToEventMonkeyList,
             addToTicketMasterList
-        } = this.datasource_;
+        } = this.dataSource_;
 
-        switch (event.source) {
-            case 'eventMonkey':
+        switch (event.source.toUpperCase()) {
+            case SOURCE_EVENT_MONKEY:
                 return addToEventMonkeyList(userId, event.id);
-            case 'ticketMaster':
+            case SOURCE_TICKET_MASTER:
                 return addToTicketMasterList(userId, event.id);
             default:
                 throw new Error(`Unknown event source: ${event.source}`);
@@ -245,12 +262,12 @@ export class EventManager {
         const {
             removeFromEventMonkeyList,
             removeFromTicketMasterList
-        } = this.datasource_;
+        } = this.dataSource_;
 
-        switch (event.source) {
-            case 'eventMonkey':
+        switch (event.source.toUpperCase()) {
+            case SOURCE_EVENT_MONKEY:
                 return removeFromEventMonkeyList(userId, event.id);
-            case 'ticketMaster':
+            case SOURCE_TICKET_MASTER:
                 return removeFromTicketMasterList(userId, event.id);
             default:
                 throw new Error(`Unknown event source: ${event.source}`);
@@ -269,7 +286,7 @@ export class EventManager {
      * @private
      */
     async checkUserType_(userId, userType) {
-        const userDetails = await this.datasource_.getUserDetails(userId);
+        const userDetails = await this.dataSource_.getUserDetails(userId);
 
         if (!userDetails) {
             return { message: `User(${userId}) does not exist` };
@@ -357,7 +374,7 @@ export class EventManager {
             return { message: failMessage.message };
         }
 
-        return await this.datasource_.getInterestList(userId);
+        return await this.dataSource_.getInterestList(userId);
     }
 
     /**
@@ -378,7 +395,7 @@ export class EventManager {
             return { message: failMessage.message };
         }
 
-        await this.datasource_.addToInterests(userId, genreId);
+        await this.dataSource_.addToInterests(userId, genreId);
 
         return { message: 'success' };
     }
@@ -401,7 +418,7 @@ export class EventManager {
             return { message: failMessage.message };
         }
 
-        await this.datasource_.removeFromInterests(userId, genreId);
+        await this.dataSource_.removeFromInterests(userId, genreId);
 
         return { message: 'success' };
     }
@@ -417,8 +434,8 @@ export class EventManager {
      * @param {string} location
      * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
-     * @param {Image[]} images
      * @param {Genre[]} genres
+     * @param {Image[]} images
      *
      * @returns {Promise<{ eventId: number } | { message: string }>} a promise
      *     for the generated event id, or a failure message
@@ -455,7 +472,7 @@ export class EventManager {
             genres
         );
 
-        const eventId = await this.datasource_.addEventDetails(event);
+        const eventId = await this.dataSource_.addEventDetails(event);
 
         if (!eventId) {
             // there is no record of the event in the database, so do not add
@@ -463,14 +480,14 @@ export class EventManager {
             return { message: 'Failed to add event details' };
         }
 
-        // set the event id with the generated database value
-        event.id = eventId;
+        // cast BigInt into regular number
+        event.id = Number(eventId);
 
         // asynchronously associate all event genres and images, as well as
         // associating the event with the user
         const [genreNameToId, imageUrlToId] = await Promise.all([
-            this.datasource_.addGenresToEvent(event.id, event.genres),
-            this.datasource_.addImagesToEvent(event.id, event.images),
+            this.dataSource_.addGenresToEvent(event.id, event.genres),
+            this.dataSource_.addImagesToEvent(event.id, event.images),
             this.addEventToList_(userId, event)
         ]);
 
@@ -484,7 +501,7 @@ export class EventManager {
             image.id = imageUrlToId.get(image.url);
         });
 
-        return { eventId: Number(event.id) };
+        return { eventId: event.id };
     }
 
     /**
@@ -506,7 +523,7 @@ export class EventManager {
 
         // only EventMonkey source events can be deleted, so only search in the
         // EventMonkey source list
-        const eventIds = await this.datasource_.getEventMonkeyList(userId);
+        const eventIds = await this.dataSource_.getEventMonkeyList(userId);
 
         // test if the requested event id is found in the user's event id list
         if (!eventIds.some(otherId => eventId === otherId)) {
@@ -515,7 +532,7 @@ export class EventManager {
             };
         }
 
-        await this.datasource_.removeEventDetails(eventId);
+        await this.dataSource_.removeEventDetails(eventId);
 
         return { message: 'success' };
     }
