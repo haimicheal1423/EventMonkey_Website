@@ -60,6 +60,7 @@ export class Database {
 
 /**
  * A data source provides an api to manage data related to users and events.
+ * @abstract
  */
 export class DataSource {
 
@@ -77,6 +78,7 @@ export class DataSource {
      * @param {User} user the user to add
      *
      * @returns {Promise<number>} the id of the data source record
+     * @abstract
      */
     async addUserDetails(user) {
         throw new Error('Unimplemented abstract function');
@@ -90,6 +92,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source added a record
+     * @abstract
      */
     async addToEventMonkeyList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -103,6 +106,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source removed a record
+     * @abstract
      */
     async removeFromEventMonkeyList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -116,6 +120,7 @@ export class DataSource {
      * @param {string} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source added a record
+     * @abstract
      */
     async addToTicketMasterList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -129,6 +134,7 @@ export class DataSource {
      * @param {string} eventId the id of the data source's event record
      *
      * @returns {Promise<boolean>} `true` if the data source removed a record
+     * @abstract
      */
     async removeFromTicketMasterList(userId, eventId) {
         throw new Error('Unimplemented abstract function');
@@ -141,6 +147,7 @@ export class DataSource {
      * @param {number} genreId the genre id to add to interests
      *
      * @returns {Promise<void>}
+     * @abstract
      */
     async addToInterests(userId, genreId) {
         throw new Error('Unimplemented abstract function');
@@ -153,6 +160,7 @@ export class DataSource {
      * @param {number} genreId the genre id to remove from interests
      *
      * @returns {Promise<void>}
+     * @abstract
      */
     async removeFromInterests(userId, genreId) {
         throw new Error('Unimplemented abstract function');
@@ -170,6 +178,7 @@ export class DataSource {
      *         username: string,
      *         profileImageId: number
      *     }>}
+     * @abstract
      */
     async getUserDetails(userId) {
         throw new Error('Unimplemented abstract function');
@@ -181,6 +190,7 @@ export class DataSource {
      * @param {number} userId
      *
      * @returns {Promise<number[]>} an array of event ids
+     * @abstract
      */
     async getEventMonkeyList(userId) {
         throw new Error('Unimplemented abstract function');
@@ -192,6 +202,7 @@ export class DataSource {
      * @param {number} userId
      *
      * @returns {Promise<number[]>} an array of event ids
+     * @abstract
      */
     async getTicketMasterList(userId) {
         throw new Error('Unimplemented abstract function');
@@ -203,6 +214,7 @@ export class DataSource {
      * @param {number} userId the id of the data source's user record
      *
      * @returns {Promise<Genre[]>}
+     * @abstract
      */
     async getInterestList(userId) {
         throw new Error('Unimplemented abstract function');
@@ -214,6 +226,7 @@ export class DataSource {
      * Gets all the event ids from the backing data source.
      *
      * @returns {Promise<number[]>}
+     * @abstract
      */
     async getAllEventIds() {
         throw new Error('Unimplemented abstract function');
@@ -225,6 +238,7 @@ export class DataSource {
      * @param {Event} event the event to add
      *
      * @returns {Promise<number>} the id of the data source record
+     * @abstract
      */
     async addEventDetails(event) {
         throw new Error('Unimplemented abstract function');
@@ -236,6 +250,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<void>}
+     * @abstract
      */
     async removeEventDetails(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -251,6 +266,7 @@ export class DataSource {
      *
      * @returns {Promise<Map<string, number>>} a map from genre name to the
      *     database's genre id
+     * @abstract
      */
     async addGenresToEvent(eventId, genres) {
         throw new Error('Unimplemented abstract function');
@@ -266,6 +282,7 @@ export class DataSource {
      *
      * @returns {Promise<Map<string, number>>} a map from image url to the
      *     database's image id
+     * @abstract
      */
     async addImagesToEvent(eventId, images) {
         throw new Error('Unimplemented abstract function');
@@ -283,6 +300,7 @@ export class DataSource {
      *         dates: { startDateTime: Date, [endDateTime]: Date },
      *         priceRanges: { currency: string, min: number, max: number }[],
      *     }>}
+     * @abstract
      */
     async getEventDetails(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -295,6 +313,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<Genre[]>}
+     * @abstract
      */
     async getEventGenres(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -307,6 +326,7 @@ export class DataSource {
      * @param {number} eventId the id of the data source's event record
      *
      * @returns {Promise<Image[]>}
+     * @abstract
      */
     async getEventImages(eventId) {
         throw new Error('Unimplemented abstract function');
@@ -319,6 +339,7 @@ export class DataSource {
      * @param {string[]} names the genre names to collect events by
      *
      * @returns {Promise<number[]>} an array of event ids
+     * @abstract
      */
     async getEventIdsWithGenres(names) {
         throw new Error('Unimplemented abstract function');
@@ -331,6 +352,7 @@ export class DataSource {
      * @param {string} searchText the text to search for in the event details
      *
      * @returns {Promise<number[]>} the event ids
+     * @abstract
      */
     async getEventIdsWithKeyword(searchText) {
         throw new Error('Unimplemented abstract function');
@@ -342,6 +364,7 @@ export class DataSource {
      * @param {string} name the genre name
      *
      * @returns {Promise<Genre>} the constructed genre object with the id
+     * @abstract
      */
     async addGenre(name) {
         throw new Error('Unimplemented abstract function');
@@ -353,6 +376,7 @@ export class DataSource {
      * @param {string[]} names the genre name
      *
      * @returns {Promise<Genre[]>} the constructed genre objects with their id
+     * @abstract
      */
     async addGenreList(names) {
         throw new Error('Unimplemented abstract function');
@@ -1013,3 +1037,10 @@ export class EventMonkeyDataSource extends DataSource {
         return imageMap;
     }
 }
+
+/**
+ * A singleton for the EventMonkey using a backing database data source.
+ *
+ * @type {EventMonkeyDataSource}
+ */
+export const emDBSource = new EventMonkeyDataSource();

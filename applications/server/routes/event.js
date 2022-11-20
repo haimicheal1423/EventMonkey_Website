@@ -2,6 +2,9 @@ import { Router } from 'express';
 import status from "http-status";
 
 import { EventManager } from "../helpers/EventManager.js";
+import { emDBSource } from "../helpers/Database.js";
+
+const eventManager = new EventManager(emDBSource);
 
 export const router = Router();
 

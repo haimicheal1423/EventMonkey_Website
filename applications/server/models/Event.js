@@ -5,13 +5,13 @@ import { Genre } from "./Genre.js";
  * The source type for events created and stored in the EventMonkey database.
  * @type {string}
  */
-export const SOURCE_EVENT_MONKEY = 'eventMonkey';
+export const SOURCE_EVENT_MONKEY = 'EVENT_MONKEY';
 
 /**
  * The source type for events created and stored through TicketMaster.
  * @type {string}
  */
-export const SOURCE_TICKET_MASTER = 'ticketMaster';
+export const SOURCE_TICKET_MASTER = 'TICKET_MASTER';
 
 /**
  * The Event data type is a container which holds event details.
