@@ -1,11 +1,7 @@
-import {
-    CompositeSource,
-    EventMonkeySource,
-    TicketMasterSource
-} from './EventSource.js';
+import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
 import { EventMonkeyDataSource } from './Database.js';
-import { Event, SOURCE_EVENT_MONKEY } from "../models/Event.js";
 import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
+import { SOURCE_EVENT_MONKEY, Event } from "../models/Event.js";
 import { Genre } from "../models/Genre.js";
 
 /**
