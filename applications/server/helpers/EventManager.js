@@ -141,6 +141,31 @@ export class EventManager {
     }
 
     /**
+     * Finds a single event by either the EventMonkey id or the TicketMaster id.
+     * The event source is composite by default.
+     *
+     * @param {{[source]: string, eventId: number|string}} options
+     *     the search options
+     * @param [options.source] the event source, either
+     *     {@link SOURCE_EVENT_MONKEY} or {@link SOURCE_TICKET_MASTER}
+     * @param options.eventId the event id
+     *
+     * @returns {Promise<Event>} the event
+     */
+    async findEventById({ source, eventId }) {
+        switch (source?.toUpperCase()) {
+            case SOURCE_EVENT_MONKEY:
+                return await this.eventMonkey_.findByEventId(eventId);
+
+            case SOURCE_TICKET_MASTER:
+                return await this.ticketMaster_.findByEventId(eventId);
+
+            default:
+                return await this.composite_.findByEventId(eventId);
+        }
+    }
+
+    /**
      * Finds a list of events associated with a user. If the user is an
      * {@link Organizer}, the events are all created and owned by that user. If
      * the user is an {@link Attendee}, the event list is that user's favorite

@@ -16,8 +16,8 @@ router.get('/search',
     (req, res) => searchEvent(req, res)
 );
 
-router.get('/user/:userId',
-    (req, res) => getEventsByUserId(req, res)
+router.get('/:eventId',
+    (req, res) => getEventById(req, res)
 );
 
 router.post('/user/:userId/create',
@@ -86,6 +86,18 @@ async function searchEvent(req, res) {
 
         const result = await eventManager.search(searchRequest);
 
+        res.status(status.OK).json(result);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function getEventById(req, res) {
+    try {
+        const eventId = Number(req.params['eventId']);
+        const source = req.query['source'];
+        const result = await eventManager.findEventById({ source, eventId });
         res.status(status.OK).json(result);
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
