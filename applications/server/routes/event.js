@@ -4,7 +4,7 @@ import status from "http-status";
 import { EventManager } from "../helpers/EventManager.js";
 import { emDBSource } from "../helpers/Database.js";
 
-const eventManager = new EventManager(emDBSource);
+export const eventManager = new EventManager(emDBSource);
 
 export const router = Router();
 
@@ -26,28 +26,6 @@ router.post('/user/:userId/create',
 
 router.delete('/user/:userId/delete/:eventId',
     (req, res) => deleteEvent(req, res)
-);
-
-// TODO: Maybe these belong in the User route instead
-
-router.get('/user/:userId/interests',
-    (req, res) => getInterests(req, res)
-);
-
-router.put('/user/:userId/add_interest/:genreId',
-    (req, res) => addToInterests(req, res)
-);
-
-router.delete('/user/:userId/remove_interest/:genreId',
-    (req, res) => removeFromInterests(req, res)
-);
-
-router.put('/user/:userId/add_favorite/:eventId',
-    (req, res) => addToFavorites(req, res)
-);
-
-router.delete('/user/:userId/remove_favorite/:eventId',
-    (req, res) => removeFromFavorites(req, res)
 );
 
 async function getAllEventMonkeyEvents(req, res) {
@@ -105,17 +83,6 @@ async function getEventById(req, res) {
     }
 }
 
-async function getEventsByUserId(req, res) {
-    try {
-        const userId = Number(req.params['userId']);
-        const result = await eventManager.findEventsByUserId(userId);
-        res.status(status.OK).json(result);
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
-        console.error(error);
-    }
-}
-
 async function createEvent(req, res) {
     try {
         const userId = Number(req.params['userId']);
@@ -160,99 +127,6 @@ async function deleteEvent(req, res) {
         }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
-        console.error(error);
-    }
-}
-
-async function addToFavorites(req, res) {
-    try {
-        const userId = Number(req.params['userId']);
-
-        // ticket master ids can be strings, so no Number cast
-        const eventId = req.params['eventId'];
-
-        const result = await eventManager.addToFavorites(userId, eventId);
-
-        if (result.message === 'success') {
-            res.status(status.OK).json(result);
-        } else {
-            res.status(status.BAD_REQUEST).json(result);
-        }
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
-        console.error(error);
-    }
-}
-
-async function removeFromFavorites(req, res) {
-    try {
-        const userId = Number(req.params['userId']);
-
-        // ticket master ids can be strings, so no Number cast
-        const eventId = req.params['eventId'];
-
-        const result = await eventManager.removeFromFavorites(userId, eventId);
-
-        if (result.message === 'success') {
-            res.status(status.OK).json(result);
-        } else {
-            res.status(status.BAD_REQUEST).json(result);
-        }
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
-        console.error(error);
-    }
-}
-
-async function getInterests(req, res) {
-    try {
-        const userId = Number(req.params['userId']);
-
-        const result = await eventManager.getInterests(userId);
-
-        if (!result.message) {
-            res.status(status.OK).json(result);
-        } else {
-            res.status(status.BAD_REQUEST).json(result);
-        }
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
-        console.error(error);
-    }
-}
-
-async function addToInterests(req, res) {
-    try {
-        const userId = Number(req.params["userId"]);
-        const genreId = Number(req.params['genreId']);
-
-        const result = await eventManager.addToInterests(userId, genreId);
-
-        if (result.message === 'success') {
-            res.status(status.OK).json(result);
-        } else {
-            res.status(status.BAD_REQUEST).json(result);
-        }
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
-        console.error(error);
-    }
-}
-
-async function removeFromInterests(req, res) {
-    try {
-        const userId = Number(req.params['userId']);
-        const genreId = Number(req.params['genreId']);
-
-        const result = await eventManager.removeFromInterests(userId, genreId);
-
-        if (result.message === 'success') {
-            res.status(status.OK).json(result);
-        } else {
-            res.status(status.BAD_REQUEST).json(result);
-        }
-    } catch (error) {
-        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
         console.error(error);
     }
 }

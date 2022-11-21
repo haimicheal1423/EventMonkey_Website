@@ -244,9 +244,8 @@ export class EventManager {
      *
      * @throws {Error} if the event source is not `'eventMonkey'` or
      *     `'ticketMaster'`
-     * @private
      */
-    async addEventToList_(userId, event) {
+    async addEventToList(userId, event) {
         const {
             addToEventMonkeyList,
             addToTicketMasterList
@@ -274,9 +273,8 @@ export class EventManager {
      *
      * @throws {Error} if the event source is not `'eventMonkey'` or
      *     `'ticketMaster'`
-     * @private
      */
-    async removeEventFromList_(userId, event) {
+    async removeEventFromList(userId, event) {
         const {
             removeFromEventMonkeyList,
             removeFromTicketMasterList
@@ -290,155 +288,6 @@ export class EventManager {
             default:
                 throw new Error(`Unknown event source: ${event.source}`);
         }
-    }
-
-    /**
-     * Checks if a user is of the given type. If the user does not exist or if
-     * the type does not match, then a failure message will be returned.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {string} userType the type of user
-     *
-     * @returns {Promise<{message: string}|undefined>} a message if the user
-     *     does not exist or if the type does not match, or undefined if success
-     * @private
-     */
-    async checkUserType_(userId, userType) {
-        const userDetails = await this.dataSource_.getUserDetails(userId);
-
-        if (!userDetails) {
-            return { message: `User(${userId}) does not exist` };
-        }
-
-        if (userDetails.type !== userType) {
-            return { message: `User(${userId}) is not type ${userType}` };
-        }
-
-        return undefined;
-    }
-
-    /**
-     * Adds an event to the attendees favorites list. The user id must point to
-     * a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number|string} eventId the EventMonkey or TicketMaster event id
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the event was successfully added to favorites
-     */
-    async addToFavorites(userId, eventId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        const event = await this.composite_.findByEventId(eventId);
-
-        if (!event) {
-            return { message: `Event(${eventId}) does not exist` };
-        }
-
-        await this.addEventToList_(userId, event);
-
-        return { message: 'success' };
-    }
-
-    /**
-     * Removes an event from the attendees favorites list. The user id must
-     * point to a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number|string} eventId the EventMonkey or TicketMaster event id
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the event was successfully removed from favorites
-     */
-    async removeFromFavorites(userId, eventId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        const event = await this.composite_.findByEventId(eventId);
-
-        if (!event) {
-            return { message: `Event(${eventId}) does not exist` };
-        }
-
-        await this.removeEventFromList_(userId, event);
-
-        return { message: 'success' };
-    }
-
-    /**
-     * Gets the genre list that the user has added as their interests
-     *
-     * @param {number} userId the EventMonkey user id
-     *
-     * @returns {Promise<{message: string} | Genre[]>} a failure message if the
-     *     user is not an {@link TYPE_ATTENDEE} user type, or the array of
-     *     genres in the interests list
-     */
-    async getInterests(userId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        return await this.dataSource_.getInterestList(userId);
-    }
-
-    /**
-     * Adds an event to the attendees favorites list. The user id must point to
-     * a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number} genreId the genre id to add to interests
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the genre was added to interests
-     */
-    async addToInterests(userId, genreId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-         if (failMessage) {
-             // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        await this.dataSource_.addToInterests(userId, genreId);
-
-        return { message: 'success' };
-    }
-
-    /**
-     * Removes an event from the attendees favorites list. The user id must
-     * point to a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number} genreId the genre id to remove from interests
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the genre was successfully removed from interests
-     */
-    async removeFromInterests(userId, genreId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        await this.dataSource_.removeFromInterests(userId, genreId);
-
-        return { message: 'success' };
     }
 
     /**
@@ -460,7 +309,8 @@ export class EventManager {
      */
     async createEvent(userId, name, description, location, dates, priceRanges,
                       genres, images) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ORGANIZER);
+        const failMessage = await userManager.checkUserType(userId,
+                                                            TYPE_ORGANIZER);
 
         if (failMessage) {
             // user is not organizer type
@@ -506,7 +356,7 @@ export class EventManager {
         const [genreNameToId, imageUrlToId] = await Promise.all([
             this.dataSource_.addGenresToEvent(event.id, event.genres),
             this.dataSource_.addImagesToEvent(event.id, event.images),
-            this.addEventToList_(userId, event)
+            this.addEventToList(userId, event)
         ]);
 
         // set the event genre ids with the database record ids
@@ -532,7 +382,8 @@ export class EventManager {
      *     'success' if the event was successfully deleted
      */
     async deleteEvent(userId, eventId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ORGANIZER);
+        const failMessage = await userManager.checkUserType(userId,
+                                                            TYPE_ORGANIZER);
 
         if (failMessage) {
             // user is not organizer type
