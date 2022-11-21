@@ -1,8 +1,9 @@
-import { CompositeSource, EventMonkeySource, TicketMasterSource } from './EventSource.js';
-import { DataSource } from './Database.js';
+import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
 import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from "../models/Event.js";
-import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
+import { TYPE_ORGANIZER } from "../models/User.js";
+import { DataSource } from './Database.js';
 import { Genre } from "../models/Genre.js";
+import { userManager } from "../routes/user.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -70,9 +71,9 @@ export class EventManager {
      *         genres: string|string[],
      *         keyword: string
      *     }} literal event search parameters
-     * @param [literal.source = 'composite'] the {@link EventSource} type, which
-     *     can be <i>'ticketMaster'</i>, <i>'EventMonkey'</i>,
-     *     or <i>'composite'</i> (by default)
+     * @param [literal.source] the {@link EventSource} type, which
+     *     can be {@link SOURCE_TICKET_MASTER} or {@link SOURCE_EVENT_MONKEY}
+     *     By default, the composite event source will be used.
      * @param [literal.limit = 20] the maximum size of the resulting array
      * @param [literal.eventId] the event id, which can be a number for
      *     EventMonkey sources or a string for TicketMaster sources
@@ -81,46 +82,38 @@ export class EventManager {
      *
      * @returns {Promise<Event[]>} the event list of any matching events
      */
-    async search({ source = 'composite', limit = 20, eventId, genres,
-                   keyword }) {
+    async search({ source, limit = 20, eventId, genres, keyword }) {
         let eventSource;
-        switch (source.toUpperCase()) {
+        switch (source?.toUpperCase()) {
             case SOURCE_EVENT_MONKEY:
                 eventSource = this.eventMonkey_;
                 break;
             case SOURCE_TICKET_MASTER:
                 eventSource = this.ticketMaster_;
                 break;
-            case 'COMPOSITE':
+            default:
                 eventSource = this.composite_;
                 break;
-            default:
-                throw new Error(`No event source defined for: ${source}`);
         }
 
-        const promises = [];
+        const workList = [];
 
         if (eventId) {
-            promises.push(eventSource.findByEventId(eventId));
+            workList.push(eventSource.findByEventId(eventId));
         }
 
         if (genres) {
-            let names;
-            if (Array.isArray(genres)) {
-                names = genres;
-            } else {
-                names = [genres];
-            }
-            promises.push(eventSource.findByGenre(names, limit));
+            const names = genres.split(",");
+            workList.push(eventSource.findByGenre(names, limit));
         }
 
         if (keyword) {
-            promises.push(eventSource.findByKeyword(keyword, limit));
+            workList.push(eventSource.findByKeyword(keyword, limit));
         }
 
         // flatten the resolved array of event lists into one array, then filter
         // out any undefined (event not found) results
-        const eventList = (await Promise.all(promises))
+        const eventList = (await Promise.all(workList))
                             .flat(1)
                             .filter(event => event !== undefined);
 

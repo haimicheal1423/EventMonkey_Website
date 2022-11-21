@@ -76,8 +76,8 @@ async function searchEvent(req, res) {
             searchRequest.eventId = req.query['eventId'];
         }
 
-        if (req.query['genre']) {
-            searchRequest.genre = req.query['genre'];
+        if (req.query['genres']) {
+            searchRequest.genres = req.query['genres'];
         }
 
         if (req.query['keyword']) {
