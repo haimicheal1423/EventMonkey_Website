@@ -67,7 +67,6 @@ export class EventManager {
      * @param {{
      *         source: string,
      *         limit: number,
-     *         eventId: number,
      *         genres: string|string[],
      *         keyword: string
      *     }} literal event search parameters
@@ -75,14 +74,12 @@ export class EventManager {
      *     can be {@link SOURCE_TICKET_MASTER} or {@link SOURCE_EVENT_MONKEY}
      *     By default, the composite event source will be used.
      * @param [literal.limit = 20] the maximum size of the resulting array
-     * @param [literal.eventId] the event id, which can be a number for
-     *     EventMonkey sources or a string for TicketMaster sources
      * @param [literal.genres] the genre name (or an array of names)
      * @param [literal.keyword] a search string
      *
      * @returns {Promise<Event[]>} the event list of any matching events
      */
-    async search({ source, limit = 20, eventId, genres, keyword }) {
+    async search({ source, limit = 20, genres, keyword }) {
         let eventSource;
         switch (source?.toUpperCase()) {
             case SOURCE_EVENT_MONKEY:
@@ -97,10 +94,6 @@ export class EventManager {
         }
 
         const workList = [];
-
-        if (eventId) {
-            workList.push(eventSource.findByEventId(eventId));
-        }
 
         if (genres) {
             const names = genres.split(",");

@@ -50,10 +50,6 @@ async function searchEvent(req, res) {
             searchRequest.limit = req.query['limit'];
         }
 
-        if (req.query['eventId']) {
-            searchRequest.eventId = req.query['eventId'];
-        }
-
         if (req.query['genres']) {
             searchRequest.genres = req.query['genres'];
         }
