@@ -3,6 +3,7 @@ import status from 'http-status';
 
 import { UserManager } from '../helpers/UserManager.js';
 import { emDBSource } from "../helpers/Database.js";
+import { eventManager } from "./event.js";
 
 export const userManager = new UserManager(emDBSource);
 export const router = Router();
@@ -17,6 +18,14 @@ router.post('/register',
 
 router.post('/login',
     (req, res) => login(req, res)
+);
+
+router.post('/:userId/create',
+    (req, res) => createEvent(req, res)
+);
+
+router.delete('/:userId/delete/:eventId',
+    (req, res) => deleteEvent(req, res)
 );
 
 router.get('/:userId/created_events',
@@ -106,6 +115,54 @@ async function login(req, res) {
     } catch (error) {
         console.error(error);
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+    }
+}
+
+async function createEvent(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+
+        const result = await eventManager.createEvent(
+            userId,
+            req.body['name'],
+            req.body['description'],
+            req.body['location'],
+            req.body['dates'],
+            req.body['priceRanges'],
+            req.body['genres'],
+            req.body['images']
+        );
+
+        if (result.eventId) {
+            res.status(status.OK).json(result);
+        } else if (result.message) {
+            res.status(status.BAD_REQUEST).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json({
+                message: 'Failed to create event, with no errors!'
+            });
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function deleteEvent(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+        const eventId = Number(req.params['eventId']);
+
+        const result = await eventManager.deleteEvent(userId, eventId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
     }
 }
 
