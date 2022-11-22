@@ -80,19 +80,19 @@ export class Image {
             throw new Error('Image undefined')
         }
 
-        if (image['ratio']) {
+        if (!image['ratio']) {
             throw new Error('Image missing ratio')
         }
 
-        if (image['width']) {
+        if (!image['width']) {
             throw new Error('Image missing width')
         }
 
-        if (image['height']) {
+        if (!image['height']) {
             throw new Error('Image missing height')
         }
 
-        if (image['url']) {
+        if (!image['url']) {
             throw new Error('Image missing url')
         }
     }

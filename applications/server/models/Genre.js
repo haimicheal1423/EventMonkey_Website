@@ -48,7 +48,7 @@ export class Genre {
         if (!genre) {
             throw new Error('Genre undefined');
         }
-        if (!genre.name) {
+        if (!genre['name']) {
             throw new Error('Genre name undefined');
         }
     }

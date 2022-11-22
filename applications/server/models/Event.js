@@ -178,23 +178,31 @@ export class Event {
     }
 
     static verifyPriceRanges(priceRanges) {
-        if (priceRanges) {
-            if (!Array.isArray(priceRanges)) {
-                throw new Error('Event price ranges must be an array');
-            }
+        if (!priceRanges) {
+            // events can be free (price range is undefined or empty array)
+            return;
+        }
 
-            if (!priceRanges['currency']) {
-                throw new Error('Missing currency in price range');
-            }
+        if (!Array.isArray(priceRanges)) {
+            throw new Error('Event price ranges must be an array');
+        }
 
-            if (!priceRanges['min']) {
-                throw new Error('Missing min price in price range');
-            }
+        if (priceRanges.length === 0) {
+            // events can be free (price range is undefined or empty array)
+            return;
+        }
 
-            if (JSON.stringify(priceRanges).length > 65535) {
-                throw new Error('Event price ranges text must be less than'
-                              + ' 65535 characters');
-            }
+        if (!priceRanges['currency']) {
+            throw new Error('Missing currency in price range');
+        }
+
+        if (!priceRanges['min']) {
+            throw new Error('Missing min price in price range');
+        }
+
+        if (JSON.stringify(priceRanges).length > 65535) {
+            throw new Error('Event price ranges text must be less than'
+                + ' 65535 characters');
         }
     }
 
