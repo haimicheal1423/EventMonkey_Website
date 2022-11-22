@@ -1,20 +1,30 @@
-import { useEffect, useState } from 'react';
 import Axios from 'axios';
 import { Routes, Route, useParams } from "react-router-dom";
+import { useEffect, useState } from 'react';
+
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/esm/Container';
+// import Container from 'react-bootstrap/esm/Container';
 import Row from 'react-bootstrap/Row';
+
 import Modal from '../components/Modal'
+
+import '../assets/css/event.css'
 
 
 function Event() {
     const columnsPerRow = 4;
     const { genre } = useParams()
     const [events, setEvents] = useState([])
-    const [showevents, setShowEvents] = useState([true])
+    // const [showEvents, setShowEvents] = useState([true])
     const [showModal, setShowModal] = useState(false)
+
+    console.log(showModal)
+
+    const handleClose = () => {
+        setShowModal(false)
+    }
 
     const getAllEvents = () => {
         if (genre) {
@@ -32,12 +42,9 @@ function Event() {
         getAllEvents();
     }, []);
 
-    const handleClose = () => {
-        setShowModal(false)
-    }
-
     return (
-        <Container>
+        // was in Container tag instead of fragment
+        <>
             <Row xs={1} md={columnsPerRow}>
                 {events?.length > 0 && events.map((event, index) =>
                     <Col>
@@ -62,7 +69,20 @@ function Event() {
 
                 )}
             </Row>
-        </Container>
+            
+            {showModal &&
+                <Modal handleClose={handleClose}>
+                    <h2>Terms and Conditions</h2>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error odit nam et reprehenderit quibusdam temporibus officia dolorum quo sint nemo quis, laborum, quasi nisi fugit praesentium debitis repudiandae! Sapiente, omnis.</p>
+                </Modal>
+            }
+
+            <div>
+                <button onClick={() => setShowModal(true)}>Show Modal</button>
+            </div>
+
+        </>
+        
     );
 }
 

@@ -18,6 +18,21 @@ export default function NewEventForm() {
             <input type="date"/>
         </label>
 
+        <label>
+            <span>Event Description:</span>
+            <input type="date"/>
+        </label>
+
+        <label>
+            <span>Event Date Time Start:</span>
+            <input type="date"/>
+        </label>
+
+        <label>
+            <span>Event Date Time End:</span>
+            <input type="date"/>
+        </label>
+
     </form>
   )
 }
