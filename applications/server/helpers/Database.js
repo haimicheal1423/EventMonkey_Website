@@ -299,6 +299,19 @@ export class DataSource {
         throw new Error('Unimplemented abstract function');
     }
 
+    /**
+     * Gets a unique array of genres using an attendee's friends list. The genre
+     * names are fetched from each user in the friends list and combined
+     * into one array.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<Genre[]>} the user ids in the friends list
+     */
+    async getFriendInterests(userId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
     /* ********** EVENTS ********** */
 
     /**
@@ -458,6 +471,17 @@ export class DataSource {
      * @abstract
      */
     async addGenreList(names) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets a {@link Genre} from the EventMonkey database.
+     *
+     * @param {number} genreId the EventMonkey genre id
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenre(genreId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -855,6 +879,37 @@ export class EventMonkeyDataSource extends DataSource {
         return result.map(row => row['friend_id']);
     }
 
+    /**
+     * Gets a unique array of genres using an attendee's friends list. The genre
+     * names are fetched from each user in the friends list and combined
+     * into one array.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<number[]>} the user ids in the friends list
+     */
+    async getFriendInterests(userId) {
+        // get a distinct list of genre ids from each user in the friends list
+        const result = await Database.query(
+            `SELECT DISTINCT ail.genre_id
+             FROM Attendee_Friend_List afl
+             INNER JOIN Attendee_Interest_List ail
+                ON ail.user_id = afl.friend_id
+             WHERE afl.user_id = ?`,
+            userId
+        );
+
+        if (!result[0]) {
+            // either no friends in the friends list, or no friend has interests
+            return [];
+        }
+
+        // construct all the Genre objects using the resulting genre ids
+        return await Promise.all(
+            result.map(row => this.getGenre(row['genre_id']))
+        );
+    }
+
     /* ********** EVENTS ********** */
 
     /**
@@ -1189,6 +1244,28 @@ export class EventMonkeyDataSource extends DataSource {
         });
 
         return genres;
+    }
+
+    /**
+     * Gets a {@link Genre} from the EventMonkey database.
+     *
+     * @param {number} genreId the EventMonkey genre id
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenre(genreId) {
+        const result = await Database.query(
+            `SELECT name
+             FROM Genre
+             WHERE genre_id = ?`,
+            genreId
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        return Genre.createWithId(genreId, result[0]['name']);
     }
 
     /**
