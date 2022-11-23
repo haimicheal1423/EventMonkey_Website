@@ -19,6 +19,10 @@ router.get('/:eventId',
     (req, res) => getEventById(req, res)
 );
 
+router.get('/recommended/:userId',
+    (req, res) => getRecommendedEvents(req, res)
+);
+
 async function getAllEventMonkeyEvents(req, res) {
     try {
         const events = await eventManager.getAllEvents();
@@ -63,6 +67,23 @@ async function getEventById(req, res) {
         const eventId = Number(req.params['eventId']);
         const source = req.query['source'];
         const result = await eventManager.findEventById({ source, eventId });
+        res.status(status.OK).json(result);
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function getRecommendedEvents(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+        let limit = Number(req.query['limit']);
+
+        if (isNaN(limit)) {
+            limit = undefined;
+        }
+
+        const result = await eventManager.getRecommendedEvents(userId, limit);
         res.status(status.OK).json(result);
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
