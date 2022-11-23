@@ -1,77 +1,293 @@
-import { Database } from "../helpers/Database.js";
-import express, {Router} from "express";
-import bcrypt from "bcrypt";
-import status from "http-status";
+import { Router } from 'express';
+import status from 'http-status';
 
+import { UserManager } from '../helpers/UserManager.js';
+import { emDBSource } from "../helpers/Database.js";
+import { eventManager } from "./event.js";
 
+export const userManager = new UserManager(emDBSource);
 export const router = Router();
-router.get("/", async function (req, res) {
+
+router.get('/:id',
+    (req, res) => getUser(req, res)
+);
+
+router.post('/register',
+    (req, res) => register(req, res)
+);
+
+router.post('/login',
+    (req, res) => login(req, res)
+);
+
+router.post('/:userId/create',
+    (req, res) => createEvent(req, res)
+);
+
+router.delete('/:userId/delete/:eventId',
+    (req, res) => deleteEvent(req, res)
+);
+
+router.get('/:userId/created_events',
+    (req, res) => getCreatedEvents(req, res)
+);
+
+router.get('/:userId/favorites',
+    (req, res) => getFavorites(req, res)
+);
+
+router.put('/:userId/add_favorite/:eventId',
+    (req, res) => addToFavorites(req, res)
+);
+
+router.delete('/:userId/remove_favorite/:eventId',
+    (req, res) => removeFromFavorites(req, res)
+);
+
+router.get('/:userId/interests',
+    (req, res) => getInterests(req, res)
+);
+
+router.put('/:userId/add_interest/:genreId',
+    (req, res) => addToInterests(req, res)
+);
+
+router.delete('/:userId/remove_interest/:genreId',
+    (req, res) => removeFromInterests(req, res)
+);
+
+async function getUser(req, res) {
     try {
-        const sqlQuery = 'SELECT * FROM User';
-        const rows = await Database.query(sqlQuery, req.params);
-        res.status(200).json(rows);
+        const userId = Number(req.params['id']);
+        const result = await userManager.getUser(userId);
+
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).send(result.message);
+        }
     } catch (error) {
-        res.status(400).send(error.message);
+        console.error(error);
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
     }
-})
-router.get('/:id', async function (req, res) {
+}
+
+async function register(req, res) {
     try {
-        const sqlQuery = 'SELECT user_id, email, password FROM User WHERE user_id=?';
+        const result = await userManager.register(
+            req.body['type'],
+            req.body['username'],
+            req.body['email'],
+            req.body['password']
+        );
 
-        const rows = await Database.query(sqlQuery, req.params.id);
-        res.status(200).json(rows);
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).send(result.message);
+        }
     } catch (error) {
-        res.status(400).send(error.message);
+        console.error(error);
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
     }
-});
+}
 
-router.post('/register', async function (req, res) {
+async function login(req, res) {
+    const email = req.body['email'];
+    const password = req.body['password'];
+
+    console.debug(`email: ${email}`, `password: ${password}`);
+
     try {
-        const { type, username, email, password } = req.body;
+        const loginDetails = await userManager.login(email, password);
 
-        const encryptedPassword = await bcrypt.hash(password, 10)
-
-        const sqlQuery = 'INSERT INTO User (type, username, email, password) VALUES (?,?,?,?)';
-        const result = await Database.query(sqlQuery, [type, username, email, encryptedPassword]);
-
-        res.status(200).json({ userId: result.insertId });
-    } catch (error) {
-        res.status(400).send(error.message)
-    }
-});
-//authenticate user
-router.post('/login', async function (req, res, next) {
-
-    var email = req.body.email;
-    var password = req.body.password;
-
-    console.log("email: ", email + " password: ", password);
-    const results = await Database.query('SELECT * FROM User WHERE email = ?', [email]);
-
-    console.log(results);
-
-    if (!results || !results.length || !results[0])
-        res.status(status.NOT_ACCEPTABLE).send('Invalid username or password.');
-    else
-        bcrypt.compare(password, results[0].password, (err, response) => {
-            if (err) {
-                res.status(status.INTERNAL_SERVER_ERROR).json(err)
-                return;
-            }
-
-            if (response) {
+        if (loginDetails.message) {
+            res.status(status.NOT_ACCEPTABLE).send(loginDetails.message);
+        } else {
             //     req.session.success = true;
             //     req.session.email = email;
             //     req.session.userId = results[0].id;
 
-                res.cookie('email', results[0].email || '');
-                res.cookie('name', results[0].name || '');
-                res.status(status.OK).json('Logged in!');
-            } else
-                res
-                    .status(status.NOT_ACCEPTABLE)
-                    .send('Invalid username or password.');
-        });
+            res.cookie('email', loginDetails.email);
+            res.cookie('name', loginDetails.username);
+            res.status(status.OK).send('Logged in!');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+    }
+}
 
-})
+async function createEvent(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
 
+        const result = await eventManager.createEvent(
+            userId,
+            req.body['name'],
+            req.body['description'],
+            req.body['location'],
+            req.body['dates'],
+            req.body['priceRanges'],
+            req.body['genres'],
+            req.body['images']
+        );
+
+        if (result.eventId) {
+            res.status(status.OK).json(result);
+        } else if (result.message) {
+            res.status(status.BAD_REQUEST).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json({
+                message: 'Failed to create event, with no errors!'
+            });
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function deleteEvent(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+        const eventId = Number(req.params['eventId']);
+
+        const result = await eventManager.deleteEvent(userId, eventId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function getCreatedEvents(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+        const result = await userManager.getCreatedEvents(userId);
+
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json({ message: result.message });
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function getFavorites(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+
+        const result = await userManager.getFavorites(userId);
+
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json({ message: result.message });
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function addToFavorites(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+
+        // ticket master ids can be strings, so no Number cast
+        const eventId = req.params['eventId'];
+
+        const result = await userManager.addToFavorites(userId, eventId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function removeFromFavorites(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+
+        // ticket master ids can be strings, so no Number cast
+        const eventId = req.params['eventId'];
+
+        const result = await userManager.removeFromFavorites(userId, eventId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function getInterests(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+
+        const result = await userManager.getInterests(userId);
+
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function addToInterests(req, res) {
+    try {
+        const userId = Number(req.params["userId"]);
+        const genreId = Number(req.params['genreId']);
+
+        const result = await userManager.addToInterests(userId, genreId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function removeFromInterests(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+        const genreId = Number(req.params['genreId']);
+
+        const result = await userManager.removeFromInterests(userId, genreId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}

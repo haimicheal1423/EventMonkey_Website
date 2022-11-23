@@ -1,3 +1,5 @@
+import { SOURCE_EVENT_MONKEY, EventList } from "./Event.js";
+
 /**
  * The {@link Attendee} user type who can search and add Events to their
  * favorites list to attend.
@@ -33,13 +35,10 @@ export class User {
     /** @type {string} */
     username;
 
-    /** @type {string} */
-    profilePictureUrl;
+    /** @type {Image} */
+    profileImage;
 
-    /** @type {Array<Notification>} */
-    notificationList;
-
-    /** @type {Array<Event>} */
+    /** @type {EventList[]} */
     eventList;
 
     /**
@@ -48,12 +47,11 @@ export class User {
      * @param {string} email
      * @param {string} password
      * @param {string} username
-     * @param {string} profilePictureUrl
-     * @param {Array<Notification>} notificationList
-     * @param {Array<Event>} eventList
+     * @param {Image} profileImage
+     * @param {EventList[]} eventList
      */
-    constructor(userId, type, email, password, username, profilePictureUrl,
-                notificationList, eventList) {
+    constructor(userId, type, email, password, username, profileImage,
+                eventList) {
         if (this.constructor === User) {
             throw new Error('Cannot instantiate abstract class');
         }
@@ -62,8 +60,7 @@ export class User {
         this.email = email;
         this.password = password;
         this.username = username;
-        this.profilePictureUrl = profilePictureUrl;
-        this.notificationList = notificationList;
+        this.profileImage = profileImage;
         this.eventList = eventList;
     }
 
@@ -73,39 +70,28 @@ export class User {
      * @param {Event} event the event to add
      */
     addEvent(event) {
-        this.eventList.push(event);
+        for (const sourceList of this.eventList) {
+            if (sourceList.source === event.source) {
+                sourceList.eventIds.push(event.id);
+                break;
+            }
+        }
     }
 
     /**
-     * Remove every occurrence of the given event from the
-     * {@link eventList} array.
+     * Remove the first occurrence of the given event from the
+     * {@link eventList} array by id.
      *
-     * @param {Event} event the event to filter out of the array (by event id)
+     * @param {Event} event the event to remove (matching by event id)
      */
     removeEvent(event) {
-        this.eventList = this.eventList
-            .filter(elem => elem.id === event.id);
-    }
-
-    /**
-     * Add an event to the {@link notificationList} array.
-     *
-     * @param {Notification} notification the notification to add
-     */
-    addNotification(notification) {
-        this.notificationList.push(notification);
-    }
-
-    /**
-     * Remove every occurrence of the given notification from the
-     * {@link notificationList} array.
-     *
-     * @param {Notification} notification the notification to filter out of the
-     *     array (by notification id)
-     */
-    removeNotification(notification) {
-        this.notificationList = this.notificationList
-            .filter(elem => elem.id === notification.id);
+        for (const sourceList of this.eventList) {
+            if (sourceList.source === event.source) {
+                const index = sourceList.eventIds.indexOf(event.id);
+                sourceList.eventIds.splice(index, 1);
+                break;
+            }
+        }
     }
 }
 
@@ -115,61 +101,21 @@ export class User {
  */
 export class Attendee extends User {
 
-    /** @type {Array<User>} */
-    friendsList;
+    /** @type {Genre[]} */
+    interests;
 
     /**
      * @param {number} userId
      * @param {string} email
      * @param {string} password
      * @param {string} username
-     * @param {string} profilePictureUrl
-     * @param {Array<Notification>} [notificationList]
-     * @param {Array<Event>} [eventList]
-     * @param {Array<User>} [friendsList]
+     * @param {Image} [profileImage]
+     * @param {EventList[]} [eventList]
      */
-    constructor(userId, email, password, username, profilePictureUrl,
-                notificationList = [], eventList = [], friendsList = []) {
-        super(userId, TYPE_ATTENDEE, email, password, username,
-              profilePictureUrl, notificationList, eventList);
-        this.friendsList = friendsList;
-    }
-
-    /**
-     * Test if the given user exists in the {@link friendsList}.
-     *
-     * @param {User} user
-     *
-     * @returns {boolean} <code>true</code> if the user id matches another user
-     *     in the {@link friendsList} array.
-     */
-    isFriend(user) {
-        for (const friend of this.friendsList) {
-            if (friend.id === user.id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Add a user to the {@link friendsList} array.
-     *
-     * @param {User} user the user to add
-     */
-    addFriend(user) {
-        this.friendsList.push(user);
-    }
-
-    /**
-     * Remove every occurrence of the given user from the {@link friendsList}
-     * array.
-     *
-     * @param {User} user the user to filter out of the array (by user id)
-     */
-    removeFriend(user) {
-        this.friendsList = this.friendsList
-            .filter(other => other.id !== user.id);
+    constructor(userId, email, password, username, profileImage,
+                eventList = []) {
+        super(userId, TYPE_ATTENDEE, email, password, username, profileImage,
+              eventList);
     }
 }
 
@@ -184,59 +130,28 @@ export class Organizer extends User {
      * @param {string} email
      * @param {string} password
      * @param {string} username
-     * @param {string} profilePictureUrl
-     * @param {Array<Notification>} [notificationList]
-     * @param {Array<Event>} [eventList]
+     * @param {Image} [profileImage]
+     * @param {EventList[]} [eventList]
      */
-    constructor(userId, email, password, username, profilePictureUrl,
-                notificationList = [], eventList = []) {
-        super(userId, TYPE_ORGANIZER, email, password, username,
-              profilePictureUrl, notificationList, eventList);
-    }
-}
-
-/**
- * A notification message created for a {@link User}.
- */
-export class Notification {
-
-    /** @type {number} */
-    id;
-
-    /** @type {Date} */
-    date;
-
-    /** @type {string} */
-    title;
-
-    /** @type {string} */
-    description;
-
-    /**
-     * @param {number} notificationId
-     * @param {Date} date
-     * @param {string} title
-     * @param {string} description
-     */
-    constructor(notificationId, date, title, description) {
-        this.id = notificationId;
-        this.date = date;
-        this.title = title;
-        this.description = description;
+    constructor(userId, email, password, username, profileImage,
+                eventList = []) {
+        super(userId, TYPE_ORGANIZER, email, password, username, profileImage,
+              eventList);
     }
 
     /**
-     * Test if the given text is found in this notification. The text is
-     * searched in the notification title and description for matches.
+     * Add an event to the {@link eventList} array. The {@link Event.source}
+     * must be {@link SOURCE_EVENT_MONKEY} since organizers can only own events
+     * created and stored in the EventMonkey database.
      *
-     * @param {string} text the text to search for
+     * @param {Event} event the event to add
      *
-     * @returns {boolean} <code>true</code> if the text is found in the
-     *     notification.
+     * @throws {Error} when event source is not {@link SOURCE_EVENT_MONKEY}
      */
-    containsText(text) {
-        // client sided?
-        return this.title.toLowerCase().indexOf(text) !== -1
-            || this.description.toLowerCase().indexOf(text) !== -1;
+    addEvent(event) {
+        if (event.source !== SOURCE_EVENT_MONKEY) {
+            throw new Error(`Expected eventMonkey source, got ${event.source}`);
+        }
+        super.addEvent(event);
     }
 }
