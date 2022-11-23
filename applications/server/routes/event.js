@@ -5,7 +5,6 @@ import { EventManager } from "../helpers/EventManager.js";
 import { emDBSource } from "../helpers/Database.js";
 
 export const eventManager = new EventManager(emDBSource);
-
 export const router = Router();
 
 router.get('/',

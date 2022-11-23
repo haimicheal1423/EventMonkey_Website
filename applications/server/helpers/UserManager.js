@@ -366,4 +366,100 @@ export class UserManager {
 
         return { message: 'success' };
     }
+
+    /**
+     * Gets the attendees friends list. The user id must point to a record of an
+     * Attendee user type.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<
+     *         { userId: number, username: string, profileImage: Image }[]
+     *         | { message: string }
+     *     >} a failure message, or
+     *     an array of constructed {@link Attendee} objects in the friends list
+     */
+    async getFriendsList(userId) {
+        const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
+
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        const friendIds = await this.dataSource_.getFriendList(userId);
+        const friends = friendIds.map(friendId => this.getUser(friendId));
+
+        /**
+         * @type {{ userId: number, username: string, profileImage: Image }[]}
+         */
+        const attendeeFriends = [];
+
+        for (let i = 0; i < friends.length; i++){
+            const friend = friends[i];
+
+            if (friend instanceof Attendee) {
+                attendeeFriends.push({
+                    userId: friend.id,
+                    username: friend.username,
+                    profileImage: friend.profileImage
+                });
+            }
+        }
+
+        return attendeeFriends;
+    }
+
+    /**
+     * Adds a friend to the attendees friends list. Both the user id and friend
+     * id must point to a record of an Attendee user type.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} friendId the friend's EventMonkey user id
+     *
+     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     *     'success' if the user was successfully removed from the friends list
+     */
+    async addToFriends(userId, friendId) {
+        const userFailMsg = await this.checkUserType(userId, TYPE_ATTENDEE);
+
+        if (userFailMsg) {
+            // user is not attendee type
+            return { message: userFailMsg.message };
+        }
+
+        const friendFailMsg = await this.checkUserType(friendId, TYPE_ATTENDEE);
+
+        if (friendFailMsg) {
+            // friend is not attendee type
+            return { message: friendFailMsg.message };
+        }
+
+        await this.dataSource_.addToFriends(userId, friendId);
+
+        return { message: 'success' };
+    }
+
+    /**
+     * Removes a friend from the attendees friends list. The user id must
+     * point to a record of an Attendee user type.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} friendId the friend's EventMonkey user id
+     *
+     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     *     'success' if the user was successfully removed from the friends list
+     */
+    async removeFromFriends(userId, friendId) {
+        const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
+
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        await this.dataSource_.removeFromFriends(userId, friendId);
+
+        return { message: 'success' };
+    }
 }

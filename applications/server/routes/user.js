@@ -56,6 +56,18 @@ router.delete('/:userId/remove_interest/:genreId',
     (req, res) => removeFromInterests(req, res)
 );
 
+router.get('/:userId/friends',
+    (req, res) => getFriendsList(req, res)
+);
+
+router.put('/:userId/add_friend/:friendId',
+    (req, res) => addToFriends(req, res)
+);
+
+router.delete('/:userId/remove_friend/:friendId',
+    (req, res) => removeFromFriends(req, res)
+);
+
 async function getUser(req, res) {
     try {
         const userId = Number(req.params['id']);
@@ -280,6 +292,59 @@ async function removeFromInterests(req, res) {
         const genreId = Number(req.params['genreId']);
 
         const result = await userManager.removeFromInterests(userId, genreId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function getFriendsList(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+
+        const result = await userManager.getFriendsList(userId);
+
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function addToFriends(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+        const friendId = Number(req.params['friendId']);
+
+        const result = await userManager.addToFriends(userId, friendId);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function removeFromFriends(req, res) {
+    try {
+        const userId = Number(req.params['userId']);
+        const friendId = Number(req.params['friendId']);
+
+        const result = await userManager.removeFromFriends(userId, friendId);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);
