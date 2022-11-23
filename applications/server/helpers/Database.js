@@ -179,6 +179,34 @@ export class DataSource {
     }
 
     /**
+     * Adds a friend to the user's friends list.
+     *
+     * @param {number} userId the id of the data source's user record
+     * @param {number} friendId the id of the friend in the data source's user
+     *     record
+     *
+     * @returns {Promise<void>}
+     * @abstract
+     */
+    async addToFriends(userId, friendId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Removes a friend from the user's friends list.
+     *
+     * @param {number} userId the id of the data source's user record
+     * @param {number} friendId the id of the friend in the data source's user
+     *     record
+     *
+     * @returns {Promise<void>}
+     * @abstract
+     */
+    async removeFromFriends(userId, friendId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
      * Adds one or more genres to the user's interest list.
      *
      * @param {number} userId the id of the data source's user record
@@ -255,6 +283,19 @@ export class DataSource {
      * @abstract
      */
     async getInterestList(userId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets an array of user ids list that the user has added to their friends
+     * list.
+     *
+     * @param {number} userId the id of the data source's user record
+     *
+     * @returns {Promise<number[]>} the user ids in the friends list
+     * @abstract
+     */
+    async getFriendList(userId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -622,6 +663,29 @@ export class EventMonkeyDataSource extends DataSource {
     }
 
     /**
+     * Adds a friend to the user's friends list.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} friendId the Event Monkey user id for the friend
+     *     record
+     *
+     * @returns {Promise<void>}
+     */
+    async addToFriends(userId, friendId) {
+    }
+
+    /**
+     * Removes a friend from the user's friends list.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} friendId the Event Monkey user id for the friend
+     *
+     * @returns {Promise<void>}
+     */
+    async removeFromFriends(userId, friendId) {
+    }
+
+    /**
      * Adds one or more genres to the user's interest list.
      *
      * @param {number} userId the EventMonkey user id
@@ -750,6 +814,17 @@ export class EventMonkeyDataSource extends DataSource {
         return result.map(row => {
             return Genre.createWithId(row['genre_id'], row['name']);
         });
+    }
+
+    /**
+     * Gets an array of user ids list that the user has added to their friends
+     * list.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<number[]>} the user ids in the friends list
+     */
+    async getFriendList(userId) {
     }
 
     /* ********** EVENTS ********** */
