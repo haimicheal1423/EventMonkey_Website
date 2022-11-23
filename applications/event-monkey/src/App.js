@@ -11,7 +11,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Interests from './pages/Interests'
 import AboutUs from './pages/AboutUs'
-import Event from './pages/Event'
+import { SingleEvent, EventSearch } from './pages/Event'
 
 
 
@@ -29,8 +29,8 @@ function App() {
           <Route path="/interests" element={<Interests />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/event" element={<Event />} />
-          <Route path="/event/:eventId" element={<Event />} />
+          <Route path="/event/search" element={<EventSearch />} />
+          <Route path="/event/id/:eventId" element={<SingleEvent />} />
         </Routes>
         <hr></hr>
       <FooterEM/>

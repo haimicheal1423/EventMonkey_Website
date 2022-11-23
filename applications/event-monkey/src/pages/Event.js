@@ -1,66 +1,86 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from "react-router-dom";
-import Card from 'react-bootstrap/Card';
-import ListGroup from 'react-bootstrap/ListGroup';
+import Container from "react-bootstrap/Container";
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Card from 'react-bootstrap/Card';
 import Axios from 'axios';
 
-function Event() {
-    const columnsPerRow = 4;
+function SingleEvent() {
     const { eventId } = useParams();
+    const [event, setEvent] = useState(undefined);
+
+    useEffect(() => {
+        Axios.get(`http://localhost:4000/events/${eventId}`)
+            .then(response => void setEvent(response.data))
+            .catch(e => alert(JSON.stringify(e.response.data)));
+    }, [eventId]);
+
+    return (
+        <Container className="d-flex">
+            <Row className="m-auto align-self-center">
+                <Col>{eventCard(event)}</Col>
+            </Row>
+        </Container>
+    );
+}
+
+function EventSearch() {
+    const columnsPerRow = 4;
     const [searchParams] = useSearchParams();
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        if (eventId) {
-            Axios.get(`http://localhost:4000/events/${eventId}`)
-                .then(response => void setEvents([response.data]));
-        } else if (searchParams.has('source') || searchParams.has('limit')
+        if (searchParams.has('source') || searchParams.has('limit')
                 || searchParams.has('keyword') || searchParams.has('genres')) {
             Axios.get(`http://localhost:4000/events/search?${searchParams}`)
-                .then(response => void setEvents(response.data));
+                .then(response => void setEvents(response.data))
+                .catch(e => alert(JSON.stringify(e.response.data)));
         } else {
             Axios.get("http://localhost:4000/events")
-                .then(response => void setEvents(response.data));
+                .then(response => void setEvents(response.data))
+                .catch(e => alert(JSON.stringify(e.response.data)));
         }
-    }, [eventId, searchParams]);
+    }, [searchParams]);
 
     return (
-        <>
-            <Row xs={1} md={columnsPerRow}>
-                {events?.length > 0 && events.map(event =>
-                    <Col>
-                        <Card style={{ width: '18rem', margin:20, padding:20 }}>
-                            <Card.Img variant="top" src={eventImage(event)} />
-                            <Card.Body>
-                                <Card.Title>
-                                    {event.name}
-                                </Card.Title>
-                                <Card.Text>{
-                                    event.description.length > 90
-                                        ? event.description.substring(0, 87) + ' [...]'
-                                        : event.description
-                                }</Card.Text>
-                            </Card.Body>
-                            <ListGroup className="list-group-flush">
-                                {priceRange(event)}
-                                {eventDate(event)}
-                                <ListGroup.Item>
-                                    <Card.Text>
-                                        {event.location}
-                                    </Card.Text>
-                                </ListGroup.Item>
-                            </ListGroup>
-                            <Card.Body>
-                                <Card.Link href="#">Card Link</Card.Link>
-                                <Card.Link href="#">Another Link</Card.Link>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                )}
-            </Row>
-        </>
+        <Row xs={1} md={columnsPerRow}>
+            {events.length > 0 && events.map(event => {
+                return <Col>{eventCard(event)}</Col>
+            })}
+        </Row>
+    );
+}
+
+function eventCard(event) {
+    if (!event) {
+        return <Card.Text>Unknown event</Card.Text>;
+    }
+
+    return (
+        <Card className="m-3 p-3" style={{ width: '18rem' }}>
+            <Card.Img variant="top" src={eventImage(event)} />
+            <Card.Body>
+                <Card.Title>{event.name}</Card.Title>
+                <Card.Text>
+                    {event.description.length > 90
+                        ? event.description.substring(0, 87) + ' [...]'
+                        : event.description}
+                </Card.Text>
+            </Card.Body>
+            <ListGroup className="list-group-flush">
+                {priceRange(event)}
+                {eventDate(event)}
+                <ListGroup.Item>
+                    <Card.Text>{event.location}</Card.Text>
+                </ListGroup.Item>
+            </ListGroup>
+            <Card.Body>
+                <Card.Link href="#">Card Link</Card.Link>
+                <Card.Link href="#">Another Link</Card.Link>
+            </Card.Body>
+        </Card>
     );
 }
 
@@ -148,4 +168,4 @@ function eventDate(event) {
     );
 }
 
-export default Event;
+export { SingleEvent, EventSearch };

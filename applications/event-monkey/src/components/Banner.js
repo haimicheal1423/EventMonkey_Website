@@ -22,7 +22,7 @@ export default function BannerEM() {
 
                 <MDBBtn
                     color='warning'
-                    onClick={() => navigate(`/event?keyword=${searchText}`)}>Search</MDBBtn> {' '}
+                    onClick={() => navigate(`/event/search?keyword=${searchText}`)}>Search</MDBBtn> {' '}
                 <MDBBtn
                     color='success'
                     onClick={() => navigate(`/event`)}>View All Events</MDBBtn>{' '}
