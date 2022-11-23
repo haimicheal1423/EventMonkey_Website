@@ -1,8 +1,9 @@
-import { CompositeSource, EventMonkeySource, TicketMasterSource } from './EventSource.js';
-import { DataSource } from './Database.js';
+import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
 import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from "../models/Event.js";
-import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
+import { TYPE_ORGANIZER } from "../models/User.js";
+import { DataSource } from './Database.js';
 import { Genre } from "../models/Genre.js";
+import { userManager } from "../routes/user.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -66,61 +67,46 @@ export class EventManager {
      * @param {{
      *         source: string,
      *         limit: number,
-     *         eventId: number,
      *         genres: string|string[],
      *         keyword: string
      *     }} literal event search parameters
-     * @param [literal.source = 'composite'] the {@link EventSource} type, which
-     *     can be <i>'ticketMaster'</i>, <i>'EventMonkey'</i>,
-     *     or <i>'composite'</i> (by default)
+     * @param [literal.source] the {@link EventSource} type, which
+     *     can be {@link SOURCE_TICKET_MASTER} or {@link SOURCE_EVENT_MONKEY}
+     *     By default, the composite event source will be used.
      * @param [literal.limit = 20] the maximum size of the resulting array
-     * @param [literal.eventId] the event id, which can be a number for
-     *     EventMonkey sources or a string for TicketMaster sources
      * @param [literal.genres] the genre name (or an array of names)
      * @param [literal.keyword] a search string
      *
      * @returns {Promise<Event[]>} the event list of any matching events
      */
-    async search({ source = 'composite', limit = 20, eventId, genres,
-                   keyword }) {
+    async search({ source, limit = 20, genres, keyword }) {
         let eventSource;
-        switch (source.toUpperCase()) {
+        switch (source?.toUpperCase()) {
             case SOURCE_EVENT_MONKEY:
                 eventSource = this.eventMonkey_;
                 break;
             case SOURCE_TICKET_MASTER:
                 eventSource = this.ticketMaster_;
                 break;
-            case 'COMPOSITE':
+            default:
                 eventSource = this.composite_;
                 break;
-            default:
-                throw new Error(`No event source defined for: ${source}`);
         }
 
-        const promises = [];
-
-        if (eventId) {
-            promises.push(eventSource.findByEventId(eventId));
-        }
+        const workList = [];
 
         if (genres) {
-            let names;
-            if (Array.isArray(genres)) {
-                names = genres;
-            } else {
-                names = [genres];
-            }
-            promises.push(eventSource.findByGenre(names, limit));
+            const names = genres.split(",");
+            workList.push(eventSource.findByGenre(names, limit));
         }
 
         if (keyword) {
-            promises.push(eventSource.findByKeyword(keyword, limit));
+            workList.push(eventSource.findByKeyword(keyword, limit));
         }
 
         // flatten the resolved array of event lists into one array, then filter
         // out any undefined (event not found) results
-        const eventList = (await Promise.all(promises))
+        const eventList = (await Promise.all(workList))
                             .flat(1)
                             .filter(event => event !== undefined);
 
@@ -145,6 +131,31 @@ export class EventManager {
         );
 
         return events.filter(event => event !== undefined);
+    }
+
+    /**
+     * Finds a single event by either the EventMonkey id or the TicketMaster id.
+     * The event source is composite by default.
+     *
+     * @param {{[source]: string, eventId: number|string}} options
+     *     the search options
+     * @param [options.source] the event source, either
+     *     {@link SOURCE_EVENT_MONKEY} or {@link SOURCE_TICKET_MASTER}
+     * @param options.eventId the event id
+     *
+     * @returns {Promise<Event>} the event
+     */
+    async findEventById({ source, eventId }) {
+        switch (source?.toUpperCase()) {
+            case SOURCE_EVENT_MONKEY:
+                return await this.eventMonkey_.findByEventId(eventId);
+
+            case SOURCE_TICKET_MASTER:
+                return await this.ticketMaster_.findByEventId(eventId);
+
+            default:
+                return await this.composite_.findByEventId(eventId);
+        }
     }
 
     /**
@@ -226,9 +237,8 @@ export class EventManager {
      *
      * @throws {Error} if the event source is not `'eventMonkey'` or
      *     `'ticketMaster'`
-     * @private
      */
-    async addEventToList_(userId, event) {
+    async addEventToList(userId, event) {
         const {
             addToEventMonkeyList,
             addToTicketMasterList
@@ -256,9 +266,8 @@ export class EventManager {
      *
      * @throws {Error} if the event source is not `'eventMonkey'` or
      *     `'ticketMaster'`
-     * @private
      */
-    async removeEventFromList_(userId, event) {
+    async removeEventFromList(userId, event) {
         const {
             removeFromEventMonkeyList,
             removeFromTicketMasterList
@@ -272,155 +281,6 @@ export class EventManager {
             default:
                 throw new Error(`Unknown event source: ${event.source}`);
         }
-    }
-
-    /**
-     * Checks if a user is of the given type. If the user does not exist or if
-     * the type does not match, then a failure message will be returned.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {string} userType the type of user
-     *
-     * @returns {Promise<{message: string}|undefined>} a message if the user
-     *     does not exist or if the type does not match, or undefined if success
-     * @private
-     */
-    async checkUserType_(userId, userType) {
-        const userDetails = await this.dataSource_.getUserDetails(userId);
-
-        if (!userDetails) {
-            return { message: `User(${userId}) does not exist` };
-        }
-
-        if (userDetails.type !== userType) {
-            return { message: `User(${userId}) is not type ${userType}` };
-        }
-
-        return undefined;
-    }
-
-    /**
-     * Adds an event to the attendees favorites list. The user id must point to
-     * a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number|string} eventId the EventMonkey or TicketMaster event id
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the event was successfully added to favorites
-     */
-    async addToFavorites(userId, eventId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        const event = await this.composite_.findByEventId(eventId);
-
-        if (!event) {
-            return { message: `Event(${eventId}) does not exist` };
-        }
-
-        await this.addEventToList_(userId, event);
-
-        return { message: 'success' };
-    }
-
-    /**
-     * Removes an event from the attendees favorites list. The user id must
-     * point to a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number|string} eventId the EventMonkey or TicketMaster event id
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the event was successfully removed from favorites
-     */
-    async removeFromFavorites(userId, eventId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        const event = await this.composite_.findByEventId(eventId);
-
-        if (!event) {
-            return { message: `Event(${eventId}) does not exist` };
-        }
-
-        await this.removeEventFromList_(userId, event);
-
-        return { message: 'success' };
-    }
-
-    /**
-     * Gets the genre list that the user has added as their interests
-     *
-     * @param {number} userId the EventMonkey user id
-     *
-     * @returns {Promise<{message: string} | Genre[]>} a failure message if the
-     *     user is not an {@link TYPE_ATTENDEE} user type, or the array of
-     *     genres in the interests list
-     */
-    async getInterests(userId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        return await this.dataSource_.getInterestList(userId);
-    }
-
-    /**
-     * Adds an event to the attendees favorites list. The user id must point to
-     * a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number} genreId the genre id to add to interests
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the genre was added to interests
-     */
-    async addToInterests(userId, genreId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-         if (failMessage) {
-             // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        await this.dataSource_.addToInterests(userId, genreId);
-
-        return { message: 'success' };
-    }
-
-    /**
-     * Removes an event from the attendees favorites list. The user id must
-     * point to a record of an Attendee user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     * @param {number} genreId the genre id to remove from interests
-     *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the genre was successfully removed from interests
-     */
-    async removeFromInterests(userId, genreId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        await this.dataSource_.removeFromInterests(userId, genreId);
-
-        return { message: 'success' };
     }
 
     /**
@@ -442,7 +302,8 @@ export class EventManager {
      */
     async createEvent(userId, name, description, location, dates, priceRanges,
                       genres, images) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ORGANIZER);
+        const failMessage = await userManager.checkUserType(userId,
+                                                            TYPE_ORGANIZER);
 
         if (failMessage) {
             // user is not organizer type
@@ -488,7 +349,7 @@ export class EventManager {
         const [genreNameToId, imageUrlToId] = await Promise.all([
             this.dataSource_.addGenresToEvent(event.id, event.genres),
             this.dataSource_.addImagesToEvent(event.id, event.images),
-            this.addEventToList_(userId, event)
+            this.addEventToList(userId, event)
         ]);
 
         // set the event genre ids with the database record ids
@@ -514,7 +375,8 @@ export class EventManager {
      *     'success' if the event was successfully deleted
      */
     async deleteEvent(userId, eventId) {
-        const failMessage = await this.checkUserType_(userId, TYPE_ORGANIZER);
+        const failMessage = await userManager.checkUserType(userId,
+                                                            TYPE_ORGANIZER);
 
         if (failMessage) {
             // user is not organizer type
