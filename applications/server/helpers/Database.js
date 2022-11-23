@@ -669,9 +669,17 @@ export class EventMonkeyDataSource extends DataSource {
      * @param {number} friendId the Event Monkey user id for the friend
      *     record
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} `true` if the attendee friend list table was
+     *     modified as a result of this function call
      */
     async addToFriends(userId, friendId) {
+        const result = await Database.query(
+            `INSERT IGNORE INTO Attendee_Friend_List(user_id, friend_id)
+             VALUES (?, ?)`,
+            [userId, friendId]
+        );
+
+        return result.affectedRows > 0;
     }
 
     /**
@@ -680,9 +688,17 @@ export class EventMonkeyDataSource extends DataSource {
      * @param {number} userId the EventMonkey user id
      * @param {number} friendId the Event Monkey user id for the friend
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>} `true` if the attendee friend list table was
+     *     modified as a result of this function call
      */
     async removeFromFriends(userId, friendId) {
+        const result = await Database.query(
+            `DELETE FROM Attendee_Friend_List
+             WHERE user_id = ? AND friend_id = ?`,
+            [userId, friendId]
+        );
+
+        return result.affectedRows > 0;
     }
 
     /**
@@ -825,6 +841,18 @@ export class EventMonkeyDataSource extends DataSource {
      * @returns {Promise<number[]>} the user ids in the friends list
      */
     async getFriendList(userId) {
+        const result = await Database.query(
+            `SELECT friend_id
+             FROM Attendee_Friend_List
+             WHERE user_id = ?`,
+            userId
+        );
+
+        if (!result[0]) {
+            return [];
+        }
+
+        return result.map(row => row['friend_id']);
     }
 
     /* ********** EVENTS ********** */
