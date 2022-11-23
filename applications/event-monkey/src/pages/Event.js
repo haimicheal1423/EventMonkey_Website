@@ -8,9 +8,10 @@ import Col from 'react-bootstrap/Col';
 // import Container from 'react-bootstrap/esm/Container';
 import Row from 'react-bootstrap/Row';
 
-import Modal from '../components/Modal'
+import ModalEM from '../components/Modal'
 
 import '../assets/css/event.css'
+import CloseIcon from '@mui/icons-material/Close';
 
 
 function Event() {
@@ -18,14 +19,7 @@ function Event() {
     const { genre } = useParams()
     const [events, setEvents] = useState([])
     // const [showEvents, setShowEvents] = useState([true])
-    const [showModal, setShowModal] = useState(false)
-
-    console.log(showModal)
-
-    const handleClose = () => {
-        setShowModal(false)
-    }
-
+    
     const getAllEvents = () => {
         if (genre) {
             Axios.get(`http://localhost:4000/events/${genre}`).then((response) => {
@@ -45,11 +39,13 @@ function Event() {
     return (
         // was in Container tag instead of fragment
         <>
+            <ModalEM/>
+
             <Row xs={1} md={columnsPerRow}>
                 {events?.length > 0 && events.map((event, index) =>
                     <Col>
                         <Card style={{ width: '18rem', margin:20, padding:20 }}>
-                            <Card.Img variant="top" src="holder.js/100px180?text=Image cap" />
+                            <Card.Img variant="top" src={"holder.js/100px180?text=Image cap"} />
                             <Card.Body>
                                 <Card.Title>Name: {event.name}</Card.Title>
                                 <Card.Text>
@@ -69,17 +65,15 @@ function Event() {
 
                 )}
             </Row>
+
             
-            {showModal &&
-                <Modal handleClose={handleClose}>
-                    <h2>Terms and Conditions</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error odit nam et reprehenderit quibusdam temporibus officia dolorum quo sint nemo quis, laborum, quasi nisi fugit praesentium debitis repudiandae! Sapiente, omnis.</p>
-                </Modal>
-            }
+            {/* <button variant="warning" onClick={handleShow}>
+                Add Event Form
+            </button>
 
             <div>
                 <button onClick={() => setShowModal(true)}>Show Modal</button>
-            </div>
+            </div> */}
 
         </>
         

@@ -7,6 +7,8 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
+import HomeIcon from '@mui/icons-material/Home';
+
 export default function NavbarEM() {
 
   const path = window.location.pathname;
