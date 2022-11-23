@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Col from 'react-bootstrap/Col';
@@ -8,21 +8,23 @@ import Axios from 'axios';
 
 function Event() {
     const columnsPerRow = 4;
+    const { eventId } = useParams();
     const [searchParams] = useSearchParams();
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        searchParams.forEach((val, key) => console.log(key, val));
-
-        if (searchParams.has('source') || searchParams.has('limit')
+        if (eventId) {
+            Axios.get(`http://localhost:4000/events/${eventId}`)
+                .then(response => void setEvents([response.data]));
+        } else if (searchParams.has('source') || searchParams.has('limit')
                 || searchParams.has('keyword') || searchParams.has('genres')) {
             Axios.get(`http://localhost:4000/events/search?${searchParams}`)
-                .then(response => setEvents(response.data));
+                .then(response => void setEvents(response.data));
         } else {
             Axios.get("http://localhost:4000/events")
-                .then(response => setEvents(response.data));
+                .then(response => void setEvents(response.data));
         }
-    }, []);
+    }, [eventId, searchParams]);
 
     return (
         <>

@@ -30,6 +30,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/event" element={<Event />} />
+          <Route path="/event/:eventId" element={<Event />} />
         </Routes>
         <hr></hr>
       <FooterEM/>
