@@ -59,11 +59,12 @@ function Event() {
                     const max = formatPrice(range.currency, range.max.toFixed(2));
 
                     return (
-                        <Card.Text key={range.currency}>{
-                            range.min === range.max
-                            ? max
-                            : `${min} - ${max}`
-                        }
+                        <Card.Text key={range.currency}>
+                            Price: {
+                                range.min === range.max
+                                ? max
+                                : `${min} - ${max}`
+                            }
                         </Card.Text>
                     );
                 })
