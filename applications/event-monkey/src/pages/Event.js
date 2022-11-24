@@ -7,6 +7,9 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/esm/Container';
 import Row from 'react-bootstrap/Row';
 
+import ModalEM from '../components/Modal'
+import '../assets/css/event.css'
+
 
 function Event() {
     const columnsPerRow = 4;
@@ -100,6 +103,10 @@ function Event() {
 
     return (
         <Container>
+            <h5 className="events-title">Events</h5>
+            <hr/>
+            <ModalEM/>
+
             <Row xs={1} md={columnsPerRow}>
                 {events?.length > 0 && events.map(event =>
                     <Col>

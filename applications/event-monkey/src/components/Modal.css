@@ -7,14 +7,21 @@
     background: rgba(0,0,0,0.5);
   } */
   .modal {
-    padding: 30px;
+    padding: 20px;
     max-width: 480px;
-    margin: 200px auto;
-    background: #fff;
-    border-radius: 10px;
+    max-height: auto;
+    margin-left: 40%;
+    margin-right: auto;
+    background: beige;
+    border-radius: 5px;
+    color:chocolate;
   }
-  .modal h2 {
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
+
+  .event-button-container {
+    padding-top: 10px;
+  }
+ 
+  .event-button {
+    color: white;
   }
   

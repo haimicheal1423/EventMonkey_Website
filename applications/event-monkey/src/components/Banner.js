@@ -25,7 +25,7 @@ export default function BannerEM() {
                     onClick={() => navigate(`/event?keyword=${searchText}`)}>Search</MDBBtn> {' '}
                 <MDBBtn
                     color='success'
-                    onClick={() => navigate(`/event`)}>View All Events</MDBBtn>{' '}
+                    onClick={() => navigate(`/event`)}>View Events</MDBBtn>{' '}
             </form>
             <img
                 src="./eventmonkey-nobg.png"
@@ -33,13 +33,7 @@ export default function BannerEM() {
                 alt=""
             />
 
-            <hr className="hr" />
-
-            <article>
-                <h2>Browse by Category </h2>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere quaerat numquam quasi est totam, voluptatibus blanditiis sunt, maiores dolorem cum hic dolores veritatis expedita tempora! Doloremque exercitationem necessitatibus natus fugiat!</p>
-            </article>
-
+            <hr/>
         </div>
     );
 }

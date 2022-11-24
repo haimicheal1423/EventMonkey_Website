@@ -39,7 +39,8 @@ export default function NavbarEM() {
               <Nav.Link href="/event">Event</Nav.Link>
 
               <NavDropdown title="User" id="basic-nav-dropdown">
-                <NavDropdown.Item href="/dashboard">Profile</NavDropdown.Item>
+                <NavDropdown.Item href="/dashboard">Dashboard</NavDropdown.Item>
+                <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
                 <NavDropdown.Item href="/interests">Interests</NavDropdown.Item>
                 <NavDropdown.Divider/>
                 <NavDropdown.Item href="/trysomethingnew">Try Something New</NavDropdown.Item>

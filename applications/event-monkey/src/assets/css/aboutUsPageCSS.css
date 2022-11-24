@@ -1,3 +1,8 @@
+.about {
+    margin:auto;
+    justify-content: center;
+    padding-left: 120px
+}
 .about-title {
     padding-top: 50px;
     font-size: 35px;
@@ -5,7 +10,7 @@
 }
 .about-card {
     display: grid;
-    max-width: 80%;
+    max-width: 90%;
     row-gap: 2vh;
     margin: 2vh 0px 5vh 0px;
     grid-template-rows: auto auto auto auto;

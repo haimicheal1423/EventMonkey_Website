@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom'
+import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import Modal from 'react-bootstrap/Modal';
+import InputGroup from 'react-bootstrap/InputGroup';
 
 import './Modal.css'
 
@@ -21,9 +22,11 @@ export default function ModalEM() {
   return (
     
     <>
-      <Button variant="primary" onClick={handleShow}>
-        Add Event Form
-      </Button>
+      <div className="event-button-container">
+        <Button className="event-button" variant="warning" onClick={handleShow}>
+          Add Event Form
+        </Button>
+      </div>
 
       <Modal show={showModal} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -38,28 +41,39 @@ export default function ModalEM() {
               type="text"
               placeholder="'Warriors vs Celtics'"
               autoFocus
-              centered
             />
           </Form.Group>
 
+          <Form.Label>Price</Form.Label>
+          <InputGroup className="mb-3">
+            <InputGroup.Text>$</InputGroup.Text>
+            <Form.Control aria-label="Amount (to the nearest dollar)" placeholder="'420.00'"/>
+          </InputGroup>
+
+          <Form.Group className="mb-3" controlId="eventForm.ControlTextarea1">
+            <Form.Label>Event Location</Form.Label>
+            <Form.Control as="textarea" rows={2} placeholder="'1 Warriors Way, San Francisco, CA 94158'"/>
+          </Form.Group>
+
+
           <Form.Group className="mb-3" controlId="eventForm.ControlTextarea1">
             <Form.Label>Event Description</Form.Label>
-            <Form.Control as="textarea" rows={3} />
+            <Form.Control as="textarea" rows={3} placeholder="'Sint minim ad velit consequat sint ipsum minim et irure esse Lorem laboris pariatur dolor.'"/>
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="eventForm.ControlTextarea1">
             <Form.Label>Event Date Start</Form.Label>
-            <Form.Control as="textarea" rows={1} placeholder="'2022-10-23'"/>
+            <Form.Control as="textarea" rows={1} placeholder="'Monday, October 01, 2022'"/>
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="eventForm.ControlTextarea1">
             <Form.Label>Event Date End</Form.Label>
-            <Form.Control as="textarea" rows={1}/>
+            <Form.Control as="textarea" rows={1} placeholder="'Tuesday, October 02, 2022'"/>
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="eventForm.ControlTextarea1">
             <Form.Label>Event Link</Form.Label>
-            <Form.Control as="textarea" rows={1}/>
+            <Form.Control as="textarea" rows={1} placeholder="'https://www.ticketmaster.com/golden-state-warriors-vs-boston-celtics-san-francisco-california-12-10-2022/event/1C005D0C9F3A27E9'"/>
           </Form.Group>
         </Form>
         </Modal.Body>
@@ -68,7 +82,7 @@ export default function ModalEM() {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleClose}>
+          <Button className="event-button"variant="warning" onClick={handleClose}>
             Add Event
           </Button>
         </Modal.Footer>

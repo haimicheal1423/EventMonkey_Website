@@ -14,6 +14,7 @@ import Interests from './pages/Interests'
 import AboutUs from './pages/AboutUs'
 import Event from './pages/Event'
 import TrySomethingNew from './pages/TrySomethingNew';
+import Profile from './pages/Profile';
 
 function App() {
 
@@ -31,6 +32,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/event" element={<Event />} />
           <Route path="/trysomethingnew" element={<TrySomethingNew />} />
+          <Route path="/profile" element={<Profile />} />
+
         </Routes>
 
         <hr/>
