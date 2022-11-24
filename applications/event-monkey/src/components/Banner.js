@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import './Banner.css';
 
-import { MDBBtn } from 'mdb-react-ui-kit';
+import Button from 'react-bootstrap/Button';
 import { useNavigate } from 'react-router-dom';
 
 export default function BannerEM() {
@@ -20,20 +20,14 @@ export default function BannerEM() {
                     placeholder='Get started with EventMonkey!'
                     onChange={(e) => setSearchText(e.target.value)} />
 
-                <MDBBtn
-                    color='warning'
-                    onClick={() => navigate(`/event?keyword=${searchText}`)}>Search</MDBBtn> {' '}
-                <MDBBtn
-                    color='success'
-                    onClick={() => navigate(`/event`)}>View Events</MDBBtn>{' '}
+                <Button
+                    className='search-button'
+                    onClick={() => navigate(`/event?keyword=${searchText}`)}>Search</Button> {' '}
+                <Button
+                    variant='success'
+                    onClick={() => navigate(`/event`)}>View All</Button>{' '}
             </form>
-            <img
-                src="./eventmonkey-nobg.png"
-                className="img-fluid"
-                alt=""
-            />
-
-            <hr/>
+            
         </div>
     );
 }

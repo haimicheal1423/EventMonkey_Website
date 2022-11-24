@@ -23,7 +23,7 @@ export default function ModalEM() {
     
     <>
       <div className="event-button-container">
-        <Button className="event-button" variant="warning" onClick={handleShow}>
+        <Button className="event-button" onClick={handleShow}>
           Add Event Form
         </Button>
       </div>

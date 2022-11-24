@@ -1,6 +1,7 @@
 .bannerTitle {
     color: chocolate;
-    padding-right: 150px;
+    margin:auto;
+    padding-bottom: 5px;
 }
 
 .banner {
@@ -14,13 +15,21 @@
 }
 
 .bannerForm {
-    padding-left: 170px;
     padding-bottom: 20px;
+    justify-content: center;
 }
 
 .bannerForm input{
-    max-width: 450px;
+    max-width: 420px;
+    border-radius: 5px;
     color:chocolate;
+}
+
+.search-button{
+    color: white;
+    background-color: #ffc107;
+    border-color:#ffc107;
+    cursor: disabled;
 }
 
 /* Search Button Text */

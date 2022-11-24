@@ -24,6 +24,19 @@
     grid-gap: 20px;
 }
 
+
+.image-button-container{
+    padding-top: 10px;
+}
+
+
+.image-button {
+    display: block;
+    margin: auto;
+    color:white;
+    
+}
+
 .profile-image-section {
     margin: auto;
     border-radius: 20%;
@@ -41,7 +54,7 @@
 }
 
 .profile-section1 {
-    padding-top: 25px;
+    padding-top: 5px;
 }
 
 .profile-section1 input {
@@ -52,7 +65,7 @@
 }
 
 .profile-section2 {
-    padding-top: 25px;
+    padding-top: 5px;
 
 }
 

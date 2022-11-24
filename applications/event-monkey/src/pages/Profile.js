@@ -6,7 +6,6 @@ import RobinLogo from '../assets/profileImages/clownsquare.png'
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button'
 
-
 export default function Profile() {
   return (
     <>
@@ -15,6 +14,9 @@ export default function Profile() {
         <hr className="hr" />
 
         <img src={RobinLogo} alt=""/>
+        <div className="image-button-container">
+          <Button className="image-button" variant="warning">change</Button>
+        </div>
       </div>
 
     
