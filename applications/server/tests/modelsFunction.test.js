@@ -4,6 +4,8 @@ import { Genre } from '../models/Genre.js';
 import { Image } from '../models/Image.js';
 import { Attendee } from '../models/User.js';
 import { Organizer } from '../models/User.js';
+import { SOURCE_EVENT_MONKEY } from '../models/Event.js';
+import { SOURCE_TICKET_MASTER } from '../models/Event.js';
 
 /**
  * Tests the addImage, removeImage, addGenre and removeGenre of the Event class.
@@ -160,7 +162,8 @@ describe('Testing User Class Functions: Attendee', () => {
     // Test objects
     let tempImage = new Image(12345, '16:9', 1920, 1080, 'test_fake_img.png');
     let tempGenre = new Genre(1234567890, 'Miscellaneous Genre');
-    let testEvent = new Event(62234, 'Event Name', 'The event\'s description',
+    let testEvent = new Event(SOURCE_TICKET_MASTER, 62234, 'Event Name',
+        'This test event\'s description; with ticket master as the source.',
         {startDateTime: 'standIn dateTime', endDateTime: 'standIn dateTime'},
         [{currency: '$', min: 50, max: 100}], [tempImage], [tempGenre]);
 
@@ -225,7 +228,8 @@ describe('Testing User Class Functions: Organizer', () => {
     // Test objects
     let tempImage = new Image(12345, '16:9', 1920, 1080, 'test_fake_img.png');
     let tempGenre = new Genre(1234567890, 'Miscellaneous Genre');
-    let testEvent = new Event(62234, 'Event Name', 'The event\'s description',
+    let testEvent = new Event(SOURCE_EVENT_MONKEY, 62234, 'Event Name',
+        'This test event\'s description; with event monkey as the source.',
         {startDateTime: 'standIn dateTime', endDateTime: 'standIn dateTime'},
         [{currency: '$', min: 50, max: 100}], [tempImage], [tempGenre]);
 
