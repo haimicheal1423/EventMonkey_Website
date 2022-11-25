@@ -18,7 +18,7 @@ function Event() {
     const columnsPerRow = 4;
     const [searchParams] = useSearchParams();
     const [events, setEvents] = useState([]);
-    const [url, setUrl] = useState('http://localhost:4000/events/')
+    // const [url, setUrl] = useState('http://localhost:4000/events/')
 
     useEffect(() => {
         searchParams.forEach((val, key) => console.log(key, val));
@@ -28,10 +28,10 @@ function Event() {
             Axios.get(`http://localhost:4000/events/search?${searchParams}`)
                 .then(response => setEvents(response.data));
         } else {
-            Axios.get("http://localhost:4000/events")
+            Axios.get()
                 .then(response => setEvents(response.data));
         }
-    }, [url]);
+    }, []);
 
     const eventImage = event => {
         if (event.images[0]) {
@@ -111,7 +111,7 @@ function Event() {
             <BannerEM/>
             <hr/>
             <ModalEM/>
-            <Button onClick={() => setUrl('http://localhost:4000/events/search?keyword=sports')}>Sports</Button>
+            {/* <Button onClick={() => setUrl('http://localhost:4000/events/search?keyword=sports')}>Sports</Button> */}
 
             <Row xs={1} md={columnsPerRow}>
                 {events?.length > 0 && events.map(event =>

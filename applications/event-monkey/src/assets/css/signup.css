@@ -16,7 +16,8 @@ h4 {
 .signup-container {
     margin:auto;
     width: 350px;
-    padding: 50px
+    padding-top: 50px;
+    padding-bottom: 50px;
 }
 
 .signup-card input {

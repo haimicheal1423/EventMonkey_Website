@@ -259,8 +259,8 @@ export default function AboutUs() {
                         <li>Express</li>
                         <li>React</li>
                         <li>Amazon AWS</li>
-                        <li>Python</li>
                         <li>Java</li>
+                        <li>SQL</li>
                         <li>Python</li>
                         <li>Clown</li>
                     </ul>

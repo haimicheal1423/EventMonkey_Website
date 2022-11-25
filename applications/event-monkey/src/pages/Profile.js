@@ -1,7 +1,7 @@
 import React from 'react'
 
 import '../assets/css/profile.css'
-import RobinLogo from '../assets/profileImages/clownsquare.png'
+import George from '../assets/profileImages/george-avatar.jpeg'
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button'
@@ -13,7 +13,7 @@ export default function Profile() {
         <h5 className="customize-profile-title">Customize Profile</h5>
         <hr className="hr" />
 
-        <img src={RobinLogo} alt=""/>
+        <img className="shadow"src={George} alt=""/>
         <div className="image-button-container">
           <Button className="image-button" variant="warning">change</Button>
         </div>
