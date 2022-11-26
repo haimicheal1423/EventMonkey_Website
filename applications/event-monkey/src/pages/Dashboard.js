@@ -13,6 +13,8 @@ function Dashboard() {
     const [user, setUser] = useState(undefined);
     const [friendsList, setFriendsList] = useState([]);
     const [interestsList, setInterestsList] = useState([]);
+    const [username, setUsername] = useState(null);
+    const [interest, setInterest] = useState(null);
 
     useEffect(() => {
         setUser(JSON.parse(localStorage.getItem('user')));
@@ -52,6 +54,22 @@ function Dashboard() {
         return <>Loading...</>;
     }
 
+    const addFriend = e => {
+        console.log('adding friend', username);
+    }
+
+    const removeFriend = e => {
+        console.log('removing friend', username);
+    }
+
+    const addInterest = e => {
+        console.log('adding interest', interest);
+    }
+
+    const removeInterest = e => {
+        console.log('removing interest', interest);
+    }
+
     return (
         <Container fluid className='d-inline-flex justify-content-center'>
             <Row xs={1} md={2}>
@@ -62,6 +80,7 @@ function Dashboard() {
                     <Container>
                         <Row className='my-3'>
                             {sectionList('Interests', 'Enter genre name',
+                                setInterest, addInterest, removeInterest,
                                 interestsList.map(genre =>
                                     <div key={`${genre.name}-${genre.id}`} className='mr-2 my-1 px-2 py-1 bg-secondary text-light rounded-pill'>
                                         {genre.name}
@@ -71,6 +90,7 @@ function Dashboard() {
                         </Row>
                         <Row className='mt-5'>
                             {sectionList('Friends', 'Enter username',
+                                setUsername, addFriend, removeFriend,
                                 friendsList.map(friend =>
                                     <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
                                         <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : 'holder.js/100px180?text=Image cap'}/>
@@ -112,7 +132,7 @@ function userCard(user, navigate) {
     );
 }
 
-function sectionList(sectionName, searchText, components) {
+function sectionList(sectionName, placeHolderText, setText, handleAdd, handleRemove, components) {
     return (
         <Container>
             <Row>
@@ -121,9 +141,9 @@ function sectionList(sectionName, searchText, components) {
             </Row>
             <Row>
                 <form className='d-flex'>
-                    <input type='text' className='form-control border-warning' placeholder={searchText}/>
-                    <Button variant='primary' className='ml-2'>Add</Button>
-                    <Button variant='danger' className='ml-2'>Remove</Button>
+                    <input type='text' className='form-control border-warning' placeholder={placeHolderText} onChange={e => setText(e.target.value)}/>
+                    <Button variant='primary' className='ml-2' onClick={handleAdd}>Add</Button>
+                    <Button variant='danger' className='ml-2' onClick={handleRemove}>Remove</Button>
                 </form>
             </Row>
             <Row className='mt-2 d-flex flex-wrap overflow-auto' style={{ maxHeight: '24rem' }}>
