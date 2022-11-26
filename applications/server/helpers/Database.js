@@ -491,6 +491,17 @@ export class DataSource {
     }
 
     /**
+     * Gets a {@link Genre} from the backing data source using a genre name.
+     *
+     * @param {string} name the genre name
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenreId(name) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
      * Gets a {@link Genre} from the EventMonkey database.
      *
      * @param {number} genreId the EventMonkey genre id
@@ -1288,6 +1299,28 @@ export class EventMonkeyDataSource extends DataSource {
         });
 
         return genres;
+    }
+
+    /**
+     * Gets a {@link Genre} from the EventMonkey database using a genre name.
+     *
+     * @param {string} name the genre name
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenreId(name) {
+        const result = await Database.query(
+            `SELECT genre_id
+             FROM Genre
+             WHERE name = ?`,
+            name
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        return Genre.createWithId(result[0]['genre_id'], name);
     }
 
     /**

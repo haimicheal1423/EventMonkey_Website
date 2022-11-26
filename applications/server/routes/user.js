@@ -48,11 +48,11 @@ router.get('/:userId/interests',
     (req, res) => getInterests(req, res)
 );
 
-router.put('/:userId/add_interest/:genreId',
+router.put('/:userId/add_interest/:genreName',
     (req, res) => addToInterests(req, res)
 );
 
-router.delete('/:userId/remove_interest/:genreId',
+router.delete('/:userId/remove_interest/:genreName',
     (req, res) => removeFromInterests(req, res)
 );
 
@@ -271,9 +271,9 @@ async function getInterests(req, res) {
 async function addToInterests(req, res) {
     try {
         const userId = parseInt(req.params["userId"]);
-        const genreId = parseInt(req.params['genreId']);
+        const genreName = req.params['genreName'];
 
-        const result = await userManager.addToInterests(userId, genreId);
+        const result = await userManager.addToInterests(userId, genreName);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);
@@ -289,9 +289,9 @@ async function addToInterests(req, res) {
 async function removeFromInterests(req, res) {
     try {
         const userId = parseInt(req.params['userId']);
-        const genreId = parseInt(req.params['genreId']);
+        const genreName = req.params['genreName'];
 
-        const result = await userManager.removeFromInterests(userId, genreId);
+        const result = await userManager.removeFromInterests(userId, genreName);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);

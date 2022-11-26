@@ -328,12 +328,12 @@ export class UserManager {
      * a record of an Attendee user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number} genreId the genre id to add to interests
+     * @param {string} genreName the genre name to add to interests
      *
      * @returns {Promise<{message: string|'success'}>} a failure message, or
      *     'success' if the genre was added to interests
      */
-    async addToInterests(userId, genreId) {
+    async addToInterests(userId, genreName) {
         const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
 
         if (failMessage) {
@@ -341,7 +341,17 @@ export class UserManager {
             return { message: failMessage.message };
         }
 
-        await this.dataSource_.addToInterests(userId, genreId);
+        let genre = await this.dataSource_.getGenreId(genreName);
+
+        if (!genre) {
+            genre = await this.dataSource_.addGenre(genreName);
+        }
+
+        if (!genre) {
+            return { message: 'Could not add genre to interests' };
+        }
+
+        await this.dataSource_.addToInterests(userId, genre.id);
 
         return { message: 'success' };
     }
@@ -351,12 +361,12 @@ export class UserManager {
      * point to a record of an Attendee user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number} genreId the genre id to remove from interests
+     * @param {string} genreName the genre name to remove from interests
      *
      * @returns {Promise<{message: string|'success'}>} a failure message, or
      *     'success' if the genre was successfully removed from interests
      */
-    async removeFromInterests(userId, genreId) {
+    async removeFromInterests(userId, genreName) {
         const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
 
         if (failMessage) {
@@ -364,7 +374,17 @@ export class UserManager {
             return { message: failMessage.message };
         }
 
-        await this.dataSource_.removeFromInterests(userId, genreId);
+        let genre = await this.dataSource_.getGenreId(genreName);
+
+        if (!genre) {
+            genre = await this.dataSource_.addGenre(genreName);
+        }
+
+        if (!genre) {
+            return { message: 'Could not remove genre from interests' };
+        }
+
+        await this.dataSource_.removeFromInterests(userId, genre.id);
 
         return { message: 'success' };
     }
