@@ -12,6 +12,7 @@ function Dashboard() {
     const navigate = useNavigate();
     const [user, setUser] = useState(undefined);
     const [friendsList, setFriendsList] = useState([]);
+    const [interestsList, setInterestsList] = useState([]);
 
     useEffect(() => {
         setUser(JSON.parse(localStorage.getItem('user')));
@@ -21,8 +22,13 @@ function Dashboard() {
         if (!user) {
             return;
         }
+
         Axios.get(`http://localhost:4000/users/${user.id}/friends`)
             .then(response => void setFriendsList(response.data))
+            .catch(e => alert(e.data));
+
+        Axios.get(`http://localhost:4000/users/${user.id}/interests`)
+            .then(response => void setInterestsList(response.data))
             .catch(e => alert(e.data));
     }, [user]);
 
@@ -33,9 +39,9 @@ function Dashboard() {
     return (
         <>
             <Container className='d-inline-flex'>
-                <Row className='m-auto'>
+                <Row className='mr-2 my-2'>
                     <Col>
-                        <Card className='m-3 p-3' style={{ width: '18rem' }}>
+                        <Card className='p-3' style={{ width: '18rem' }}>
                             <Card.Img variant='top' src={user.profileImage ? user.profileImage.url : 'holder.js/100px180?text=Image cap'} />
                             <Card.Body>
                                 <Card.Title>Welcome {user.username}!</Card.Title>
@@ -58,9 +64,30 @@ function Dashboard() {
                         </Card>
                     </Col>
                 </Row>
-                <Row className='mx-3 my-3'>
-                    <Col className='d-flex flex-column align-items-baseline'>
-                        <h5>Friends</h5>
+                <Row className='mr-2 my-2'>
+                    <Col className='pt-3 d-flex flex-column align-items-baseline'>
+                        <h5 className='my-0'>Interests</h5>
+                        <hr className='my-2 w-100' />
+                        <form className='d-flex'>
+                            <input
+                                type='text'
+                                className='form-control border-warning'
+                                placeholder='Enter genre name'/>
+                            <Button variant='primary' className='ml-2'>Add</Button>
+                            <Button variant='danger' className='ml-2'>Remove</Button>
+                        </form>
+                        <div className='mt-2 d-flex flex-wrap overflow-auto' style={{maxHeight: '10rem'}}>
+                            {interestsList.map(genre => {
+                                return (
+                                    <div key={genre.id} className='mr-2 my-1 px-2 py-1 bg-secondary text-light rounded-pill'>
+                                        {genre.name}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </Col>
+                    <Col className='pt-3 d-flex flex-column align-items-baseline'>
+                        <h5 className='my-0'>Friends</h5>
                         <hr className='my-2 w-100' />
                         <form className='d-flex'>
                             <input
