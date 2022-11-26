@@ -275,7 +275,7 @@ async function addToInterests(req, res) {
 
         const result = await userManager.addToInterests(userId, genreName);
 
-        if (result.message === 'success') {
+        if (!result.message) {
             res.status(status.OK).json(result);
         } else {
             res.status(status.BAD_REQUEST).json(result);
@@ -328,7 +328,7 @@ async function addToFriends(req, res) {
 
         const result = await userManager.addToFriends(userId, username);
 
-        if (result.message === 'success') {
+        if (!result.message) {
             res.status(status.OK).json(result);
         } else {
             res.status(status.BAD_REQUEST).json(result);
@@ -342,9 +342,9 @@ async function addToFriends(req, res) {
 async function removeFromFriends(req, res) {
     try {
         const userId = parseInt(req.params['userId']);
-        const friendId = parseInt(req.params['friendId']);
+        const username = req.params['username'];
 
-        const result = await userManager.removeFromFriends(userId, friendId);
+        const result = await userManager.removeFromFriends(userId, username);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);

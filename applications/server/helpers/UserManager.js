@@ -444,8 +444,10 @@ export class UserManager {
      * @param {number} userId the EventMonkey user id
      * @param {string} username the friend's username
      *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the user was successfully added to the friends list
+     * @returns {Promise<
+     *     { userId: number, username: string, profileImage: Image }
+     *     | {message: string}>} a failure message, or the simplified user
+     *     details for the friend
      */
     async addToFriends(userId, username) {
         const userFailMsg = await this.checkUserType(userId, TYPE_ATTENDEE);
@@ -471,7 +473,16 @@ export class UserManager {
 
         await this.dataSource_.addToFriends(userId, friendId);
 
-        return { message: 'success' };
+        const friend = await this.dataSource_.getUserDetails(friendId);
+
+        const { getImage } = this.dataSource_;
+        const profileImage = await getImage(friend.profileImageId);
+
+        return {
+            userId: friendId,
+            username: username,
+            profileImage
+        };
     }
 
     /**
