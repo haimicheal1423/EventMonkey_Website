@@ -55,6 +55,11 @@ function Dashboard() {
     }
 
     const addFriend = e => {
+        if (!username) {
+            // no input
+            return;
+        }
+
         if (friendsList.some(friend => friend.username.toLowerCase() === username.toLowerCase())) {
             // already in the friend list
             return;
@@ -62,10 +67,15 @@ function Dashboard() {
 
         Axios.put(`http://localhost:4000/users/${user.id}/add_friend/${username}`)
             .then(response => void setFriendsList(friendsList.concat(response.data)))
-            .catch(error => alert(error.data));
+            .catch(error => alert(error.response.data.message));
     };
 
     const removeFriend = e => {
+        if (!username) {
+            // no input
+            return;
+        }
+
         const lowerUsername = username.toLowerCase();
 
         if (!friendsList.some(friend => friend.username.toLowerCase() === lowerUsername)) {
@@ -82,10 +92,15 @@ function Dashboard() {
                 }
                 return Promise.resolve();
             })
-            .catch(error => alert(error.data));
+            .catch(error => alert(error.response.data.message));
     };
 
     const addInterest = e => {
+        if (!interest) {
+            // no input
+            return;
+        }
+
         if (interestsList.some(genre => genre.name.toLowerCase() === interest.toLowerCase())) {
             // already in the interests list
             return;
@@ -93,10 +108,15 @@ function Dashboard() {
 
         Axios.put(`http://localhost:4000/users/${user.id}/add_interest/${interest}`)
             .then(response => void setInterestsList(interestsList.concat(response.data)))
-            .catch(error => alert(error.data));
+            .catch(error => alert(error.response.data.message));
     };
 
     const removeInterest = e => {
+        if (!interest) {
+            // no input
+            return;
+        }
+
         const lowerInterest = interest.toLowerCase();
 
         if (!interestsList.some(genre => genre.name.toLowerCase() === lowerInterest)) {
@@ -112,7 +132,7 @@ function Dashboard() {
                     }));
                 }
             })
-            .catch(error => alert(error.data));
+            .catch(error => alert(error.response.data.message));
     };
 
     return (

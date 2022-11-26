@@ -461,7 +461,7 @@ export class UserManager {
 
         if (!friendId) {
             // no user found for given username
-            return { message: `User('${username}') does not exist` };
+            return { message: `User ${username} does not exist` };
         }
 
         const friendFailMsg = await this.checkUserType(friendId, TYPE_ATTENDEE);
@@ -507,7 +507,7 @@ export class UserManager {
 
         if (!friendId) {
             // no user found for given username
-            return { message: `User('${username}') does not exist` };
+            return { message: `User ${username} does not exist` };
         }
 
         await this.dataSource_.removeFromFriends(userId, friendId);
