@@ -102,8 +102,12 @@ export class DataSource {
      *
      * @param {string} email the email to check
      *
-     * @returns {Promise<{email: string, password: string, username: string}>}
-     *     the login details
+     * @returns {Promise<{
+     *         userId: number,
+     *         email: string,
+     *         password: string,
+     *         username: string
+     *     }>} the login details
      * @abstract
      */
     async getLoginDetails(email) {
@@ -556,12 +560,16 @@ export class EventMonkeyDataSource extends DataSource {
      *
      * @param {string} email the email to check
      *
-     * @returns {Promise<{email: string, password: string, username: string}>}
-     *     the login details
+     * @returns {Promise<{
+     *         userId: number,
+     *         email: string,
+     *         password: string,
+     *         username: string
+     *     }>} the login details
      */
     async getLoginDetails(email) {
         const result = await Database.query(
-            `SELECT email, password, username
+            `SELECT user_id, email, password, username
              FROM User
              WHERE email = ?`,
             email
@@ -571,10 +579,12 @@ export class EventMonkeyDataSource extends DataSource {
             return undefined;
         }
 
+        const userId = result[0]['user_id'];
         const password = result[0]['password'];
         const username = result[0]['username'];
 
         return {
+            userId,
             email,
             password,
             username

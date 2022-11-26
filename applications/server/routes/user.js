@@ -116,13 +116,13 @@ async function login(req, res) {
         if (loginDetails.message) {
             res.status(status.NOT_ACCEPTABLE).send(loginDetails.message);
         } else {
-            //     req.session.success = true;
-            //     req.session.email = email;
-            //     req.session.userId = results[0].id;
+            const user = await userManager.getUser(loginDetails.userId);
 
-            res.cookie('email', loginDetails.email);
-            res.cookie('name', loginDetails.username);
-            res.status(status.OK).send('Logged in!');
+            if (user.message) {
+                res.status(status.NOT_ACCEPTABLE).send(user.message);
+            } else {
+                res.status(status.OK).json(user);
+            }
         }
     } catch (error) {
         console.error(error);

@@ -165,10 +165,12 @@ export class UserManager {
      * @param {string} email
      * @param {string} password
      *
-     * @returns {Promise<
-     *           {message: string}
-     *         | {email: string, password: string, username: string}
-     *     >} the login details, or a failure message
+     * @returns {Promise<{message: string} | {
+     *         userId: number,
+     *         email: string,
+     *         password: string,
+     *         username: string
+     *     }>} the login details, or a failure message
      */
     async login(email, password) {
         const loginDetails = await this.dataSource_.getLoginDetails(email);
@@ -388,7 +390,12 @@ export class UserManager {
         }
 
         const friendIds = await this.dataSource_.getFriendList(userId);
-        const friends = friendIds.map(friendId => this.getUser(friendId));
+
+        const friends = await Promise.all(
+            friendIds.map(friendId => {
+                return this.getUser(friendId);
+            })
+        );
 
         /**
          * @type {{ userId: number, username: string, profileImage: Image }[]}
@@ -398,7 +405,7 @@ export class UserManager {
         for (let i = 0; i < friends.length; i++){
             const friend = friends[i];
 
-            if (friend instanceof Attendee) {
+            if (friend.type === TYPE_ATTENDEE) {
                 attendeeFriends.push({
                     userId: friend.id,
                     username: friend.username,
