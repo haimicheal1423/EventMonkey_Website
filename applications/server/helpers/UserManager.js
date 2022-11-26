@@ -422,17 +422,24 @@ export class UserManager {
      * id must point to a record of an Attendee user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number} friendId the friend's EventMonkey user id
+     * @param {string} username the friend's username
      *
      * @returns {Promise<{message: string|'success'}>} a failure message, or
-     *     'success' if the user was successfully removed from the friends list
+     *     'success' if the user was successfully added to the friends list
      */
-    async addToFriends(userId, friendId) {
+    async addToFriends(userId, username) {
         const userFailMsg = await this.checkUserType(userId, TYPE_ATTENDEE);
 
         if (userFailMsg) {
             // user is not attendee type
             return { message: userFailMsg.message };
+        }
+
+        const friendId = await this.dataSource_.getUserId(username);
+
+        if (!friendId) {
+            // no user found for given username
+            return { message: `User('${username}') does not exist` };
         }
 
         const friendFailMsg = await this.checkUserType(friendId, TYPE_ATTENDEE);
@@ -452,17 +459,24 @@ export class UserManager {
      * point to a record of an Attendee user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number} friendId the friend's EventMonkey user id
+     * @param {string} username the friend's username
      *
      * @returns {Promise<{message: string|'success'}>} a failure message, or
      *     'success' if the user was successfully removed from the friends list
      */
-    async removeFromFriends(userId, friendId) {
+    async removeFromFriends(userId, username) {
         const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
 
         if (failMessage) {
             // user is not attendee type
             return { message: failMessage.message };
+        }
+
+        const friendId = await this.dataSource_.getUserId(username);
+
+        if (!friendId) {
+            // no user found for given username
+            return { message: `User('${username}') does not exist` };
         }
 
         await this.dataSource_.removeFromFriends(userId, friendId);

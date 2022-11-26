@@ -115,6 +115,18 @@ export class DataSource {
     }
 
     /**
+     * Gets the user id for a user with the given username.
+     *
+     * @param {string} username the user's username
+     *
+     * @returns {Promise<number>} the user id
+     * @abstract
+     */
+    async getUserId(username) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
      * Adds user details to the backing data source.
      *
      * @param {User} user the user to add
@@ -589,6 +601,28 @@ export class EventMonkeyDataSource extends DataSource {
             password,
             username
         };
+    }
+
+    /**
+     * Gets the user id for a user with the given username.
+     *
+     * @param {string} username the user's username
+     *
+     * @returns {Promise<number>} the user id
+     */
+    async getUserId(username) {
+        const result = await Database.query(
+            `SELECT user_id
+             FROM User
+             WHERE username = ?`,
+            username
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        return result[0]['user_id'];
     }
 
     /**

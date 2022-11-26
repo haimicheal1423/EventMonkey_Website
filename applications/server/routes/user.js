@@ -60,11 +60,11 @@ router.get('/:userId/friends',
     (req, res) => getFriendsList(req, res)
 );
 
-router.put('/:userId/add_friend/:friendId',
+router.put('/:userId/add_friend/:username',
     (req, res) => addToFriends(req, res)
 );
 
-router.delete('/:userId/remove_friend/:friendId',
+router.delete('/:userId/remove_friend/:username',
     (req, res) => removeFromFriends(req, res)
 );
 
@@ -324,9 +324,9 @@ async function getFriendsList(req, res) {
 async function addToFriends(req, res) {
     try {
         const userId = parseInt(req.params['userId']);
-        const friendId = parseInt(req.params['friendId']);
+        const username = req.params['username'];
 
-        const result = await userManager.addToFriends(userId, friendId);
+        const result = await userManager.addToFriends(userId, username);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);
