@@ -55,20 +55,61 @@ function Dashboard() {
     }
 
     const addFriend = e => {
-        console.log('adding friend', username);
-    }
+        if (friendsList.some(friend => friend.username.toLowerCase() === username.toLowerCase())) {
+            // already in the friend list
+            return;
+        }
+
+        Axios.put(`http://localhost:4000/users/${user.id}/add_friend/${username}`)
+            .then(response => void setFriendsList(friendsList.concat(response.data)))
+            .catch(error => alert(error.data));
+    };
 
     const removeFriend = e => {
-        console.log('removing friend', username);
-    }
+        if (!friendsList.some(friend => friend.username.toLowerCase() === username.toLowerCase())) {
+            // not in the friend list
+            return;
+        }
+
+        Axios.delete(`http://localhost:4000/users/${user.id}/remove_friend/${username}`)
+            .then(response => {
+                if (response.data.message === 'success') {
+                    setFriendsList(friendsList.filter(friend => {
+                        return friend.username !== username;
+                    }));
+                }
+                return Promise.resolve();
+            })
+            .catch(error => alert(error.data));
+    };
 
     const addInterest = e => {
-        console.log('adding interest', interest);
-    }
+        if (interestsList.some(genre => genre.name.toLowerCase() === interest.toLowerCase())) {
+            // already in the interests list
+            return;
+        }
+
+        Axios.put(`http://localhost:4000/users/${user.id}/add_interest/${interest}`)
+            .then(response => void setInterestsList(interestsList.concat(response.data)))
+            .catch(error => alert(error.data));
+    };
 
     const removeInterest = e => {
-        console.log('removing interest', interest);
-    }
+        if (!interestsList.some(genre => genre.name.toLowerCase() === interest.toLowerCase())) {
+            // not in the interests list
+            return;
+        }
+
+        Axios.delete(`http://localhost:4000/users/${user.id}/remove_interest/${interest}`)
+            .then(response => {
+                if (response.data.message === 'success') {
+                    setInterestsList(interestsList.filter(genre => {
+                        return genre.name !== interest;
+                    }));
+                }
+            })
+            .catch(error => alert(error.data));
+    };
 
     return (
         <Container fluid className='d-inline-flex justify-content-center'>
@@ -79,25 +120,33 @@ function Dashboard() {
                 <Col>
                     <Container>
                         <Row className='my-3'>
-                            {sectionList('Interests', 'Enter genre name',
-                                setInterest, addInterest, removeInterest,
-                                interestsList.map(genre =>
+                            <SectionList
+                                sectionName='Interests'
+                                placeHolderText='Enter genre name'
+                                setText={setInterest}
+                                handleAdd={addInterest}
+                                handleRemove={removeInterest}
+                                components={interestsList.map(genre =>
                                     <div key={`${genre.name}-${genre.id}`} className='mr-2 my-1 px-2 py-1 bg-secondary text-light rounded-pill'>
                                         {genre.name}
                                     </div>
-                                )
-                            )}
+                                )}
+                            />
                         </Row>
                         <Row className='mt-5'>
-                            {sectionList('Friends', 'Enter username',
-                                setUsername, addFriend, removeFriend,
-                                friendsList.map(friend =>
+                            <SectionList
+                                sectionName='Friends'
+                                placeHolderText='Enter username'
+                                setText={setUsername}
+                                handleAdd={addFriend}
+                                handleRemove={removeFriend}
+                                components={friendsList.map(friend =>
                                     <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
                                         <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : 'holder.js/100px180?text=Image cap'}/>
                                         <Card.Footer>{friend.username}</Card.Footer>
                                     </Card>
-                                )
-                            )}
+                                )}
+                            />
                         </Row>
                     </Container>
                 </Col>
@@ -132,22 +181,22 @@ function userCard(user, navigate) {
     );
 }
 
-function sectionList(sectionName, placeHolderText, setText, handleAdd, handleRemove, components) {
+function SectionList(props) {
     return (
         <Container>
             <Row>
-                <h5 className='my-0'>{sectionName}</h5>
+                <h5 className='my-0'>{props.sectionName}</h5>
                 <hr className='my-2 w-100'/>
             </Row>
             <Row>
                 <form className='d-flex'>
-                    <input type='text' className='form-control border-warning' placeholder={placeHolderText} onChange={e => setText(e.target.value)}/>
-                    <Button variant='primary' className='ml-2' onClick={handleAdd}>Add</Button>
-                    <Button variant='danger' className='ml-2' onClick={handleRemove}>Remove</Button>
+                    <input type='text' className='form-control border-warning' placeholder={props.placeHolderText} onChange={e => props.setText(e.target.value)}/>
+                    <Button variant='primary' className='ml-2' onClick={props.handleAdd}>Add</Button>
+                    <Button variant='danger' className='ml-2' onClick={props.handleRemove}>Remove</Button>
                 </form>
             </Row>
             <Row className='mt-2 d-flex flex-wrap overflow-auto' style={{ maxHeight: '24rem' }}>
-                {components}
+                {props.components}
             </Row>
         </Container>
     );
