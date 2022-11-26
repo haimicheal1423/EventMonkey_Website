@@ -64,7 +64,7 @@ async function searchEvent(req, res) {
 
 async function getEventById(req, res) {
     try {
-        const eventId = Number(req.params['eventId']);
+        const eventId = parseInt(req.params['eventId']);
         const source = req.query['source'];
         const result = await eventManager.findEventById({ source, eventId });
         res.status(status.OK).json(result);
@@ -76,8 +76,8 @@ async function getEventById(req, res) {
 
 async function getRecommendedEvents(req, res) {
     try {
-        const userId = Number(req.params['userId']);
-        let limit = Number(req.query['limit']);
+        const userId = parseInt(req.params['userId']);
+        let limit = parseInt(req.query['limit']);
 
         if (isNaN(limit)) {
             limit = undefined;
