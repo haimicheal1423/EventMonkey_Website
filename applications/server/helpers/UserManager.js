@@ -330,7 +330,7 @@ export class UserManager {
      * @param {number} userId the EventMonkey user id
      * @param {string} genreName the genre name to add to interests
      *
-     * @returns {Promise<{message: string|'success'}>} a failure message, or
+     * @returns {Promise<Genre | {message: string}>} a failure message, or
      *     'success' if the genre was added to interests
      */
     async addToInterests(userId, genreName) {
@@ -353,7 +353,7 @@ export class UserManager {
 
         await this.dataSource_.addToInterests(userId, genre.id);
 
-        return { message: 'success' };
+        return genre;
     }
 
     /**

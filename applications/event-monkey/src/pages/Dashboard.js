@@ -66,7 +66,9 @@ function Dashboard() {
     };
 
     const removeFriend = e => {
-        if (!friendsList.some(friend => friend.username.toLowerCase() === username.toLowerCase())) {
+        const lowerUsername = username.toLowerCase();
+
+        if (!friendsList.some(friend => friend.username.toLowerCase() === lowerUsername)) {
             // not in the friend list
             return;
         }
@@ -75,7 +77,7 @@ function Dashboard() {
             .then(response => {
                 if (response.data.message === 'success') {
                     setFriendsList(friendsList.filter(friend => {
-                        return friend.username !== username;
+                        return friend.username.toLowerCase() !== lowerUsername;
                     }));
                 }
                 return Promise.resolve();
@@ -95,7 +97,9 @@ function Dashboard() {
     };
 
     const removeInterest = e => {
-        if (!interestsList.some(genre => genre.name.toLowerCase() === interest.toLowerCase())) {
+        const lowerInterest = interest.toLowerCase();
+
+        if (!interestsList.some(genre => genre.name.toLowerCase() === lowerInterest)) {
             // not in the interests list
             return;
         }
@@ -104,7 +108,7 @@ function Dashboard() {
             .then(response => {
                 if (response.data.message === 'success') {
                     setInterestsList(interestsList.filter(genre => {
-                        return genre.name !== interest;
+                        return genre.name.toLowerCase() !== lowerInterest;
                     }));
                 }
             })
