@@ -68,6 +68,7 @@ export class Image {
      */
     static createWithId(id, ratio, width, height, url) {
         const image = new Image();
+        image.id = id;
         image.ratio = ratio;
         image.width = width;
         image.height = height;

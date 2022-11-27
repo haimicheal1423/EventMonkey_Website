@@ -111,11 +111,13 @@ export class Attendee extends User {
      * @param {string} username
      * @param {Image} [profileImage]
      * @param {EventList[]} [eventList]
+     * @param {Genre[]} [interests]
      */
     constructor(userId, email, password, username, profileImage,
-                eventList = []) {
+                eventList = [], interests = []) {
         super(userId, TYPE_ATTENDEE, email, password, username, profileImage,
               eventList);
+        this.interests = interests;
     }
 }
 

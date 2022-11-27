@@ -64,10 +64,16 @@ async function searchEvent(req, res) {
 
 async function getEventById(req, res) {
     try {
-        const eventId = parseInt(req.params['eventId']);
+        const eventId = req.params['eventId'];
         const source = req.query['source'];
         const result = await eventManager.findEventById({ source, eventId });
-        res.status(status.OK).json(result);
+
+        if (result) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST)
+                .send(`Event(${eventId}) does not exist`);
+        }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
         console.error(error);
@@ -84,7 +90,12 @@ async function getRecommendedEvents(req, res) {
         }
 
         const result = await eventManager.getRecommendedEvents(userId, limit);
-        res.status(status.OK).json(result);
+
+        if (result.message) {
+            res.status(status.BAD_REQUEST).json({ message: result.message });
+        } else {
+            res.status(status.OK).json(result);
+        }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
         console.error(error);
