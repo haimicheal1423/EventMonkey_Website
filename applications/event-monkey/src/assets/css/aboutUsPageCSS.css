@@ -1,43 +1,30 @@
-body {
-    background-color: #25282b !important;
+.about {
+    margin:auto;
+    justify-content: center;
+    padding-left: 120px;
+    color: #404a54;
 }
-
-.body-page {
-    margin: 0 auto;
-    width: fit-content;
-    padding: 10px;
-    color: #D9DEE2 !important;
+.about-title {
+    padding-top: 50px;
+    font-size: 35px;
+    color: chocolate;
 }
-
-.btn {
-    background: maroon;
-    color: white;
-    outline: none !important;
-    box-shadow: none !important;
-}
-.btn:focus {
-    outline: none !important;
-}
-
-.navbar-brand {
-    margin-left: 30px;
-}
-
 .about-card {
     display: grid;
+    max-width: 90%;
     row-gap: 2vh;
     margin: 2vh 0px 5vh 0px;
     grid-template-rows: auto auto auto auto;
     font-family: Georgia, serif;
     padding: 20px;
-    background-color: #25282b;
+    background-color: beige;
     border-radius: 1rem;
     filter: drop-shadow(0 0 1rem #0F1011);
 }
 
 .section-title {
-    display: none;
-    color: #3b56ed;
+    display: block;
+    color: chocolate;
     font-size: calc(16px + .2vw);
     text-decoration: underline;
     margin: 0px;
@@ -84,14 +71,14 @@ body {
     padding: 3px 0px 0px 0px;
 }
 
-.skills {
+/* .skills {
     display: none;
-}
+} */
 
 .circle {
     height: 15px;
     width: 15px;
-    background-color: #2a45de;
+    background-color: chocolate;
     border-radius: 50%;
     display: inline-block;
 }
@@ -113,6 +100,11 @@ body {
     padding-left: 10px;
     list-style-type: none;
     display: inline-block;
+}
+
+.knowledge-section {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .extra-notes-section {

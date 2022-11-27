@@ -1,0 +1,99 @@
+.customize-profile-title {
+    padding-top: 55px;
+    font-size: 30px;
+    color: chocolate;
+}
+
+.hr {
+    margin-left: 300px;
+    margin-right: 300px;
+    padding-bottom: 10px;
+}
+
+.grid-container {
+    display: grid;
+    margin: auto;
+    padding: 0;
+    height: 60vh;
+    width:auto;
+    justify-content: center;
+    color: chocolate;
+
+    grid-template-columns: 400px 400px;
+    grid-template-rows: 200px;
+    grid-gap: 20px;
+}
+
+
+.image-button-container{
+    padding-top: 20px;
+}
+
+
+.image-button {
+    display: block;
+    margin: auto;
+    color:white;
+    
+}
+
+.profile-image-section {
+    margin: auto;
+    border-radius: 20%;
+    overflow: hidden;
+    padding-bottom: 30px;
+}
+
+.profile-image-section img{
+    object-fit: cover;
+    width: 200px;
+    height:auto;
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 100px;
+}
+
+.profile-section1 {
+    padding-top: 5px;
+}
+
+.profile-section1 input {
+    color:chocolate;
+    border-color:chocolate;
+    display: block;
+    width: 300px
+}
+
+.profile-section2 {
+    padding-top: 5px;
+
+}
+
+.profile-section2 input {
+    color:chocolate;
+    border-color:chocolate;
+    display: block;
+    width: 300px
+}
+
+
+.profile-section3 {
+    grid-column: span 2;
+}
+
+.profile-section3 textarea {
+    color:chocolate;
+    border-color:chocolate;
+    display: block;
+    width: 720px;
+    height: 200px;
+}
+
+.submit-button {
+    padding: 5px;
+    text-align: center;
+    justify-content: center;
+    width: 300px;
+    color:white;
+    cursor: pointer;
+}

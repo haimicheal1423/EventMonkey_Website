@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useNavigate } from 'react';
 import Axios from 'axios';
 import { useSearchParams } from "react-router-dom";
 import Card from 'react-bootstrap/Card';
@@ -6,11 +6,19 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/esm/Container';
 import Row from 'react-bootstrap/Row';
+import Button from 'react-bootstrap/Button';
+
+
+import ModalEM from '../components/Modal'
+import BannerEM from '../components/Banner'
+import '../assets/css/event.css'
+
 
 function Event() {
     const columnsPerRow = 4;
     const [searchParams] = useSearchParams();
     const [events, setEvents] = useState([]);
+    // const [url, setUrl] = useState('http://localhost:4000/events/')
 
     useEffect(() => {
         searchParams.forEach((val, key) => console.log(key, val));
@@ -20,7 +28,7 @@ function Event() {
             Axios.get(`http://localhost:4000/events/search?${searchParams}`)
                 .then(response => setEvents(response.data));
         } else {
-            Axios.get("http://localhost:4000/events")
+            Axios.get()
                 .then(response => setEvents(response.data));
         }
     }, []);
@@ -99,6 +107,12 @@ function Event() {
 
     return (
         <Container>
+            <h5 className="events-title">Events</h5>
+            <BannerEM/>
+            <hr/>
+            <ModalEM/>
+            {/* <Button onClick={() => setUrl('http://localhost:4000/events/search?keyword=sports')}>Sports</Button> */}
+
             <Row xs={1} md={columnsPerRow}>
                 {events?.length > 0 && events.map(event =>
                     <Col>

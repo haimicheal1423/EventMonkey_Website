@@ -15,7 +15,7 @@ Event monkey allows you to search and load data for events that are nearby you. 
 Application URL
 </h3>
 
-[Event Monkey](https://www.google.com/ "Event Monkey")
+[Event Monkey](http://eventmonkey.xyz/ "Event Monkey")
 
 <h2>
 
