@@ -175,7 +175,7 @@ function Dashboard() {
                 handleRemove={removeFriend}
                 components={friendsList.map(friend =>
                     <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
-                        <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : 'holder.js/100px180?text=Image cap'}/>
+                        <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : George}/>
                         <Card.Footer>{friend.username}</Card.Footer>
                     </Card>
                 )}
