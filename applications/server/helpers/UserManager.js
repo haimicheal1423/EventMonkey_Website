@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import { DataSource } from './Database.js';
 import { TYPE_ATTENDEE, TYPE_ORGANIZER, Attendee, Organizer } from '../models/User.js';

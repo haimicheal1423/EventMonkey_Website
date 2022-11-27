@@ -1,5 +1,5 @@
 import { jest, beforeEach, describe, it, expect } from "@jest/globals";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import { EventMonkeyDataSource } from '../helpers/Database.js';
 import { UserManager } from '../helpers/UserManager.js';
@@ -513,7 +513,7 @@ describe('registering problematic users', () => {
     });
 });
 
-describe('valid user login', () => {
+describe('user login', () => {
     it('performs a successful user login', async() => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new UserManager(dataSource);
