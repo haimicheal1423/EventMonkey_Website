@@ -1,20 +1,37 @@
-.gradient-custom-3 {
-    /* fallback for old browsers */
-    background: #84fab0;
+h4 {
+    text-align: center;
+    font-size: 30px;
+}
 
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: -webkit-linear-gradient(to right, rgba(132, 250, 176, 0.5), rgba(143, 211, 244, 0.5));
+.signup-card {
+    padding: 40px;
+    background-color: beige;
+    border-width: 2px;
+    border-color: chocolate;
+    color: chocolate;
+    text-align: left;
+    width: 350px;
+}
 
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    background: linear-gradient(to right, rgba(132, 250, 176, 0.5), rgba(143, 211, 244, 0.5))
-    }
-    .gradient-custom-4 {
-    /* fallback for old browsers */
-    background: #84fab0;
+.signup-container {
+    margin:auto;
+    width: 350px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
 
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: -webkit-linear-gradient(to right, rgba(132, 250, 176, 1), rgba(143, 211, 244, 1));
+.signup-card input {
+    border-color: chocolate;
+    color:chocolate;
+}
 
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    background: linear-gradient(to right, rgba(132, 250, 176, 1), rgba(143, 211, 244, 1))
-    }
+.signup-card button {
+    color: white;
+    width: 266px;
+    cursor:pointer;
+}
+
+button:hover {
+    background-color: white;
+}
+

@@ -1,12 +1,17 @@
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/esm/Container';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useNavigate } from 'react-router';
-import Button from 'react-bootstrap/Button';
 import React, { useEffect, useState } from 'react';
 import Axios from 'axios';
+
+import '../assets/css/dashboard.css'
+
+import George from '../assets/profileImages/george-avatar.jpeg'
+
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -136,45 +141,98 @@ function Dashboard() {
     };
 
     return (
-        <Container fluid className='d-inline-flex justify-content-center'>
-            <Row xs={1} md={2}>
-                <Col md='auto' className='p-3'>
-                    {userCard(user, navigate)}
-                </Col>
+        <Container>
+            <div className="welcome-container">
+                <img className="welcome-img shadow"src={George} alt=""/>
+                <h2 className="dashboard-title">Welcome Sajan!</h2>
+                <h6 className="dashboard-subtitle">This is your personalized dashboard..</h6>
+                <Button className="logout-btn" onClick={() => {
+                    localStorage.setItem('token',false);
+                    navigate('/');
+                }}>logout</Button>
+                <hr/>
+            </div>
+
+            <div className="tsn-container">
+                <SectionList
+                    sectionName='Interests'
+                    placeHolderText='Enter genre name'
+                    setText={setInterest}
+                    handleAdd={addInterest}
+                    handleRemove={removeInterest}
+                    components={interestsList.map(genre =>
+                        <div key={`${genre.name}-${genre.id}`} className='mr-2 my-1 px-2 py-1 bg-secondary text-light rounded-pill'>
+                            {genre.name}
+                        </div>
+                    )}
+                />
+            </div>
+
+            <div className="tsn-container">
+                <SectionList
+                    sectionName='Friends'
+                    placeHolderText='Enter username'
+                    setText={setUsername}
+                    handleAdd={addFriend}
+                    handleRemove={removeFriend}
+                    components={friendsList.map(friend =>
+                        <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
+                            <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : 'holder.js/100px180?text=Image cap'}/>
+                            <Card.Footer>{friend.username}</Card.Footer>
+                        </Card>
+                    )}
+                />
+            </div>
+
+            <div className="tsn-container">
+                <h6>Try Something New</h6>
+                {/* carousel here? */}
+                <hr/>
+            </div>
+
+            <div className="rec-container">
+                <h6>Recommended Just For You!</h6>
+                {/* carousel here? */}
+                <hr/>
+            </div>
+
+            <div className="category-container">
+                <h6>Browse by Category</h6>
+                {/* carousel here? */}
+                <hr/>
+            </div>
+
+            <div className="recent-container">
+                <h6>Recent Events</h6>
+                {/* carousel here? */}
+                <hr/>
+            </div>
+
+            {/* <Row>
+                <Col></Col>
                 <Col>
-                    <Container>
-                        <Row className='my-3'>
-                            <SectionList
-                                sectionName='Interests'
-                                placeHolderText='Enter genre name'
-                                setText={setInterest}
-                                handleAdd={addInterest}
-                                handleRemove={removeInterest}
-                                components={interestsList.map(genre =>
-                                    <div key={`${genre.name}-${genre.id}`} className='mr-2 my-1 px-2 py-1 bg-secondary text-light rounded-pill'>
-                                        {genre.name}
-                                    </div>
-                                )}
-                            />
-                        </Row>
-                        <Row className='mt-5'>
-                            <SectionList
-                                sectionName='Friends'
-                                placeHolderText='Enter username'
-                                setText={setUsername}
-                                handleAdd={addFriend}
-                                handleRemove={removeFriend}
-                                components={friendsList.map(friend =>
-                                    <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
-                                        <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : 'holder.js/100px180?text=Image cap'}/>
-                                        <Card.Footer>{friend.username}</Card.Footer>
-                                    </Card>
-                                )}
-                            />
-                        </Row>
-                    </Container>
+                    <Card style={{ width: '18rem'}}>
+                        <Card.Img variant="top" src="holder.js/100px180?text=Image cap" />
+                        <Card.Body>
+                            <Card.Title>Welcome Sajan!</Card.Title>
+                            <Card.Text>
+                                Some quick example text to build on the card title and make up the
+                                bulk of the card's content.
+                            </Card.Text>
+                        </Card.Body>
+                        <ListGroup className="list-group-flush">
+                            <ListGroup.Item>Sajan Gururng</ListGroup.Item>
+                            <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
+                            <ListGroup.Item  onClick={() => {
+                                localStorage.setItem('token',false);
+                                navigate('/');
+                            }}>Logout</ListGroup.Item>
+                        </ListGroup>
+                    </Card>
                 </Col>
-            </Row>
+                <Col></Col>
+            </Row> */}
+
         </Container>
     );
 }

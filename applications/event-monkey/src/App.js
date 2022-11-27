@@ -1,5 +1,6 @@
 import './App.css';
 
+import React, { useState } from 'react';
 import { Route, Routes } from 'react-router-dom'
 
 import NavbarEM from './components/Navbar.js';
@@ -12,12 +13,12 @@ import Dashboard from './pages/Dashboard'
 import Interests from './pages/Interests'
 import AboutUs from './pages/AboutUs'
 import Event from './pages/Event'
-
-
+import TrySomethingNew from './pages/TrySomethingNew';
+import Profile from './pages/Profile';
 
 function App() {
-  return (
 
+  return (
     <>
       <NavbarEM/>
       <div className="App">
@@ -30,8 +31,13 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/event" element={<Event />} />
+          <Route path="/trysomethingnew" element={<TrySomethingNew />} />
+          <Route path="/profile" element={<Profile />} />
+
         </Routes>
-        <hr></hr>
+
+        <hr/>
+
       <FooterEM/>
       </div>
     </>
