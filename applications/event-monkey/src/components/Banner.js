@@ -22,12 +22,12 @@ export default function BannerEM() {
 
                 <Button
                     className='search-button'
-                    onClick={() => navigate(`/event?keyword=${searchText}`)}>Search</Button> {' '}
+                    onClick={() => navigate(`/event/search?keyword=${searchText}`)}>Search</Button> {' '}
                 <Button
                     variant='success'
-                    onClick={() => navigate(`/event`)}>View All</Button>{' '}
+                    onClick={() => navigate(`/event`)}>View All Events</Button>{' '}
             </form>
-            
+
         </div>
     );
 }
