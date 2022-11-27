@@ -48,17 +48,29 @@ router.get('/:userId/interests',
     (req, res) => getInterests(req, res)
 );
 
-router.put('/:userId/add_interest/:genreId',
+router.put('/:userId/add_interest/:genreName',
     (req, res) => addToInterests(req, res)
 );
 
-router.delete('/:userId/remove_interest/:genreId',
+router.delete('/:userId/remove_interest/:genreName',
     (req, res) => removeFromInterests(req, res)
+);
+
+router.get('/:userId/friends',
+    (req, res) => getFriendsList(req, res)
+);
+
+router.put('/:userId/add_friend/:username',
+    (req, res) => addToFriends(req, res)
+);
+
+router.delete('/:userId/remove_friend/:username',
+    (req, res) => removeFromFriends(req, res)
 );
 
 async function getUser(req, res) {
     try {
-        const userId = Number(req.params['id']);
+        const userId = parseInt(req.params['id']);
         const result = await userManager.getUser(userId);
 
         if (!result.message) {
@@ -104,13 +116,13 @@ async function login(req, res) {
         if (loginDetails.message) {
             res.status(status.NOT_ACCEPTABLE).send(loginDetails.message);
         } else {
-            //     req.session.success = true;
-            //     req.session.email = email;
-            //     req.session.userId = results[0].id;
+            const user = await userManager.getUser(loginDetails.userId);
 
-            res.cookie('email', loginDetails.email);
-            res.cookie('name', loginDetails.username);
-            res.status(status.OK).send('Logged in!');
+            if (user.message) {
+                res.status(status.NOT_ACCEPTABLE).send(user.message);
+            } else {
+                res.status(status.OK).json(user);
+            }
         }
     } catch (error) {
         console.error(error);
@@ -120,7 +132,7 @@ async function login(req, res) {
 
 async function createEvent(req, res) {
     try {
-        const userId = Number(req.params['userId']);
+        const userId = parseInt(req.params['userId']);
 
         const result = await eventManager.createEvent(
             userId,
@@ -150,8 +162,8 @@ async function createEvent(req, res) {
 
 async function deleteEvent(req, res) {
     try {
-        const userId = Number(req.params['userId']);
-        const eventId = Number(req.params['eventId']);
+        const userId = parseInt(req.params['userId']);
+        const eventId = parseInt(req.params['eventId']);
 
         const result = await eventManager.deleteEvent(userId, eventId);
 
@@ -168,7 +180,7 @@ async function deleteEvent(req, res) {
 
 async function getCreatedEvents(req, res) {
     try {
-        const userId = Number(req.params['userId']);
+        const userId = parseInt(req.params['userId']);
         const result = await userManager.getCreatedEvents(userId);
 
         if (!result.message) {
@@ -184,7 +196,7 @@ async function getCreatedEvents(req, res) {
 
 async function getFavorites(req, res) {
     try {
-        const userId = Number(req.params['userId']);
+        const userId = parseInt(req.params['userId']);
 
         const result = await userManager.getFavorites(userId);
 
@@ -201,7 +213,7 @@ async function getFavorites(req, res) {
 
 async function addToFavorites(req, res) {
     try {
-        const userId = Number(req.params['userId']);
+        const userId = parseInt(req.params['userId']);
 
         // ticket master ids can be strings, so no Number cast
         const eventId = req.params['eventId'];
@@ -221,7 +233,7 @@ async function addToFavorites(req, res) {
 
 async function removeFromFavorites(req, res) {
     try {
-        const userId = Number(req.params['userId']);
+        const userId = parseInt(req.params['userId']);
 
         // ticket master ids can be strings, so no Number cast
         const eventId = req.params['eventId'];
@@ -241,7 +253,7 @@ async function removeFromFavorites(req, res) {
 
 async function getInterests(req, res) {
     try {
-        const userId = Number(req.params['userId']);
+        const userId = parseInt(req.params['userId']);
 
         const result = await userManager.getInterests(userId);
 
@@ -258,12 +270,12 @@ async function getInterests(req, res) {
 
 async function addToInterests(req, res) {
     try {
-        const userId = Number(req.params["userId"]);
-        const genreId = Number(req.params['genreId']);
+        const userId = parseInt(req.params["userId"]);
+        const genreName = req.params['genreName'];
 
-        const result = await userManager.addToInterests(userId, genreId);
+        const result = await userManager.addToInterests(userId, genreName);
 
-        if (result.message === 'success') {
+        if (!result.message) {
             res.status(status.OK).json(result);
         } else {
             res.status(status.BAD_REQUEST).json(result);
@@ -276,10 +288,63 @@ async function addToInterests(req, res) {
 
 async function removeFromInterests(req, res) {
     try {
-        const userId = Number(req.params['userId']);
-        const genreId = Number(req.params['genreId']);
+        const userId = parseInt(req.params['userId']);
+        const genreName = req.params['genreName'];
 
-        const result = await userManager.removeFromInterests(userId, genreId);
+        const result = await userManager.removeFromInterests(userId, genreName);
+
+        if (result.message === 'success') {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function getFriendsList(req, res) {
+    try {
+        const userId = parseInt(req.params['userId']);
+
+        const result = await userManager.getFriendsList(userId);
+
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function addToFriends(req, res) {
+    try {
+        const userId = parseInt(req.params['userId']);
+        const username = req.params['username'];
+
+        const result = await userManager.addToFriends(userId, username);
+
+        if (!result.message) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST).json(result);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function removeFromFriends(req, res) {
+    try {
+        const userId = parseInt(req.params['userId']);
+        const username = req.params['username'];
+
+        const result = await userManager.removeFromFriends(userId, username);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);

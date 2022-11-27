@@ -1,6 +1,6 @@
 import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
 import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from "../models/Event.js";
-import { TYPE_ORGANIZER } from "../models/User.js";
+import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
 import { DataSource } from './Database.js';
 import { Genre } from "../models/Genre.js";
 import { userManager } from "../routes/user.js";
@@ -131,6 +131,34 @@ export class EventManager {
         );
 
         return events.filter(event => event !== undefined);
+    }
+
+    /**
+     * Finds all recommended events for a given user id.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} [limit] the event list limit (default max 20 events)
+     *
+     * @returns {Promise<Event[]>} the recommended events
+     */
+    async getRecommendedEvents(userId, limit = 20) {
+        const failMessage = await userManager.checkUserType(userId,
+                                                            TYPE_ATTENDEE);
+
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
+        }
+
+        const interests = await this.dataSource_.getInterestList(userId);
+        const fromFriends = await this.dataSource_.getFriendInterests(userId);
+
+        if (fromFriends && fromFriends.length) {
+            interests.concat(fromFriends);
+        }
+
+        const genreNames = interests.map(genre => genre.name);
+        return await this.composite_.findByGenre(genreNames, limit);
     }
 
     /**

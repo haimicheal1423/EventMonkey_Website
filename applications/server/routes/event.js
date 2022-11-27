@@ -5,7 +5,6 @@ import { EventManager } from "../helpers/EventManager.js";
 import { emDBSource } from "../helpers/Database.js";
 
 export const eventManager = new EventManager(emDBSource);
-
 export const router = Router();
 
 router.get('/',
@@ -18,6 +17,10 @@ router.get('/search',
 
 router.get('/:eventId',
     (req, res) => getEventById(req, res)
+);
+
+router.get('/recommended/:userId',
+    (req, res) => getRecommendedEvents(req, res)
 );
 
 async function getAllEventMonkeyEvents(req, res) {
@@ -71,6 +74,23 @@ async function getEventById(req, res) {
             res.status(status.BAD_REQUEST)
                 .send(`Event(${eventId}) does not exist`);
         }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function getRecommendedEvents(req, res) {
+    try {
+        const userId = parseInt(req.params['userId']);
+        let limit = parseInt(req.query['limit']);
+
+        if (isNaN(limit)) {
+            limit = undefined;
+        }
+
+        const result = await eventManager.getRecommendedEvents(userId, limit);
+        res.status(status.OK).json(result);
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
         console.error(error);

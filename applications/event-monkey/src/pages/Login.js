@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card';
@@ -14,25 +13,27 @@ function Login() {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
-    const  handleSubmit = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        if(email && password){
-            Axios.post(`http://localhost:4000/users/login`,{email,password}).then((response) => {
-                navigate('/dashboard');
-                localStorage.setItem('token',true);
-            }).catch(e => {
+        if (email && password) {
+            Axios.post(`http://localhost:4000/users/login`, { email, password })
+                .then(response => {
+                    localStorage.setItem('token', 'true');
+                    localStorage.setItem('user', JSON.stringify(response.data));
+                    navigate('/dashboard');
+                }).catch(e => {
                 alert(JSON.stringify(e.response.data));
             });
-        }else{
+        } else {
             alert('Email/Password is required');
         }
     }
 
     useEffect(() => {
-        if(localStorage.getItem('token') === true ){
+        if (localStorage.getItem('token') === 'true') {
             navigate('/dashboard');
         }
-    },[localStorage.getItem('token')])
+    }, [localStorage.getItem('token')])
 
     return (
         <>
@@ -45,7 +46,7 @@ function Login() {
                             <Form.Label>Email</Form.Label>
                             <Form.Control type="email" placeholder="" value={email} onChange={(e)=>setEmail(e.target.value)} />
                         </Form.Group>
-                    
+
                         <Form.Group className="mb-3" controlId="formBasicPassword">
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" placeholder="" value={password} onChange={(e)=>setPassword(e.target.value)} />
