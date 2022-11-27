@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Card from 'react-bootstrap/Card';
 import Axios from 'axios';
-
+import George from '../assets/profileImages/george-avatar.jpeg'
 
 import ModalEM from '../components/Modal'
 import BannerEM from '../components/Banner'
@@ -103,7 +103,7 @@ function eventImage(event) {
     if (event.images[0]) {
         return event.images[0].url;
     } else {
-        return 'holder.js/100px180?text=Image cap';
+        return George;
     }
 }
 
