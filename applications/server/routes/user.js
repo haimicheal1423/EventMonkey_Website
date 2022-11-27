@@ -145,14 +145,10 @@ async function createEvent(req, res) {
             req.body['images']
         );
 
-        if (result.eventId) {
+        if (!result.message) {
             res.status(status.OK).json(result);
-        } else if (result.message) {
-            res.status(status.BAD_REQUEST).json(result);
         } else {
-            res.status(status.BAD_REQUEST).json({
-                message: 'Failed to create event, with no errors!'
-            });
+            res.status(status.BAD_REQUEST).json(result);
         }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
@@ -170,7 +166,7 @@ async function deleteEvent(req, res) {
         if (result.message === 'success') {
             res.status(status.OK).json(result);
         } else {
-            res.status(status.BAD_REQUEST).json(result);
+            res.status(status.BAD_REQUEST).json({ message: result.message });
         }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
@@ -181,7 +177,8 @@ async function deleteEvent(req, res) {
 async function getCreatedEvents(req, res) {
     try {
         const userId = parseInt(req.params['userId']);
-        const result = await userManager.getCreatedEvents(userId);
+
+        const result = await eventManager.getCreatedEvents(userId);
 
         if (!result.message) {
             res.status(status.OK).json(result);
@@ -198,7 +195,7 @@ async function getFavorites(req, res) {
     try {
         const userId = parseInt(req.params['userId']);
 
-        const result = await userManager.getFavorites(userId);
+        const result = await eventManager.getFavorites(userId);
 
         if (!result.message) {
             res.status(status.OK).json(result);
@@ -218,7 +215,13 @@ async function addToFavorites(req, res) {
         // ticket master ids can be strings, so no Number cast
         const eventId = req.params['eventId'];
 
-        const result = await userManager.addToFavorites(userId, eventId);
+        const event = await eventManager.findEventById({ eventId });
+
+        if (!event) {
+            return { message: `Event(${eventId}) does not exist` };
+        }
+
+        const result = await userManager.addToFavorites(userId, event);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);
@@ -238,7 +241,13 @@ async function removeFromFavorites(req, res) {
         // ticket master ids can be strings, so no Number cast
         const eventId = req.params['eventId'];
 
-        const result = await userManager.removeFromFavorites(userId, eventId);
+        const event = await eventManager.findEventById({ eventId });
+
+        if (!event) {
+            return { message: `Event(${eventId}) does not exist` };
+        }
+
+        const result = await userManager.removeFromFavorites(userId, event);
 
         if (result.message === 'success') {
             res.status(status.OK).json(result);

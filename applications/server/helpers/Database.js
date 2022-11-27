@@ -91,6 +91,22 @@ export class Database {
             }
         }
     }
+
+    /**
+     * Ends the database pool connection. The pool reference will be set to
+     * undefined and any future database queries will need to run
+     * {@link Database.initPool} again.
+     *
+     * @returns {Promise<void>}
+     */
+    static async shutdown() {
+        try {
+            await pool.end();
+            pool = undefined;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
 
 /**

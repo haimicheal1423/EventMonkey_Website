@@ -90,7 +90,12 @@ async function getRecommendedEvents(req, res) {
         }
 
         const result = await eventManager.getRecommendedEvents(userId, limit);
-        res.status(status.OK).json(result);
+
+        if (result.message) {
+            res.status(status.BAD_REQUEST).json({ message: result.message });
+        } else {
+            res.status(status.OK).json(result);
+        }
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
         console.error(error);

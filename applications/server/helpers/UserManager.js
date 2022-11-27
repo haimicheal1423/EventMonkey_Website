@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 
 import { DataSource } from './Database.js';
 import { TYPE_ATTENDEE, TYPE_ORGANIZER, Attendee, Organizer } from '../models/User.js';
-import { eventManager } from "../routes/event.js";
+import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER } from "../models/Event.js";
 
 export class UserManager {
 
@@ -13,6 +13,9 @@ export class UserManager {
      */
     dataSource_;
 
+    /**
+     * @param {DataSource} dataSource
+     */
     constructor(dataSource) {
         this.dataSource_ = dataSource;
     }
@@ -46,8 +49,8 @@ export class UserManager {
      *
      * @param {number} userId the EventMonkey user id
      *
-     * @returns {Promise<User | { message: string }>} the user object if it
-     *     exists, otherwise a message on failure
+     * @returns {Promise<Attendee | Organizer | { message: string }>} the user
+     *     object if it exists, otherwise a message on failure
      */
     async getUser(userId) {
         const userDetails = await this.dataSource_.getUserDetails(userId);
@@ -173,9 +176,9 @@ export class UserManager {
      *     }>} the login details, or a failure message
      */
     async login(email, password) {
-        const loginDetails = await this.dataSource_.getLoginDetails(email);
+        const details = await this.dataSource_.getLoginDetails(email);
 
-        if (!loginDetails) {
+        if (!details) {
             // no login details exist for this email in the data source
             return { message: 'Invalid username or password.' };
         }
@@ -192,57 +195,18 @@ export class UserManager {
             });
         }
 
-        const valid = await validatePassword(password, loginDetails.password);
+        try {
+            const valid = await validatePassword(password, details.password);
 
-        if (valid) {
-            return loginDetails;
-        } else {
+            if (valid) {
+                return details;
+            } else {
+                return { message: 'Invalid username or password.' };
+            }
+        } catch (error) {
+            console.error(error);
             return { message: 'Invalid username or password.' };
         }
-    }
-
-    /**
-     * Gets an array of events in the {@link Organizer} event list. This
-     * function will verify that the user id references a user which has
-     * {@link TYPE_ORGANIZER} as a user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     *
-     * @returns {Promise<{message: string} | Event[]>} an array of events which
-     *     the organizer has created, or a failure message if the user does not
-     *     have a {@link TYPE_ORGANIZER} user type
-     */
-    async getCreatedEvents(userId) {
-        const failMessage = await this.checkUserType(userId, TYPE_ORGANIZER);
-
-        if (failMessage) {
-            // user is not organizer type
-            return { message: failMessage.message };
-        }
-
-        return await eventManager.findEventsByUserId(userId);
-    }
-
-    /**
-     * Gets an array of events in the {@link Attendee} event list. This
-     * function will verify that the user id references a user which has
-     * {@link TYPE_ATTENDEE} as a user type.
-     *
-     * @param {number} userId the EventMonkey user id
-     *
-     * @returns {Promise<{message: string} | Event[]>} an array of events which
-     *     the attendee has added to their favorites, or a failure message if
-     *     the user does not have a {@link TYPE_ATTENDEE} user type
-     */
-    async getFavorites(userId) {
-        const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
-
-        if (failMessage) {
-            // user is not attendee type
-            return { message: failMessage.message };
-        }
-
-        return await eventManager.findEventsByUserId(userId);
     }
 
     /**
@@ -250,12 +214,12 @@ export class UserManager {
      * a record of an Attendee user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number|string} eventId the EventMonkey or TicketMaster event id
+     * @param {Event} event the EventMonkey or TicketMaster event
      *
      * @returns {Promise<{message: string|'success'}>} a failure message, or
      *     'success' if the event was successfully added to favorites
      */
-    async addToFavorites(userId, eventId) {
+    async addToFavorites(userId, event) {
         const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
 
         if (failMessage) {
@@ -263,13 +227,21 @@ export class UserManager {
             return { message: failMessage.message };
         }
 
-        const event = await eventManager.findEventById({ eventId });
+        const {
+            addToEventMonkeyList,
+            addToTicketMasterList
+        } = this.dataSource_;
 
-        if (!event) {
-            return { message: `Event(${eventId}) does not exist` };
+        switch (event.source.toUpperCase()) {
+            case SOURCE_EVENT_MONKEY:
+                await addToEventMonkeyList(userId, event.id);
+                break;
+            case SOURCE_TICKET_MASTER:
+                await addToTicketMasterList(userId, event.id);
+                break;
+            default:
+                throw new Error(`Unknown event source: ${event.source}`);
         }
-
-        await eventManager.addEventToList(userId, event);
 
         return { message: 'success' };
     }
@@ -279,12 +251,12 @@ export class UserManager {
      * point to a record of an Attendee user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number|string} eventId the EventMonkey or TicketMaster event id
+     * @param {Event} event the EventMonkey or TicketMaster event
      *
      * @returns {Promise<{message: string|'success'}>} a failure message, or
      *     'success' if the event was successfully removed from favorites
      */
-    async removeFromFavorites(userId, eventId) {
+    async removeFromFavorites(userId, event) {
         const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
 
         if (failMessage) {
@@ -292,13 +264,21 @@ export class UserManager {
             return { message: failMessage.message };
         }
 
-        const event = await eventManager.findEventById({ eventId });
+        const {
+            removeFromEventMonkeyList,
+            removeFromTicketMasterList
+        } = this.dataSource_;
 
-        if (!event) {
-            return { message: `Event(${eventId}) does not exist` };
+        switch (event.source.toUpperCase()) {
+            case SOURCE_EVENT_MONKEY:
+                await removeFromEventMonkeyList(userId, event.id);
+                break;
+            case SOURCE_TICKET_MASTER:
+                await removeFromTicketMasterList(userId, event.id);
+                break;
+            default:
+                throw new Error(`Unknown event source: ${event.source}`);
         }
-
-        await eventManager.removeEventFromList(userId, event);
 
         return { message: 'success' };
     }
