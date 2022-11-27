@@ -3,7 +3,6 @@ import Container from 'react-bootstrap/esm/Container';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import { useNavigate } from 'react-router';
 import React, { useEffect, useState } from 'react';
 import Axios from 'axios';
@@ -143,46 +142,44 @@ function Dashboard() {
     return (
         <Container>
             <div className="welcome-container">
-                <img className="welcome-img shadow"src={George} alt=""/>
-                <h2 className="dashboard-title">Welcome Sajan!</h2>
-                <h6 className="dashboard-subtitle">This is your personalized dashboard..</h6>
+                <img className="welcome-img shadow" src={user.profileImage ? user.profileImage.url : George} alt=""/>
+                <h2 className="dashboard-title">Welcome {user.username}!</h2>
+                <h6 className="dashboard-subtitle">This is your personalized dashboard...</h6>
                 <Button className="logout-btn" onClick={() => {
-                    localStorage.setItem('token',false);
+                    localStorage.removeItem('user');
+                    localStorage.setItem('token', 'false');
                     navigate('/');
                 }}>logout</Button>
                 <hr/>
             </div>
 
-            <div className="tsn-container">
-                <SectionList
-                    sectionName='Interests'
-                    placeHolderText='Enter genre name'
-                    setText={setInterest}
-                    handleAdd={addInterest}
-                    handleRemove={removeInterest}
-                    components={interestsList.map(genre =>
-                        <div key={`${genre.name}-${genre.id}`} className='mr-2 my-1 px-2 py-1 bg-secondary text-light rounded-pill'>
-                            {genre.name}
-                        </div>
-                    )}
-                />
-            </div>
+            <SectionList
+                sectionName='Interests'
+                placeHolderText='Enter genre name'
+                setText={setInterest}
+                handleAdd={addInterest}
+                handleRemove={removeInterest}
+                components={interestsList.map(genre =>
+                    <div key={`${genre.name}-${genre.id}`} className='mr-2 my-1 px-2 py-1 bg-secondary text-light rounded-pill'>
+                        {genre.name}
+                    </div>
+                )}
+            />
+            <hr/>
 
-            <div className="tsn-container">
-                <SectionList
-                    sectionName='Friends'
-                    placeHolderText='Enter username'
-                    setText={setUsername}
-                    handleAdd={addFriend}
-                    handleRemove={removeFriend}
-                    components={friendsList.map(friend =>
-                        <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
-                            <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : 'holder.js/100px180?text=Image cap'}/>
-                            <Card.Footer>{friend.username}</Card.Footer>
-                        </Card>
-                    )}
-                />
-            </div>
+            <SectionList
+                sectionName='Friends'
+                placeHolderText='Enter username'
+                setText={setUsername}
+                handleAdd={addFriend}
+                handleRemove={removeFriend}
+                components={friendsList.map(friend =>
+                    <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
+                        <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : 'holder.js/100px180?text=Image cap'}/>
+                        <Card.Footer>{friend.username}</Card.Footer>
+                    </Card>
+                )}
+            />
 
             <div className="tsn-container">
                 <h6>Try Something New</h6>
@@ -237,38 +234,11 @@ function Dashboard() {
     );
 }
 
-function userCard(user, navigate) {
-    return (
-        <Card className='p-2' style={{ width: '18rem' }}>
-            <Card.Img variant='top' src={user.profileImage ? user.profileImage.url : 'holder.js/100px180?text=Image cap'} />
-            <Card.Body>
-                <Card.Title>Welcome {user.username}!</Card.Title>
-                <Card.Text>
-                    Some quick example text to build on the card title and make up the
-                    bulk of the card's content.
-                </Card.Text>
-            </Card.Body>
-            <ListGroup className='list-group-flush'>
-                <ListGroup.Item>{user.username}</ListGroup.Item>
-                <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
-                <ListGroup.Item>
-                    <Button variant='danger' onClick={() => {
-                        localStorage.setItem('token', 'false');
-                        localStorage.removeItem('user');
-                        navigate('/');
-                    }}>Logout</Button>
-                </ListGroup.Item>
-            </ListGroup>
-        </Card>
-    );
-}
-
 function SectionList(props) {
     return (
-        <Container>
+        <Container style={{color: 'chocolate'}}>
             <Row>
-                <h5 className='my-0'>{props.sectionName}</h5>
-                <hr className='my-2 w-100'/>
+                <h5 className='my-3'>{props.sectionName}</h5>
             </Row>
             <Row>
                 <form className='d-flex'>
