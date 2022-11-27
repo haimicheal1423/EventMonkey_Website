@@ -1,0 +1,61 @@
+.welcome-container {
+    padding: 50px;
+}
+
+.dashboard-title {
+    margin: auto;
+    text-align: center;
+    justify-content: center;
+    color: chocolate;
+    padding-top: 20px;
+}
+
+.dashboard-subtitle {
+    margin: auto;
+    text-align: center;
+    justify-content: center;
+    color: #0f010f;
+    padding-bottom: 10px;
+    opacity: 50%;
+}
+.welcome-img {
+    max-width: 150px;
+    max-height: auto;
+    border-radius: 50%;
+    position:sticky;
+}
+
+.logout-btn {
+    margin: auto;
+    text-align: center;
+    justify-content: center;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.tsn-container {
+    margin: auto;
+    text-align: center;
+    justify-content: center;
+    color: chocolate;
+}
+
+.rec-container {
+    margin: auto;
+    text-align: center;
+    justify-content: center;
+    color: chocolate;
+}
+.category-container {
+    margin: auto;
+    text-align: center;
+    justify-content: center;
+    color: chocolate;
+}
+
+.recent-container {
+    margin: auto;
+    text-align: center;
+    justify-content: center;
+    color: chocolate;
+}

@@ -186,7 +186,7 @@ export class TicketMasterSource extends EventSource {
                     .map(extractVenueLocation)[0];
         };
 
-        const constructPriceRange = priceRanges => {
+        const constructPriceRange = (priceRanges = []) => {
             /*
              * a map to keep track of possible price ranges with the same
              * currency type. Duplicate currency types must be reduced to one
@@ -219,6 +219,35 @@ export class TicketMasterSource extends EventSource {
             return Array.from(rangeMap.values());
         };
 
+        const constructDate = (dates = {}) => {
+            const date = {
+                startDateTime: undefined,
+                endDateTime: undefined
+            };
+
+            if (dates['start']) {
+                const dateStart = dates['start'];
+
+                if (dateStart['dateTime']) {
+                    date.startDateTime = new Date(dateStart['dateTime']);
+                } else if (dateStart['localDate']) {
+                    date.startDateTime = new Date(dateStart['localDate']);
+                }
+            }
+
+            if (dates['end']) {
+                const dateEnd = dates['end'];
+
+                if (dateEnd['dateTime']) {
+                    date.endDateTime = new Date(dateEnd['dateTime']);
+                } else if (dateEnd['localDate']) {
+                    date.endDateTime = new Date(dateEnd['localDate']);
+                }
+            }
+
+            return date;
+        };
+
         // sometimes TicketMaster event properties are undefined, so try and
         // find the best information to fill in
         const description = eventObj['description']
@@ -227,17 +256,8 @@ export class TicketMasterSource extends EventSource {
             || 'No description available';
 
         const location = constructLocation(eventObj);
-
-        const date = {
-            startDateTime: new Date(eventObj['dates']['start']['dateTime'])
-        };
-
-        if (eventObj['dates']['end']) {
-            date.endDateTime = new Date(eventObj['dates']['end']['dateTime']);
-        }
-
-        // not all TicketMaster events have defined price ranges
-        const priceRange = constructPriceRange(eventObj['priceRanges'] || []);
+        const date = constructDate(eventObj['dates']);
+        const priceRange = constructPriceRange(eventObj['priceRanges']);
 
         const images = eventObj['images'].map(image => {
             const { ratio, width, height, url } = image;

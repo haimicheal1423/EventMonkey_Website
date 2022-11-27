@@ -1,9 +1,8 @@
 import { EventMonkeySource, TicketMasterSource, CompositeSource } from './EventSource.js';
 import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from "../models/Event.js";
-import { TYPE_ORGANIZER } from "../models/User.js";
 import { DataSource } from './Database.js';
 import { Genre } from "../models/Genre.js";
-import { userManager } from "../routes/user.js";
+import { TYPE_ATTENDEE, TYPE_ORGANIZER } from "../models/User.js";
 
 /**
  * A manager for any request relating to searching, adding, or removing
@@ -52,6 +51,30 @@ export class EventManager {
             this.eventMonkey_,
             this.ticketMaster_
         );
+    }
+
+    /**
+     * Checks if a user is of the given type. If the user does not exist or if
+     * the type does not match, then a failure message will be returned.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {string} userType the type of user
+     *
+     * @returns {Promise<{message: string}|undefined>} a message if the user
+     *     does not exist or if the type does not match, or undefined if success
+     */
+    async checkUserType(userId, userType) {
+        const userDetails = await this.dataSource_.getUserDetails(userId);
+
+        if (!userDetails) {
+            return { message: `User(${userId}) does not exist` };
+        }
+
+        if (userDetails.type !== userType) {
+            return { message: `User(${userId}) is not type ${userType}` };
+        }
+
+        return undefined;
     }
 
     /**
@@ -131,6 +154,32 @@ export class EventManager {
         );
 
         return events.filter(event => event !== undefined);
+    }
+
+    /**
+     * Finds all recommended events for a given user id.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} [limit] the event list limit (default max 20 events)
+     *
+     * @returns {Promise<Event[]> | { message: string }} the recommended events
+     */
+    async getRecommendedEvents(userId, limit = 20) {
+        const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
+
+        if (failMessage) {
+            return { message: failMessage.message };
+        }
+
+        const interests = await this.dataSource_.getInterestList(userId);
+        const fromFriends = await this.dataSource_.getFriendInterests(userId);
+
+        if (fromFriends && fromFriends.length) {
+            interests.push(...fromFriends);
+        }
+
+        const genreNames = interests.map(genre => genre.name);
+        return await this.composite_.findByGenre(genreNames, limit);
     }
 
     /**
@@ -226,61 +275,47 @@ export class EventManager {
     }
 
     /**
-     * Adds an event to the user's event list. The event list source type is
-     * determined by the {@link Event.source}. This only affects the database
-     * and will not change the user or event objects.
+     * Gets an array of events in the {@link Organizer} event list. This
+     * function will verify that the user id references a user which has
+     * {@link TYPE_ORGANIZER} as a user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {Event} event the event
      *
-     * @returns {Promise<boolean|*>}
-     *
-     * @throws {Error} if the event source is not `'eventMonkey'` or
-     *     `'ticketMaster'`
+     * @returns {Promise<{message: string} | Event[]>} an array of events which
+     *     the organizer has created, or a failure message if the user does not
+     *     have a {@link TYPE_ORGANIZER} user type
      */
-    async addEventToList(userId, event) {
-        const {
-            addToEventMonkeyList,
-            addToTicketMasterList
-        } = this.dataSource_;
+    async getCreatedEvents(userId) {
+        const failMessage = await this.checkUserType(userId, TYPE_ORGANIZER);
 
-        switch (event.source.toUpperCase()) {
-            case SOURCE_EVENT_MONKEY:
-                return addToEventMonkeyList(userId, event.id);
-            case SOURCE_TICKET_MASTER:
-                return addToTicketMasterList(userId, event.id);
-            default:
-                throw new Error(`Unknown event source: ${event.source}`);
+        if (failMessage) {
+            // user is not organizer type
+            return { message: failMessage.message };
         }
+
+        return await this.findEventsByUserId(userId);
     }
 
     /**
-     * Removes an event from the user's event list. The event list source type
-     * is determined by the {@link Event.source}. This only affects the database
-     * and will not change the user or event objects.
+     * Gets an array of events in the {@link Attendee} event list. This
+     * function will verify that the user id references a user which has
+     * {@link TYPE_ATTENDEE} as a user type.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {Event} event the event
      *
-     * @returns {Promise<boolean|*>}
-     *
-     * @throws {Error} if the event source is not `'eventMonkey'` or
-     *     `'ticketMaster'`
+     * @returns {Promise<{message: string} | Event[]>} an array of events which
+     *     the attendee has added to their favorites, or a failure message if
+     *     the user does not have a {@link TYPE_ATTENDEE} user type
      */
-    async removeEventFromList(userId, event) {
-        const {
-            removeFromEventMonkeyList,
-            removeFromTicketMasterList
-        } = this.dataSource_;
+    async getFavorites(userId) {
+        const failMessage = await this.checkUserType(userId, TYPE_ATTENDEE);
 
-        switch (event.source.toUpperCase()) {
-            case SOURCE_EVENT_MONKEY:
-                return removeFromEventMonkeyList(userId, event.id);
-            case SOURCE_TICKET_MASTER:
-                return removeFromTicketMasterList(userId, event.id);
-            default:
-                throw new Error(`Unknown event source: ${event.source}`);
+        if (failMessage) {
+            // user is not attendee type
+            return { message: failMessage.message };
         }
+
+        return await this.findEventsByUserId(userId);
     }
 
     /**
@@ -302,8 +337,7 @@ export class EventManager {
      */
     async createEvent(userId, name, description, location, dates, priceRanges,
                       genres, images) {
-        const failMessage = await userManager.checkUserType(userId,
-                                                            TYPE_ORGANIZER);
+        const failMessage = await this.checkUserType(userId, TYPE_ORGANIZER);
 
         if (failMessage) {
             // user is not organizer type
@@ -344,12 +378,16 @@ export class EventManager {
         // cast BigInt into regular number
         event.id = Number(eventId);
 
+        if (event.source !== SOURCE_EVENT_MONKEY) {
+            return { message: `Event source must be ${SOURCE_EVENT_MONKEY}` };
+        }
+
         // asynchronously associate all event genres and images, as well as
         // associating the event with the user
         const [genreNameToId, imageUrlToId] = await Promise.all([
             this.dataSource_.addGenresToEvent(event.id, event.genres),
             this.dataSource_.addImagesToEvent(event.id, event.images),
-            this.addEventToList(userId, event)
+            this.dataSource_.addToEventMonkeyList(userId, event.id)
         ]);
 
         // set the event genre ids with the database record ids
@@ -375,8 +413,7 @@ export class EventManager {
      *     'success' if the event was successfully deleted
      */
     async deleteEvent(userId, eventId) {
-        const failMessage = await userManager.checkUserType(userId,
-                                                            TYPE_ORGANIZER);
+        const failMessage = await this.checkUserType(userId, TYPE_ORGANIZER);
 
         if (failMessage) {
             // user is not organizer type

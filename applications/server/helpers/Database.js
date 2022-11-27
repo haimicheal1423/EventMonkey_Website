@@ -3,16 +3,43 @@ import mariadb from 'mariadb';
 import { Image } from "../models/Image.js";
 import { Genre } from "../models/Genre.js";
 
-const pool = mariadb.createPool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    connectionLimit: process.env.DB_CONN_LIMIT || 10,
-});
+/**
+ * The database pool, initialized with {@link Database.initPool}.
+ *
+ * @type {mariadb.Pool}
+ */
+let pool = undefined;
 
 export class Database {
+
+    /**
+     * Initializes the database connection.
+     *
+     * @param host
+     * @param port
+     * @param user
+     * @param password
+     * @param database
+     * @param connectionLimit
+     * @returns {Promise<void>}
+     */
+    static async initPool({ host, port, user, password, database,
+                            connectionLimit }) {
+        const connectionPool = mariadb.createPool({
+            host,
+            port: port || 3306,
+            user,
+            password,
+            database,
+            connectionLimit: connectionLimit || 10,
+        });
+
+        if (connectionPool) {
+            pool = connectionPool;
+        } else {
+            throw new Error('Failed to initialize database');
+        }
+    }
 
     /**
      * Queries the database with optional query values.
@@ -22,6 +49,10 @@ export class Database {
      * @returns {Promise<any>} the database result
      */
     static async query(sql, values) {
+        if (!pool) {
+            throw new Error('No database connection');
+        }
+
         let conn;
         try {
             conn = await pool.getConnection();
@@ -44,6 +75,10 @@ export class Database {
      *         | Promise<mariadb.UpsertResult[]>} the database result
      */
     static async batch(sql, values) {
+        if (!pool) {
+            throw new Error('No database connection');
+        }
+
         let conn;
         try {
             conn = await pool.getConnection();
@@ -54,6 +89,22 @@ export class Database {
             if (conn) {
                 await conn.release();
             }
+        }
+    }
+
+    /**
+     * Ends the database pool connection. The pool reference will be set to
+     * undefined and any future database queries will need to run
+     * {@link Database.initPool} again.
+     *
+     * @returns {Promise<void>}
+     */
+    static async shutdown() {
+        try {
+            await pool.end();
+            pool = undefined;
+        } catch (error) {
+            console.log(error);
         }
     }
 }
@@ -102,11 +153,27 @@ export class DataSource {
      *
      * @param {string} email the email to check
      *
-     * @returns {Promise<{email: string, password: string, username: string}>}
-     *     the login details
+     * @returns {Promise<{
+     *         userId: number,
+     *         email: string,
+     *         password: string,
+     *         username: string
+     *     }>} the login details
      * @abstract
      */
     async getLoginDetails(email) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets the user id for a user with the given username.
+     *
+     * @param {string} username the user's username
+     *
+     * @returns {Promise<number>} the user id
+     * @abstract
+     */
+    async getUserId(username) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -175,6 +242,34 @@ export class DataSource {
      * @abstract
      */
     async removeFromTicketMasterList(userId, eventId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Adds a friend to the user's friends list.
+     *
+     * @param {number} userId the id of the data source's user record
+     * @param {number} friendId the id of the friend in the data source's user
+     *     record
+     *
+     * @returns {Promise<void>}
+     * @abstract
+     */
+    async addToFriends(userId, friendId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Removes a friend from the user's friends list.
+     *
+     * @param {number} userId the id of the data source's user record
+     * @param {number} friendId the id of the friend in the data source's user
+     *     record
+     *
+     * @returns {Promise<void>}
+     * @abstract
+     */
+    async removeFromFriends(userId, friendId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -255,6 +350,32 @@ export class DataSource {
      * @abstract
      */
     async getInterestList(userId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets an array of user ids list that the user has added to their friends
+     * list.
+     *
+     * @param {number} userId the id of the data source's user record
+     *
+     * @returns {Promise<number[]>} the user ids in the friends list
+     * @abstract
+     */
+    async getFriendList(userId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets a unique array of genres using an attendee's friends list. The genre
+     * names are fetched from each user in the friends list and combined
+     * into one array.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<Genre[]>} the user ids in the friends list
+     */
+    async getFriendInterests(userId) {
         throw new Error('Unimplemented abstract function');
     }
 
@@ -421,6 +542,28 @@ export class DataSource {
     }
 
     /**
+     * Gets a {@link Genre} from the backing data source using a genre name.
+     *
+     * @param {string} name the genre name
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenreId(name) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
+     * Gets a {@link Genre} from the EventMonkey database.
+     *
+     * @param {number} genreId the EventMonkey genre id
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenre(genreId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    /**
      * Gets an {@link Image} from the backing data source.
      *
      * @param {number} imageId the id of the data source's image record
@@ -491,12 +634,16 @@ export class EventMonkeyDataSource extends DataSource {
      *
      * @param {string} email the email to check
      *
-     * @returns {Promise<{email: string, password: string, username: string}>}
-     *     the login details
+     * @returns {Promise<{
+     *         userId: number,
+     *         email: string,
+     *         password: string,
+     *         username: string
+     *     }>} the login details
      */
     async getLoginDetails(email) {
         const result = await Database.query(
-            `SELECT email, password, username
+            `SELECT user_id, email, password, username
              FROM User
              WHERE email = ?`,
             email
@@ -506,14 +653,33 @@ export class EventMonkeyDataSource extends DataSource {
             return undefined;
         }
 
+        const userId = result[0]['user_id'];
         const password = result[0]['password'];
         const username = result[0]['username'];
 
-        return {
-            email,
-            password,
+        return { userId, email, password, username };
+    }
+
+    /**
+     * Gets the user id for a user with the given username.
+     *
+     * @param {string} username the user's username
+     *
+     * @returns {Promise<number>} the user id
+     */
+    async getUserId(username) {
+        const result = await Database.query(
+            `SELECT user_id
+             FROM User
+             WHERE username = ?`,
             username
-        };
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        return result[0]['user_id'];
     }
 
     /**
@@ -622,6 +788,45 @@ export class EventMonkeyDataSource extends DataSource {
     }
 
     /**
+     * Adds a friend to the user's friends list.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} friendId the Event Monkey user id for the friend
+     *     record
+     *
+     * @returns {Promise<boolean>} `true` if the attendee friend list table was
+     *     modified as a result of this function call
+     */
+    async addToFriends(userId, friendId) {
+        const result = await Database.query(
+            `INSERT IGNORE INTO Attendee_Friend_List(user_id, friend_id)
+             VALUES (?, ?)`,
+            [userId, friendId]
+        );
+
+        return result.affectedRows > 0;
+    }
+
+    /**
+     * Removes a friend from the user's friends list.
+     *
+     * @param {number} userId the EventMonkey user id
+     * @param {number} friendId the Event Monkey user id for the friend
+     *
+     * @returns {Promise<boolean>} `true` if the attendee friend list table was
+     *     modified as a result of this function call
+     */
+    async removeFromFriends(userId, friendId) {
+        const result = await Database.query(
+            `DELETE FROM Attendee_Friend_List
+             WHERE user_id = ? AND friend_id = ?`,
+            [userId, friendId]
+        );
+
+        return result.affectedRows > 0;
+    }
+
+    /**
      * Adds one or more genres to the user's interest list.
      *
      * @param {number} userId the EventMonkey user id
@@ -673,19 +878,15 @@ export class EventMonkeyDataSource extends DataSource {
             userId
         );
 
-        let type = undefined;
-        let email = undefined;
-        let password = undefined;
-        let username = undefined;
-        let profileImageId = undefined;
-
-        if (result[0]) {
-            type = result[0]['type'];
-            email = result[0]['email'];
-            password = result[0]['password'];
-            username = result[0]['username'];
-            profileImageId = result[0]['profile_image'];
+        if (!result[0]) {
+            return undefined;
         }
+
+        const type = result[0]['type'];
+        const email = result[0]['email'];
+        const password = result[0]['password'];
+        const username = result[0]['username'];
+        const profileImageId = result[0]['profile_image'];
 
         return { type, email, password, username, profileImageId };
     }
@@ -750,6 +951,60 @@ export class EventMonkeyDataSource extends DataSource {
         return result.map(row => {
             return Genre.createWithId(row['genre_id'], row['name']);
         });
+    }
+
+    /**
+     * Gets an array of user ids list that the user has added to their friends
+     * list.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<number[]>} the user ids in the friends list
+     */
+    async getFriendList(userId) {
+        const result = await Database.query(
+            `SELECT friend_id
+             FROM Attendee_Friend_List
+             WHERE user_id = ?`,
+            userId
+        );
+
+        if (!result[0]) {
+            return [];
+        }
+
+        return result.map(row => row['friend_id']);
+    }
+
+    /**
+     * Gets a unique array of genres using an attendee's friends list. The genre
+     * names are fetched from each user in the friends list and combined
+     * into one array.
+     *
+     * @param {number} userId the EventMonkey user id
+     *
+     * @returns {Promise<number[]>} the user ids in the friends list
+     */
+    async getFriendInterests(userId) {
+        // get a distinct list of genre ids from each user in the friends list
+        const result = await Database.query(
+            `SELECT DISTINCT ail.genre_id
+             FROM Attendee_Friend_List afl
+             INNER JOIN Attendee_Interest_List ail
+                ON ail.user_id = afl.friend_id
+             WHERE afl.user_id = ?`,
+            userId
+        );
+
+        if (!result[0]) {
+            // either no friends in the friends list, or no friend has interests
+            return [];
+        }
+
+        // construct all the Genre objects using the resulting genre ids
+        return await Promise.all(
+            result.map(row => this.getGenre(row['genre_id']))
+        );
     }
 
     /* ********** EVENTS ********** */
@@ -1089,6 +1344,54 @@ export class EventMonkeyDataSource extends DataSource {
     }
 
     /**
+     * Gets a {@link Genre} from the EventMonkey database using a genre name.
+     *
+     * @param {string} name the genre name
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenreId(name) {
+        const result = await Database.query(
+            `SELECT genre_id
+             FROM Genre
+             WHERE name = ?`,
+            name
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        return Genre.createWithId(result[0]['genre_id'], name);
+    }
+
+    /**
+     * Gets a {@link Genre} from the EventMonkey database.
+     *
+     * @param {number} genreId the EventMonkey genre id
+     *
+     * @returns {Promise<Genre>} the constructed genre object with an id
+     */
+    async getGenre(genreId) {
+        if (!genreId) {
+            return undefined;
+        }
+
+        const result = await Database.query(
+            `SELECT name
+             FROM Genre
+             WHERE genre_id = ?`,
+            genreId
+        );
+
+        if (!result[0]) {
+            return undefined;
+        }
+
+        return Genre.createWithId(genreId, result[0]['name']);
+    }
+
+    /**
      * Gets an {@link Image} from the EventMonkey database.
      *
      * @param {number} imageId the EventMonkey image id
@@ -1096,6 +1399,10 @@ export class EventMonkeyDataSource extends DataSource {
      * @returns {Promise<Image>} the constructed image object with an id
      */
     async getImage(imageId) {
+        if (!imageId) {
+            return undefined;
+        }
+
         const result = await Database.query(
             `SELECT ratio, width, height, url
              FROM Image

@@ -7,7 +7,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
-
+import HomeIcon from '@mui/icons-material/Home';
 
 export default function NavbarEM() {
 
@@ -39,15 +39,11 @@ export default function NavbarEM() {
               <Nav.Link href="/event">Event</Nav.Link>
 
               <NavDropdown title="User" id="basic-nav-dropdown">
-                <NavDropdown.Item href="/dashboard">Profile</NavDropdown.Item>
-                <NavDropdown.Item href="/interests">
-                  Interests
-                </NavDropdown.Item>
-                <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href="#action/3.4">
-                  Separated link
-                </NavDropdown.Item>
+                <NavDropdown.Item href="/dashboard">Dashboard</NavDropdown.Item>
+                <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
+                <NavDropdown.Item href="/interests">Interests</NavDropdown.Item>
+                <NavDropdown.Divider/>
+                <NavDropdown.Item href="/trysomethingnew">Try Something New</NavDropdown.Item>
               </NavDropdown>
             </Nav>
           </Navbar.Collapse>
