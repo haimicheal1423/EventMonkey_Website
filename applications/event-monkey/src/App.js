@@ -32,6 +32,7 @@ function App() {
           <Route path="/interests" element={<Interests />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/event" element={<EventSearch />} />
           <Route path="/event/search" element={<EventSearch />} />
           <Route path="/event/id/:eventId" element={<SingleEvent />} />
           <Route path="/trysomethingnew" element={<TrySomethingNew />} />

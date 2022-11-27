@@ -51,17 +51,20 @@ function EventSearch() {
     }, [searchParams]);
 
     return (
-        <Container>
+        <div className='m-3'>
             <h5 className="events-title">Events</h5>
+
             <BannerEM/>
             <hr/>
+
             <ModalEM/>
-            <Row xs={1} md={columnsPerRow}>
-                {events.length > 0 && events.map(event => {
+
+            <div className='mt-2 d-flex flex-wrap overflow-auto'>
+                {events?.length && events.map(event => {
                     return <Col>{eventCard(event)}</Col>
                 })}
-            </Row>
-        </Container>
+            </div>
+        </div>
     );
 }
 
