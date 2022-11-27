@@ -3,16 +3,43 @@ import mariadb from 'mariadb';
 import { Image } from "../models/Image.js";
 import { Genre } from "../models/Genre.js";
 
-const pool = mariadb.createPool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    connectionLimit: process.env.DB_CONN_LIMIT || 10,
-});
+/**
+ * The database pool, initialized with {@link Database.initPool}.
+ *
+ * @type {mariadb.Pool}
+ */
+let pool = undefined;
 
 export class Database {
+
+    /**
+     * Initializes the database connection.
+     *
+     * @param host
+     * @param port
+     * @param user
+     * @param password
+     * @param database
+     * @param connectionLimit
+     * @returns {Promise<void>}
+     */
+    static async initPool({ host, port, user, password, database,
+                            connectionLimit }) {
+        const connectionPool = mariadb.createPool({
+            host,
+            port: port || 3306,
+            user,
+            password,
+            database,
+            connectionLimit: connectionLimit || 10,
+        });
+
+        if (connectionPool) {
+            pool = connectionPool;
+        } else {
+            throw new Error('Failed to initialize database');
+        }
+    }
 
     /**
      * Queries the database with optional query values.
@@ -22,6 +49,10 @@ export class Database {
      * @returns {Promise<any>} the database result
      */
     static async query(sql, values) {
+        if (!pool) {
+            throw new Error('No database connection');
+        }
+
         let conn;
         try {
             conn = await pool.getConnection();
@@ -44,6 +75,10 @@ export class Database {
      *         | Promise<mariadb.UpsertResult[]>} the database result
      */
     static async batch(sql, values) {
+        if (!pool) {
+            throw new Error('No database connection');
+        }
+
         let conn;
         try {
             conn = await pool.getConnection();
@@ -606,12 +641,7 @@ export class EventMonkeyDataSource extends DataSource {
         const password = result[0]['password'];
         const username = result[0]['username'];
 
-        return {
-            userId,
-            email,
-            password,
-            username
-        };
+        return { userId, email, password, username };
     }
 
     /**
@@ -832,19 +862,15 @@ export class EventMonkeyDataSource extends DataSource {
             userId
         );
 
-        let type = undefined;
-        let email = undefined;
-        let password = undefined;
-        let username = undefined;
-        let profileImageId = undefined;
-
-        if (result[0]) {
-            type = result[0]['type'];
-            email = result[0]['email'];
-            password = result[0]['password'];
-            username = result[0]['username'];
-            profileImageId = result[0]['profile_image'];
+        if (!result[0]) {
+            return undefined;
         }
+
+        const type = result[0]['type'];
+        const email = result[0]['email'];
+        const password = result[0]['password'];
+        const username = result[0]['username'];
+        const profileImageId = result[0]['profile_image'];
 
         return { type, email, password, username, profileImageId };
     }
@@ -1331,6 +1357,10 @@ export class EventMonkeyDataSource extends DataSource {
      * @returns {Promise<Genre>} the constructed genre object with an id
      */
     async getGenre(genreId) {
+        if (!genreId) {
+            return undefined;
+        }
+
         const result = await Database.query(
             `SELECT name
              FROM Genre
@@ -1353,6 +1383,10 @@ export class EventMonkeyDataSource extends DataSource {
      * @returns {Promise<Image>} the constructed image object with an id
      */
     async getImage(imageId) {
+        if (!imageId) {
+            return undefined;
+        }
+
         const result = await Database.query(
             `SELECT ratio, width, height, url
              FROM Image
