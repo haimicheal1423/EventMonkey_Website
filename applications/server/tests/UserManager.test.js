@@ -1,10 +1,16 @@
-import { jest, beforeEach, describe, it, expect } from "@jest/globals";
+import { jest, beforeEach, describe, it, expect, test } from "@jest/globals";
 import bcrypt from 'bcryptjs';
 
 import { EventMonkeyDataSource } from '../helpers/Database.js';
 import { UserManager } from '../helpers/UserManager.js';
 import { Attendee, Organizer, TYPE_ATTENDEE, TYPE_ORGANIZER } from '../models/User.js';
+import {
+    Event,
+    SOURCE_EVENT_MONKEY,
+    SOURCE_TICKET_MASTER
+} from '../models/Event.js';
 import { Image } from '../models/Image.js';
+import { Genre } from "../models/Genre.js";
 
 const bcryptHash = jest.spyOn(bcrypt, 'hash')
                         .mockImplementation(async() => 'mock-password-hash');
@@ -608,5 +614,293 @@ describe('user login', () => {
 
         expect(details.message).toBeDefined();
         expect(details.message).toBe('Invalid username or password.');
+    });
+});
+
+describe('adding to favorites', () => {
+    test('attendee adding an event with EventMonkey source', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
+
+        jest.spyOn(dataSource, 'addToEventMonkeyList')
+            .mockImplementationOnce(async() => true);
+
+        jest.spyOn(dataSource, 'addToTicketMasterList');
+
+        const source = SOURCE_EVENT_MONKEY;
+        const name = 'Event Name';
+        const description = 'Event Description';
+        const location = 'Event Location';
+        const dates = { startDateTime: new Date(Date.now()) };
+        const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+        const images = [Image.create('1_1', 1, 1, '-url-')];
+        const genres = [Genre.create('Cool Genre')];
+
+        const event = new Event(
+            source,
+            name,
+            description,
+            location,
+            dates,
+            priceRanges,
+            images,
+            genres
+        );
+
+        event.id = 1234;
+
+        const result = await manager.addToFavorites(userId, event);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.addToEventMonkeyList)
+            .toHaveBeenCalledWith(userId, event.id);
+
+        expect(dataSource.addToTicketMasterList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBe('success');
+    });
+
+    test('attendee adding an event with TicketMaster source',
+        async() => {
+            const dataSource = new EventMonkeyDataSource();
+            const manager = new UserManager(dataSource);
+
+            const userId = 999;
+            const type = TYPE_ATTENDEE;
+            const username = 'username';
+            const email = 'email';
+            const password = 'secret';
+            const profileImageId = 123;
+
+            jest.spyOn(manager, 'checkUserType');
+
+            jest.spyOn(dataSource, 'getUserDetails')
+                .mockImplementationOnce(async() => {
+                    return { type, username, email, password, profileImageId }
+                });
+
+            jest.spyOn(dataSource, 'addToEventMonkeyList');
+
+            jest.spyOn(dataSource, 'addToTicketMasterList')
+                .mockImplementationOnce(async() => true);
+
+            const source = SOURCE_TICKET_MASTER;
+            const name = 'Event Name';
+            const description = 'Event Description';
+            const location = 'Event Location';
+            const dates = { startDateTime: new Date(Date.now()) };
+            const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+            const images = [Image.create('1_1', 1, 1, '-url-')];
+            const genres = [Genre.create('Cool Genre')];
+
+            const event = new Event(
+                source,
+                name,
+                description,
+                location,
+                dates,
+                priceRanges,
+                images,
+                genres
+            );
+
+            event.id = 1234;
+
+            const result = await manager.addToFavorites(userId, event);
+
+            expect(manager.checkUserType)
+                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+            expect(dataSource.addToEventMonkeyList)
+                .toHaveBeenCalledTimes(0);
+
+            expect(dataSource.addToTicketMasterList)
+                .toHaveBeenCalledWith(userId, event.id);
+
+            expect(result.message).toBe('success');
+        });
+
+    test('attendee adding an event with an unknown source',
+        async() => {
+            const dataSource = new EventMonkeyDataSource();
+            const manager = new UserManager(dataSource);
+
+            const userId = 999;
+            const type = TYPE_ATTENDEE;
+            const username = 'username';
+            const email = 'email';
+            const password = 'secret';
+            const profileImageId = 123;
+
+            jest.spyOn(manager, 'checkUserType');
+
+            jest.spyOn(dataSource, 'getUserDetails')
+                .mockImplementationOnce(async() => {
+                    return { type, username, email, password, profileImageId }
+                });
+
+            jest.spyOn(dataSource, 'addToEventMonkeyList');
+            jest.spyOn(dataSource, 'addToTicketMasterList');
+
+            const source = 'UNKNOWN';
+            const name = 'Event Name';
+            const description = 'Event Description';
+            const location = 'Event Location';
+            const dates = { startDateTime: new Date(Date.now()) };
+            const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+            const images = [Image.create('1_1', 1, 1, '-url-')];
+            const genres = [Genre.create('Cool Genre')];
+
+            const event = new Event(
+                source,
+                name,
+                description,
+                location,
+                dates,
+                priceRanges,
+                images,
+                genres
+            );
+
+            event.id = 1234;
+
+            const result = await manager.addToFavorites(userId, event);
+
+            expect(manager.checkUserType)
+                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+            expect(dataSource.addToEventMonkeyList)
+                .toHaveBeenCalledTimes(0);
+
+            expect(dataSource.addToTicketMasterList)
+                .toHaveBeenCalledTimes(0);
+
+            expect(result.message).toBe(`Unknown event source: ${source}`);
+        });
+
+    test('adding an event with an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ORGANIZER;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
+
+        jest.spyOn(dataSource, 'addToEventMonkeyList');
+        jest.spyOn(dataSource, 'addToTicketMasterList');
+
+        const source = 'UNKNOWN';
+        const name = 'Event Name';
+        const description = 'Event Description';
+        const location = 'Event Location';
+        const dates = { startDateTime: new Date(Date.now()) };
+        const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+        const images = [Image.create('1_1', 1, 1, '-url-')];
+        const genres = [Genre.create('Cool Genre')];
+
+        const event = new Event(
+            source,
+            name,
+            description,
+            location,
+            dates,
+            priceRanges,
+            images,
+            genres
+        );
+
+        event.id = 1234;
+
+        const result = await manager.addToFavorites(userId, event);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.addToEventMonkeyList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.addToTicketMasterList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
+
+    test('adding an event with a non-existing attendee', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'addToEventMonkeyList');
+        jest.spyOn(dataSource, 'addToTicketMasterList');
+
+        const source = 'UNKNOWN';
+        const name = 'Event Name';
+        const description = 'Event Description';
+        const location = 'Event Location';
+        const dates = { startDateTime: new Date(Date.now()) };
+        const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+        const images = [Image.create('1_1', 1, 1, '-url-')];
+        const genres = [Genre.create('Cool Genre')];
+
+        const event = new Event(
+            source,
+            name,
+            description,
+            location,
+            dates,
+            priceRanges,
+            images,
+            genres
+        );
+
+        event.id = 1234;
+
+        const result = await manager.addToFavorites(userId, event);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, type);
+
+        expect(dataSource.addToEventMonkeyList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.addToTicketMasterList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBe(`User(${userId}) does not exist`);
     });
 });
