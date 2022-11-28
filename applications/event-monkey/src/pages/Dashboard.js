@@ -28,7 +28,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.get(`http://localhost:4000/users/${user.id}/friends`)
+        Axios.get(`http://eventmonkey.xyz:4000/users/${user.id}/friends`)
             // .then(response => {
             //     const data = [];
             //     for (let i = 0; i < 10; i++) {
@@ -40,7 +40,7 @@ function Dashboard() {
             .then(response => void setFriendsList(response.data))
             .catch(e => alert(e.data));
 
-        Axios.get(`http://localhost:4000/users/${user.id}/interests`)
+        Axios.get(`http://eventmonkey.xyz:4000/users/${user.id}/interests`)
             // .then(response => {
             //     const data = [];
             //     for (let i = 0; i < 10; i++) {
@@ -68,7 +68,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.put(`http://localhost:4000/users/${user.id}/add_friend/${username}`)
+        Axios.put(`http://eventmonkey.xyz:4000/users/${user.id}/add_friend/${username}`)
             .then(response => void setFriendsList(friendsList.concat(response.data)))
             .catch(error => alert(error.response.data.message));
     };
@@ -86,7 +86,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.delete(`http://localhost:4000/users/${user.id}/remove_friend/${username}`)
+        Axios.delete(`http://eventmonkey.xyz:4000/users/${user.id}/remove_friend/${username}`)
             .then(response => {
                 if (response.data.message === 'success') {
                     setFriendsList(friendsList.filter(friend => {
@@ -109,7 +109,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.put(`http://localhost:4000/users/${user.id}/add_interest/${interest}`)
+        Axios.put(`http://eventmonkey.xyz:4000/users/${user.id}/add_interest/${interest}`)
             .then(response => void setInterestsList(interestsList.concat(response.data)))
             .catch(error => alert(error.response.data.message));
     };
@@ -127,7 +127,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.delete(`http://localhost:4000/users/${user.id}/remove_interest/${interest}`)
+        Axios.delete(`http://eventmonkey.xyz:4000/users/${user.id}/remove_interest/${interest}`)
             .then(response => {
                 if (response.data.message === 'success') {
                     setInterestsList(interestsList.filter(genre => {
@@ -146,8 +146,8 @@ function Dashboard() {
                 <h6 className="dashboard-subtitle">This is your personalized dashboard...</h6>
                 <Button className="logout-btn" onClick={() => {
                     localStorage.removeItem('user');
-                    localStorage.setItem('token', 'false');
-                    navigate('/');
+                    localStorage.setItem('token',"");
+                    window.location.href = '/';
                 }}>logout</Button>
                 <hr/>
             </div>
