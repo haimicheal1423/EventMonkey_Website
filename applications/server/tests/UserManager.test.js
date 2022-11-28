@@ -904,3 +904,291 @@ describe('adding to favorites', () => {
         expect(result.message).toBe(`User(${userId}) does not exist`);
     });
 });
+
+describe('removing from favorites', () => {
+    test('attendee removing an event with EventMonkey source', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
+
+        jest.spyOn(dataSource, 'removeFromEventMonkeyList')
+            .mockImplementationOnce(async() => true);
+
+        jest.spyOn(dataSource, 'removeFromTicketMasterList');
+
+        const source = SOURCE_EVENT_MONKEY;
+        const name = 'Event Name';
+        const description = 'Event Description';
+        const location = 'Event Location';
+        const dates = { startDateTime: new Date(Date.now()) };
+        const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+        const images = [Image.create('1_1', 1, 1, '-url-')];
+        const genres = [Genre.create('Cool Genre')];
+
+        const event = new Event(
+            source,
+            name,
+            description,
+            location,
+            dates,
+            priceRanges,
+            images,
+            genres
+        );
+
+        event.id = 1234;
+
+        const result = await manager.removeFromFavorites(userId, event);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.removeFromEventMonkeyList)
+            .toHaveBeenCalledWith(userId, event.id);
+
+        expect(dataSource.removeFromTicketMasterList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBe('success');
+    });
+
+    test('attendee removing an event with TicketMaster source',
+        async() => {
+            const dataSource = new EventMonkeyDataSource();
+            const manager = new UserManager(dataSource);
+
+            const userId = 999;
+            const type = TYPE_ATTENDEE;
+            const username = 'username';
+            const email = 'email';
+            const password = 'secret';
+            const profileImageId = 123;
+
+            jest.spyOn(manager, 'checkUserType');
+
+            jest.spyOn(dataSource, 'getUserDetails')
+                .mockImplementationOnce(async() => {
+                    return { type, username, email, password, profileImageId }
+                });
+
+            jest.spyOn(dataSource, 'removeFromEventMonkeyList');
+
+            jest.spyOn(dataSource, 'removeFromTicketMasterList')
+                .mockImplementationOnce(async() => true);
+
+            const source = SOURCE_TICKET_MASTER;
+            const name = 'Event Name';
+            const description = 'Event Description';
+            const location = 'Event Location';
+            const dates = { startDateTime: new Date(Date.now()) };
+            const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+            const images = [Image.create('1_1', 1, 1, '-url-')];
+            const genres = [Genre.create('Cool Genre')];
+
+            const event = new Event(
+                source,
+                name,
+                description,
+                location,
+                dates,
+                priceRanges,
+                images,
+                genres
+            );
+
+            event.id = 1234;
+
+            const result = await manager.removeFromFavorites(userId, event);
+
+            expect(manager.checkUserType)
+                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+            expect(dataSource.removeFromEventMonkeyList)
+                .toHaveBeenCalledTimes(0);
+
+            expect(dataSource.removeFromTicketMasterList)
+                .toHaveBeenCalledWith(userId, event.id);
+
+            expect(result.message).toBe('success');
+        });
+
+    test('attendee removing an event with an unknown source',
+        async() => {
+            const dataSource = new EventMonkeyDataSource();
+            const manager = new UserManager(dataSource);
+
+            const userId = 999;
+            const type = TYPE_ATTENDEE;
+            const username = 'username';
+            const email = 'email';
+            const password = 'secret';
+            const profileImageId = 123;
+
+            jest.spyOn(manager, 'checkUserType');
+
+            jest.spyOn(dataSource, 'getUserDetails')
+                .mockImplementationOnce(async() => {
+                    return { type, username, email, password, profileImageId }
+                });
+
+            jest.spyOn(dataSource, 'removeFromEventMonkeyList');
+            jest.spyOn(dataSource, 'removeFromTicketMasterList');
+
+            const source = 'UNKNOWN';
+            const name = 'Event Name';
+            const description = 'Event Description';
+            const location = 'Event Location';
+            const dates = { startDateTime: new Date(Date.now()) };
+            const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+            const images = [Image.create('1_1', 1, 1, '-url-')];
+            const genres = [Genre.create('Cool Genre')];
+
+            const event = new Event(
+                source,
+                name,
+                description,
+                location,
+                dates,
+                priceRanges,
+                images,
+                genres
+            );
+
+            event.id = 1234;
+
+            const result = await manager.removeFromFavorites(userId, event);
+
+            expect(manager.checkUserType)
+                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+            expect(dataSource.removeFromEventMonkeyList)
+                .toHaveBeenCalledTimes(0);
+
+            expect(dataSource.removeFromTicketMasterList)
+                .toHaveBeenCalledTimes(0);
+
+            expect(result.message).toBe(`Unknown event source: ${source}`);
+        });
+
+    test('removing an event with an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ORGANIZER;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
+
+        jest.spyOn(dataSource, 'removeFromEventMonkeyList');
+        jest.spyOn(dataSource, 'removeFromTicketMasterList');
+
+        const source = 'UNKNOWN';
+        const name = 'Event Name';
+        const description = 'Event Description';
+        const location = 'Event Location';
+        const dates = { startDateTime: new Date(Date.now()) };
+        const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+        const images = [Image.create('1_1', 1, 1, '-url-')];
+        const genres = [Genre.create('Cool Genre')];
+
+        const event = new Event(
+            source,
+            name,
+            description,
+            location,
+            dates,
+            priceRanges,
+            images,
+            genres
+        );
+
+        event.id = 1234;
+
+        const result = await manager.removeFromFavorites(userId, event);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.removeFromEventMonkeyList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.removeFromTicketMasterList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
+
+    test('removing an event with a non-existing attendee', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'removeFromEventMonkeyList');
+        jest.spyOn(dataSource, 'removeFromTicketMasterList');
+
+        const source = 'UNKNOWN';
+        const name = 'Event Name';
+        const description = 'Event Description';
+        const location = 'Event Location';
+        const dates = { startDateTime: new Date(Date.now()) };
+        const priceRanges = [{ currency: 'USD', min: 10, max: 20 }];
+        const images = [Image.create('1_1', 1, 1, '-url-')];
+        const genres = [Genre.create('Cool Genre')];
+
+        const event = new Event(
+            source,
+            name,
+            description,
+            location,
+            dates,
+            priceRanges,
+            images,
+            genres
+        );
+
+        event.id = 1234;
+
+        const result = await manager.removeFromFavorites(userId, event);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, type);
+
+        expect(dataSource.removeFromEventMonkeyList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.removeFromTicketMasterList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBe(`User(${userId}) does not exist`);
+    });
+});

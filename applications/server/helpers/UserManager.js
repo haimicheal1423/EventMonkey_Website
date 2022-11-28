@@ -277,7 +277,7 @@ export class UserManager {
                 await removeFromTicketMasterList(userId, event.id);
                 break;
             default:
-                throw new Error(`Unknown event source: ${event.source}`);
+                return { message: `Unknown event source: ${event.source}` };
         }
 
         return { message: 'success' };
