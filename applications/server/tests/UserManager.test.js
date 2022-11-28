@@ -1705,3 +1705,131 @@ describe('removing from interests list', () => {
             expect(result.message).toBe(`User(${userId}) does not exist`);
         });
 });
+
+describe('getting friends list', () => {
+    test('for a valid attendee', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        const mockFriend = {
+            userId: 321,
+            username: 'friend-name',
+            profileImage: undefined
+        };
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
+
+        jest.spyOn(dataSource, 'getFriendList')
+            .mockImplementationOnce(async() => [mockFriend.userId]);
+
+        jest.spyOn(manager, 'getUser')
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                id: mockFriend.userId,
+                username: mockFriend.username,
+                profileImage: mockFriend.profileImage
+            }));
+
+        const result = await manager.getFriendsList(userId);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getFriendList)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.getUser)
+            .toHaveBeenCalledWith(mockFriend.userId);
+
+        expect(result.message).toBeUndefined();
+        expect(result).toStrictEqual([mockFriend]);
+    });
+
+    test('using an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ORGANIZER;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
+
+        jest.spyOn(dataSource, 'getFriendList');
+        jest.spyOn(manager, 'getUser');
+
+        const result = await manager.getFriendsList(userId);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getFriendList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(manager.getUser)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
+
+    test('for a non-existing attendee', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'getFriendList');
+        jest.spyOn(manager, 'getUser');
+
+        const result = await manager.getFriendsList(userId);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getFriendList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(manager.getUser)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) does not exist`);
+    });
+});

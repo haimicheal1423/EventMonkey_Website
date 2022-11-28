@@ -452,11 +452,7 @@ export class UserManager {
         const { getImage } = this.dataSource_;
         const profileImage = await getImage(friend.profileImageId);
 
-        return {
-            userId: friendId,
-            username: username,
-            profileImage
-        };
+        return { userId: friendId, username, profileImage };
     }
 
     /**
