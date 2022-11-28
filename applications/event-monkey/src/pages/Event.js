@@ -25,10 +25,10 @@ function Event() {
 
         if (searchParams.has('source') || searchParams.has('limit')
                 || searchParams.has('keyword') || searchParams.has('genres')) {
-            Axios.get(`http://localhost:4000/events/search?${searchParams}`)
+            Axios.get(`http://eventmonkey.xyz:4000/events/search?${searchParams}`)
                 .then(response => setEvents(response.data));
         } else {
-            Axios.get()
+            Axios.get("http://eventmonkey.xyz:4000/events")
                 .then(response => setEvents(response.data));
         }
     }, []);
