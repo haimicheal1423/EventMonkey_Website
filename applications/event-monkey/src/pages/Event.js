@@ -1,15 +1,16 @@
+import Axios from 'axios';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Card from 'react-bootstrap/Card';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Container from "react-bootstrap/Container";
+
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Card from 'react-bootstrap/Card';
-import Axios from 'axios';
-import George from '../assets/profileImages/george-avatar.jpeg'
 
 import ModalEM from '../components/Modal'
 import BannerEM from '../components/Banner'
+import George from '../assets/profileImages/george-avatar.jpeg'
 import '../assets/css/event.css'
 
 function SingleEvent() {
@@ -17,7 +18,7 @@ function SingleEvent() {
     const [event, setEvent] = useState(undefined);
 
     useEffect(() => {
-        Axios.get(`http://eventmonkey.xyz:4000/events/${eventId}`)
+        Axios.get(`/events/${eventId}`)
             .then(response => void setEvent(response.data))
             .catch(e => alert(JSON.stringify(e.response.data)));
     }, [eventId]);
@@ -35,16 +36,16 @@ function EventSearch() {
     const columnsPerRow = 4;
     const [searchParams] = useSearchParams();
     const [events, setEvents] = useState([]);
-    // const [url, setUrl] = useState('http://eventmonkey.xyz:4000/events/')
+    // const [url, setUrl] = useState('/events/')
 
     useEffect(() => {
         if (searchParams.get('source') || searchParams.get('limit')
                 || searchParams.get('keyword') || searchParams.get('genres')) {
-            Axios.get(`http://eventmonkey.xyz:4000/events/search?${searchParams}`)
+            Axios.get(`/events/search?${searchParams}`)
                 .then(response => void setEvents(response.data))
                 .catch(e => alert(JSON.stringify(e.response.data)));
         } else {
-            Axios.get("http://eventmonkey.xyz:4000/events")
+            Axios.get("/events")
                 .then(response => void setEvents(response.data))
                 .catch(e => alert(JSON.stringify(e.response.data)));
         }

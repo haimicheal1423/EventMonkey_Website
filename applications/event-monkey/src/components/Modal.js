@@ -70,7 +70,7 @@ export default function ModalEM() {
             priceRange.max = priceRange.min;
         }
 
-        Axios.post(`http://eventmonkey.xyz:4000/users/${user.id}/create`, {
+        Axios.post(`/users/${user.id}/create`, {
                 name: form.elements.name.value,
                 description: form.elements.description.value,
                 location: form.elements.location.value,

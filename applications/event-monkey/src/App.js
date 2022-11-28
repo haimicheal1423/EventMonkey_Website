@@ -17,7 +17,6 @@ import TrySomethingNew from './pages/TrySomethingNew';
 import Profile from './pages/Profile';
 import { isLoggedIn } from './utils';
 
-
 function App() {
 
     const ProtectRoute = ({ children }) => {

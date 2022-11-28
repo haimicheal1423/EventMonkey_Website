@@ -31,7 +31,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.get(`http://eventmonkey.xyz:4000/users/${user.id}/friends`)
+        Axios.get(`/users/${user.id}/friends`)
             // .then(response => {
             //     const data = [];
             //     for (let i = 0; i < 10; i++) {
@@ -43,7 +43,7 @@ function Dashboard() {
             .then(response => void setFriendsList(response.data))
             .catch(e => alert(e.data));
 
-        Axios.get(`http://eventmonkey.xyz:4000/users/${user.id}/interests`)
+        Axios.get(`/users/${user.id}/interests`)
             // .then(response => {
             //     const data = [];
             //     for (let i = 0; i < 10; i++) {
@@ -61,7 +61,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.get(`http://eventmonkey.xyz:4000/events/recommended/${user.id}`)
+        Axios.get(`/events/recommended/${user.id}`)
             .then(response => void setRecommendedEvents(response.data))
             .catch(e => alert(e.data));
     }, [interestsList, friendsList]);
@@ -81,7 +81,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.put(`http://eventmonkey.xyz:4000/users/${user.id}/add_friend/${username}`)
+        Axios.put(`/users/${user.id}/add_friend/${username}`)
             .then(response => void setFriendsList(friendsList.concat(response.data)))
             .catch(error => alert(error.response.data.message));
     };
@@ -99,7 +99,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.delete(`http://eventmonkey.xyz:4000/users/${user.id}/remove_friend/${username}`)
+        Axios.delete(`/users/${user.id}/remove_friend/${username}`)
             .then(response => {
                 if (response.data.message === 'success') {
                     setFriendsList(friendsList.filter(friend => {
@@ -122,7 +122,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.put(`http://eventmonkey.xyz:4000/users/${user.id}/add_interest/${interest}`)
+        Axios.put(`/users/${user.id}/add_interest/${interest}`)
             .then(response => void setInterestsList(interestsList.concat(response.data)))
             .catch(error => alert(error.response.data.message));
     };
@@ -140,7 +140,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.delete(`http://eventmonkey.xyz:4000/users/${user.id}/remove_interest/${interest}`)
+        Axios.delete(`/users/${user.id}/remove_interest/${interest}`)
             .then(response => {
                 if (response.data.message === 'success') {
                     setInterestsList(interestsList.filter(genre => {

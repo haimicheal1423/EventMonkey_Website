@@ -19,7 +19,7 @@ export default function Signup() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (email && password) {
-            Axios.post(`http://eventmonkey.xyz:4000/users/register`, {type, username, email, password }).then((response) => {
+            Axios.post(`/users/register`, {type, username, email, password }).then((response) => {
                 navigate('/login');
             }).catch(e => {
                 alert(JSON.stringify(e.response.data));
