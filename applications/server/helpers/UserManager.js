@@ -240,7 +240,7 @@ export class UserManager {
                 await addToTicketMasterList(userId, event.id);
                 break;
             default:
-                throw new Error(`Unknown event source: ${event.source}`);
+                return { message: `Unknown event source: ${event.source}` };
         }
 
         return { message: 'success' };
@@ -277,7 +277,7 @@ export class UserManager {
                 await removeFromTicketMasterList(userId, event.id);
                 break;
             default:
-                throw new Error(`Unknown event source: ${event.source}`);
+                return { message: `Unknown event source: ${event.source}` };
         }
 
         return { message: 'success' };
@@ -356,15 +356,9 @@ export class UserManager {
 
         let genre = await this.dataSource_.getGenreId(genreName);
 
-        if (!genre) {
-            genre = await this.dataSource_.addGenre(genreName);
+        if (genre) {
+            await this.dataSource_.removeFromInterests(userId, genre.id);
         }
-
-        if (!genre) {
-            return { message: 'Could not remove genre from interests' };
-        }
-
-        await this.dataSource_.removeFromInterests(userId, genre.id);
 
         return { message: 'success' };
     }
@@ -458,11 +452,7 @@ export class UserManager {
         const { getImage } = this.dataSource_;
         const profileImage = await getImage(friend.profileImageId);
 
-        return {
-            userId: friendId,
-            username: username,
-            profileImage
-        };
+        return { userId: friendId, username, profileImage };
     }
 
     /**
