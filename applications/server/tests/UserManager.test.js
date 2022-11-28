@@ -1,14 +1,10 @@
 import { jest, beforeEach, describe, it, expect, test } from "@jest/globals";
 import bcrypt from 'bcryptjs';
 
+import { TYPE_ATTENDEE, TYPE_ORGANIZER, Attendee, Organizer } from '../models/User.js';
+import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from '../models/Event.js';
 import { EventMonkeyDataSource } from '../helpers/Database.js';
 import { UserManager } from '../helpers/UserManager.js';
-import { Attendee, Organizer, TYPE_ATTENDEE, TYPE_ORGANIZER } from '../models/User.js';
-import {
-    Event,
-    SOURCE_EVENT_MONKEY,
-    SOURCE_TICKET_MASTER
-} from '../models/Event.js';
 import { Image } from '../models/Image.js';
 import { Genre } from "../models/Genre.js";
 
@@ -1194,7 +1190,7 @@ describe('removing from favorites', () => {
 });
 
 describe('getting interests list', () => {
-    test('getting the interests list for a valid attendee', async() => {
+    test('for a valid attendee', async() => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new UserManager(dataSource);
 
@@ -1230,7 +1226,7 @@ describe('getting interests list', () => {
         expect(result).toBe('mock-interests-list');
     });
 
-    test('getting the interests list using an Organizer user type', async() => {
+    test('using an Organizer user type', async() => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new UserManager(dataSource);
 
@@ -1265,7 +1261,7 @@ describe('getting interests list', () => {
         expect(result.message).toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
     });
 
-    test('getting the interests list for a non-existing attendee', async() => {
+    test('for a non-existing attendee', async() => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new UserManager(dataSource);
 
@@ -1295,415 +1291,406 @@ describe('getting interests list', () => {
 });
 
 describe('adding to interests list', () => {
-    test('an attendee adding a genre that exists to their interests',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('an attendee adding a genre that exists', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const type = TYPE_ATTENDEE;
-            const username = 'username';
-            const email = 'email';
-            const password = 'secret';
-            const profileImageId = 123;
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
 
-            const genreId = 777;
-            const genreName = 'Cool Genre';
-            const expectedGenre = Genre.createWithId(genreId, genreName);
+        const genreId = 777;
+        const genreName = 'Cool Genre';
+        const expectedGenre = Genre.createWithId(genreId, genreName);
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => {
-                    return { type, username, email, password, profileImageId }
-                });
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
 
-            jest.spyOn(dataSource, 'getGenreId')
-                .mockImplementationOnce(async() => expectedGenre);
+        jest.spyOn(dataSource, 'getGenreId')
+            .mockImplementationOnce(async() => expectedGenre);
 
-            jest.spyOn(dataSource, 'addGenre');
+        jest.spyOn(dataSource, 'addGenre');
 
-            jest.spyOn(dataSource, 'addToInterests')
-                .mockImplementationOnce(async() => Promise.resolve());
+        jest.spyOn(dataSource, 'addToInterests')
+            .mockImplementationOnce(async() => Promise.resolve());
 
-            const result = await manager.addToInterests(userId, genreName);
+        const result = await manager.addToInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledWith(genreName);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledWith(genreName);
 
-            expect(dataSource.addGenre)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.addGenre)
+            .toHaveBeenCalledTimes(0);
 
-            expect(dataSource.addToInterests)
-                .toHaveBeenCalledWith(userId, genreId);
+        expect(dataSource.addToInterests)
+            .toHaveBeenCalledWith(userId, genreId);
 
-            expect(result.message).toBeUndefined();
-            expect(result).toStrictEqual(expectedGenre);
-        });
+        expect(result.message).toBeUndefined();
+        expect(result).toStrictEqual(expectedGenre);
+    });
 
-    test('an attendee adding a genre that does not exist to their interests',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('an attendee adding a genre that does not exist', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const type = TYPE_ATTENDEE;
-            const username = 'username';
-            const email = 'email';
-            const password = 'secret';
-            const profileImageId = 123;
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
 
-            const genreId = 777;
-            const genreName = 'Cool Genre';
-            const expectedGenre = Genre.createWithId(genreId, genreName);
+        const genreId = 777;
+        const genreName = 'Cool Genre';
+        const expectedGenre = Genre.createWithId(genreId, genreName);
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => {
-                    return { type, username, email, password, profileImageId }
-                });
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
 
-            jest.spyOn(dataSource, 'getGenreId')
-                .mockImplementationOnce(async() => undefined);
+        jest.spyOn(dataSource, 'getGenreId')
+            .mockImplementationOnce(async() => undefined);
 
-            jest.spyOn(dataSource, 'addGenre')
-                .mockImplementationOnce(async() => expectedGenre);
+        jest.spyOn(dataSource, 'addGenre')
+            .mockImplementationOnce(async() => expectedGenre);
 
-            jest.spyOn(dataSource, 'addToInterests')
-                .mockImplementationOnce(async() => Promise.resolve());
+        jest.spyOn(dataSource, 'addToInterests')
+            .mockImplementationOnce(async() => Promise.resolve());
 
-            const result = await manager.addToInterests(userId, genreName);
+        const result = await manager.addToInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledWith(genreName);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledWith(genreName);
 
-            expect(dataSource.addGenre)
-                .toHaveBeenCalledWith(genreName);
+        expect(dataSource.addGenre)
+            .toHaveBeenCalledWith(genreName);
 
-            expect(dataSource.addToInterests)
-                .toHaveBeenCalledWith(userId, genreId);
+        expect(dataSource.addToInterests)
+            .toHaveBeenCalledWith(userId, genreId);
 
-            expect(result.message).toBeUndefined();
-            expect(result).toStrictEqual(expectedGenre);
-        });
+        expect(result.message).toBeUndefined();
+        expect(result).toStrictEqual(expectedGenre);
+    });
 
-    test('failing to add a genre that does not exist',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('failing to add a genre that does not exist', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const type = TYPE_ATTENDEE;
-            const username = 'username';
-            const email = 'email';
-            const password = 'secret';
-            const profileImageId = 123;
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
 
-            const genreName = 'Cool Genre';
+        const genreName = 'Cool Genre';
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => {
-                    return { type, username, email, password, profileImageId }
-                });
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
 
-            jest.spyOn(dataSource, 'getGenreId')
-                .mockImplementationOnce(async() => undefined);
+        jest.spyOn(dataSource, 'getGenreId')
+            .mockImplementationOnce(async() => undefined);
 
-            jest.spyOn(dataSource, 'addGenre')
-                .mockImplementationOnce(async() => undefined);
+        jest.spyOn(dataSource, 'addGenre')
+            .mockImplementationOnce(async() => undefined);
 
-            jest.spyOn(dataSource, 'addToInterests');
+        jest.spyOn(dataSource, 'addToInterests');
 
-            const result = await manager.addToInterests(userId, genreName);
+        const result = await manager.addToInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledWith(genreName);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledWith(genreName);
 
-            expect(dataSource.addGenre)
-                .toHaveBeenCalledWith(genreName);
+        expect(dataSource.addGenre)
+            .toHaveBeenCalledWith(genreName);
 
-            expect(dataSource.addToInterests)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.addToInterests)
+            .toHaveBeenCalledTimes(0);
 
-            expect(result.message).toBeDefined();
-            expect(result.message).toBe('Could not add genre to interests');
-        });
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe('Could not add genre to interests');
+    });
 
-    test('using an Organizer user type',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('using an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const type = TYPE_ORGANIZER;
-            const username = 'username';
-            const email = 'email';
-            const password = 'secret';
-            const profileImageId = 123;
+        const userId = 999;
+        const type = TYPE_ORGANIZER;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
 
-            const genreName = 'Cool Genre';
+        const genreName = 'Cool Genre';
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => {
-                    return { type, username, email, password, profileImageId }
-                });
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
 
-            jest.spyOn(dataSource, 'getGenreId');
-            jest.spyOn(dataSource, 'addGenre');
-            jest.spyOn(dataSource, 'addToInterests');
+        jest.spyOn(dataSource, 'getGenreId');
+        jest.spyOn(dataSource, 'addGenre');
+        jest.spyOn(dataSource, 'addToInterests');
 
-            const result = await manager.addToInterests(userId, genreName);
+        const result = await manager.addToInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledTimes(0);
 
-            expect(dataSource.addGenre)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.addGenre)
+            .toHaveBeenCalledTimes(0);
 
-            expect(dataSource.addToInterests)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.addToInterests)
+            .toHaveBeenCalledTimes(0);
 
-            expect(result.message).toBeDefined();
-            expect(result.message)
-                .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
-        });
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
 
-    test('using a non-existing user',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('using a non-existing user', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const genreName = 'Cool Genre';
+        const userId = 999;
+        const genreName = 'Cool Genre';
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => undefined);
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
 
-            jest.spyOn(dataSource, 'getGenreId');
-            jest.spyOn(dataSource, 'addGenre');
-            jest.spyOn(dataSource, 'addToInterests');
+        jest.spyOn(dataSource, 'getGenreId');
+        jest.spyOn(dataSource, 'addGenre');
+        jest.spyOn(dataSource, 'addToInterests');
 
-            const result = await manager.addToInterests(userId, genreName);
+        const result = await manager.addToInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledTimes(0);
 
-            expect(dataSource.addGenre)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.addGenre)
+            .toHaveBeenCalledTimes(0);
 
-            expect(dataSource.addToInterests)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.addToInterests)
+            .toHaveBeenCalledTimes(0);
 
-            expect(result.message).toBeDefined();
-            expect(result.message).toBe(`User(${userId}) does not exist`);
-        });
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User(${userId}) does not exist`);
+    });
 });
 
 describe('removing from interests list', () => {
-    test('an attendee removing a genre that exists',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('an attendee removing a genre that exists', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const type = TYPE_ATTENDEE;
-            const username = 'username';
-            const email = 'email';
-            const password = 'secret';
-            const profileImageId = 123;
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
 
-            const genreId = 777;
-            const genreName = 'Cool Genre';
-            const expectedGenre = Genre.createWithId(genreId, genreName);
+        const genreId = 777;
+        const genreName = 'Cool Genre';
+        const expectedGenre = Genre.createWithId(genreId, genreName);
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => {
-                    return { type, username, email, password, profileImageId }
-                });
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
 
-            jest.spyOn(dataSource, 'getGenreId')
-                .mockImplementationOnce(async() => expectedGenre);
+        jest.spyOn(dataSource, 'getGenreId')
+            .mockImplementationOnce(async() => expectedGenre);
 
-            jest.spyOn(dataSource, 'removeFromInterests')
-                .mockImplementationOnce(async() => Promise.resolve());
+        jest.spyOn(dataSource, 'removeFromInterests')
+            .mockImplementationOnce(async() => Promise.resolve());
 
-            const result = await manager.removeFromInterests(userId, genreName);
+        const result = await manager.removeFromInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledWith(genreName);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledWith(genreName);
 
-            expect(dataSource.removeFromInterests)
-                .toHaveBeenCalledWith(userId, genreId);
+        expect(dataSource.removeFromInterests)
+            .toHaveBeenCalledWith(userId, genreId);
 
-            expect(result.message).toBeDefined();
-            expect(result.message).toBe('success');
-        });
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe('success');
+    });
 
-    test('an attendee removing a genre that does not exist',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('an attendee removing a genre that does not exist', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const type = TYPE_ATTENDEE;
-            const username = 'username';
-            const email = 'email';
-            const password = 'secret';
-            const profileImageId = 123;
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
 
-            const genreName = 'Cool Genre';
+        const genreName = 'Cool Genre';
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => {
-                    return { type, username, email, password, profileImageId }
-                });
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
 
-            jest.spyOn(dataSource, 'getGenreId')
-                .mockImplementationOnce(async() => undefined);
+        jest.spyOn(dataSource, 'getGenreId')
+            .mockImplementationOnce(async() => undefined);
 
-            jest.spyOn(dataSource, 'removeFromInterests');
+        jest.spyOn(dataSource, 'removeFromInterests');
 
-            const result = await manager.removeFromInterests(userId, genreName);
+        const result = await manager.removeFromInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledWith(genreName);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledWith(genreName);
 
-            expect(dataSource.removeFromInterests)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.removeFromInterests)
+            .toHaveBeenCalledTimes(0);
 
-            expect(result.message).toBeDefined();
-            expect(result.message).toBe('success');
-        });
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe('success');
+    });
 
-    test('using an Organizer user type',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('using an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const type = TYPE_ORGANIZER;
-            const username = 'username';
-            const email = 'email';
-            const password = 'secret';
-            const profileImageId = 123;
+        const userId = 999;
+        const type = TYPE_ORGANIZER;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
 
-            const genreName = 'Cool Genre';
+        const genreName = 'Cool Genre';
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => {
-                    return { type, username, email, password, profileImageId }
-                });
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
 
-            jest.spyOn(dataSource, 'getGenreId');
-            jest.spyOn(dataSource, 'removeFromInterests');
+        jest.spyOn(dataSource, 'getGenreId');
+        jest.spyOn(dataSource, 'removeFromInterests');
 
-            const result = await manager.removeFromInterests(userId, genreName);
+        const result = await manager.removeFromInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledTimes(0);
 
-            expect(dataSource.removeFromInterests)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.removeFromInterests)
+            .toHaveBeenCalledTimes(0);
 
-            expect(result.message).toBeDefined();
-            expect(result.message)
-                .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
-        });
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
 
-    test('using a non-existing user',
-        async() => {
-            const dataSource = new EventMonkeyDataSource();
-            const manager = new UserManager(dataSource);
+    test('using a non-existing user', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
 
-            const userId = 999;
-            const genreName = 'Cool Genre';
+        const userId = 999;
+        const genreName = 'Cool Genre';
 
-            jest.spyOn(manager, 'checkUserType');
+        jest.spyOn(manager, 'checkUserType');
 
-            jest.spyOn(dataSource, 'getUserDetails')
-                .mockImplementationOnce(async() => undefined);
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
 
-            jest.spyOn(dataSource, 'getGenreId');
-            jest.spyOn(dataSource, 'removeFromInterests');
+        jest.spyOn(dataSource, 'getGenreId');
+        jest.spyOn(dataSource, 'removeFromInterests');
 
-            const result = await manager.removeFromInterests(userId, genreName);
+        const result = await manager.removeFromInterests(userId, genreName);
 
-            expect(dataSource.getUserDetails)
-                .toHaveBeenCalledWith(userId);
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
 
-            expect(manager.checkUserType)
-                .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
 
-            expect(dataSource.getGenreId)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.getGenreId)
+            .toHaveBeenCalledTimes(0);
 
-            expect(dataSource.removeFromInterests)
-                .toHaveBeenCalledTimes(0);
+        expect(dataSource.removeFromInterests)
+            .toHaveBeenCalledTimes(0);
 
-            expect(result.message).toBeDefined();
-            expect(result.message).toBe(`User(${userId}) does not exist`);
-        });
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User(${userId}) does not exist`);
+    });
 });
 
 describe('getting friends list', () => {
