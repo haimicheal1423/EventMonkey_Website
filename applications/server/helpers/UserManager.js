@@ -356,15 +356,9 @@ export class UserManager {
 
         let genre = await this.dataSource_.getGenreId(genreName);
 
-        if (!genre) {
-            genre = await this.dataSource_.addGenre(genreName);
+        if (genre) {
+            await this.dataSource_.removeFromInterests(userId, genre.id);
         }
-
-        if (!genre) {
-            return { message: 'Could not remove genre from interests' };
-        }
-
-        await this.dataSource_.removeFromInterests(userId, genre.id);
 
         return { message: 'success' };
     }
