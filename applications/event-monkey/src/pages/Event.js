@@ -59,12 +59,24 @@ function EventSearch() {
 
             <ModalEM/>
 
-            <div className='mt-2 d-flex flex-wrap overflow-auto'>
+            <div className='mt-2 d-flex flex-wrap justify-content-center overflow-auto'>
                 {events?.length && events.map(event => {
-                    return <Col>{eventCard(event)}</Col>
+                    return simpleEventCard(event);
                 })}
             </div>
         </div>
+    );
+}
+
+export function simpleEventCard(event) {
+    return (
+        <Card key={event.id} className="m-3 p-3" style={{ minWidth: '18rem', maxWidth: '18rem' }}>
+            <Card.Img variant="top" src={eventImage(event)} />
+            <Card.Body>
+                <Card.Title>{event.name}</Card.Title>
+                <Card.Link href={`/event/id/${event.id}`}>View Details</Card.Link>
+            </Card.Body>
+        </Card>
     );
 }
 
@@ -92,7 +104,7 @@ function eventCard(event) {
                 </ListGroup.Item>
             </ListGroup>
             <Card.Body>
-                <Card.Link href="#">Card Link</Card.Link>
+                <Card.Link href={`/event/id/${event.id}`}>View Details</Card.Link>
                 <Card.Link href="#">Another Link</Card.Link>
             </Card.Body>
         </Card>

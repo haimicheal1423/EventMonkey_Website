@@ -9,11 +9,14 @@ import Axios from 'axios';
 import '../assets/css/dashboard.css'
 
 import George from '../assets/profileImages/george-avatar.jpeg'
+import Col from "react-bootstrap/Col";
+import { simpleEventCard } from "./Event";
 
 
 function Dashboard() {
     const navigate = useNavigate();
     const [user, setUser] = useState(undefined);
+    const [recommendedEvents, setRecommendedEvents] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [interestsList, setInterestsList] = useState([]);
     const [username, setUsername] = useState(null);
@@ -52,6 +55,16 @@ function Dashboard() {
             .then(response => void setInterestsList(response.data))
             .catch(e => alert(e.data));
     }, [user]);
+
+    useEffect(() => {
+        if (!user) {
+            return;
+        }
+
+        Axios.get(`http://eventmonkey.xyz:4000/events/recommended/${user.id}`)
+            .then(response => void setRecommendedEvents(response.data))
+            .catch(e => alert(e.data));
+    }, [interestsList, friendsList]);
 
     if (!user) {
         return <>Loading...</>;
@@ -188,7 +201,12 @@ function Dashboard() {
 
             <div className="rec-container">
                 <h6>Recommended Just For You!</h6>
-                {/* carousel here? */}
+
+                <div className='mt-2 d-flex overflow-auto'>
+                    {recommendedEvents?.length && recommendedEvents.map(event => {
+                        return simpleEventCard(event);
+                    })}
+                </div>
                 <hr/>
             </div>
 
