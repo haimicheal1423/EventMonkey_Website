@@ -710,7 +710,7 @@ export class EventMonkeyDataSource extends DataSource {
      * database.
      *
      * @param {number} userId the EventMonkey user id
-     * @param {number} eventId the EventMOnkey event id
+     * @param {number} eventId the EventMonkey event id
      *
      * @returns {Promise<boolean>} `true` if the database added a record
      */
