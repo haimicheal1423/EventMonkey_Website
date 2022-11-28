@@ -11,11 +11,7 @@ jobs:
       - name: Running tests
         working-directory: ./
         run:
-<<<<<<< HEAD
-          node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --coverageReporters json-summary
-=======
           node --experimental-vm-modules ./applications/server/node_modules/jest/bin/jest.js --coverage --coverageReporters json-summary
->>>>>>> origin/devBranch
       - name: Jest Coverage Comment
         uses: MishaKav/jest-coverage-comment@main
 
