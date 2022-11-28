@@ -18,7 +18,7 @@ export default function Signup() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (email && password) {
-            Axios.post(`http://localhost:4000/users/register`, {type, username, email, password }).then((response) => {
+            Axios.post(`http://eventmonkey.xyz:4000/users/register`, {type, username, email, password }).then((response) => {
                 navigate('/login');
             }).catch(e => {
                 alert(JSON.stringify(e.response.data));
@@ -47,7 +47,7 @@ export default function Signup() {
                             <Form.Label>Email address</Form.Label>
                             <Form.Control type="email" placeholder="" value={email} onChange={(e) => setEmail(e.target.value)} />
                         </Form.Group>
-            
+
                         <Form.Group className="mb-3" controlId="formBasicPassword">
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" placeholder="" value={password} onChange={(e) => setPassword(e.target.value)} />
