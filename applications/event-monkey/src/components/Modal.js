@@ -11,91 +11,90 @@ import { Col, Row } from "react-bootstrap";
 //Modal = Fades bg and central popup.
 export default function ModalEM() {
     const [validated, setValidated] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
-  const handleClose = () => {
-      setShowModal(false)
-      setValidated(false);
-  }
+    const handleClose = () => {
+        setShowModal(false)
+        setValidated(false);
+    }
 
-  const handleShow = () => {
-      setShowModal(true)
-      setValidated(false);
-  }
+    const handleShow = () => {
+        setShowModal(true)
+        setValidated(false);
+    }
 
-  const handleSubmit = (event) => {
-      const form = event.currentTarget;
+    const handleSubmit = (event) => {
+        const form = event.currentTarget;
 
-      if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-      }
+        if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
 
-      // console.log('name', form.elements.name.value);
-      // console.log('price', form.elements.price.value);
-      // console.log('location', form.elements.location.value);
-      // console.log('description', form.elements.description.value);
-      // console.log('startDate', Date.parse(form.elements.startDate.value));
-      // console.log('endDate', Date.parse(form.elements.endDate.value));
-      // console.log('externalUrl', form.elements.externalUrl.value);
+        // console.log('name', form.elements.name.value);
+        // console.log('price', form.elements.price.value);
+        // console.log('location', form.elements.location.value);
+        // console.log('description', form.elements.description.value);
+        // console.log('startDate', Date.parse(form.elements.startDate.value));
+        // console.log('endDate', Date.parse(form.elements.endDate.value));
+        // console.log('externalUrl', form.elements.externalUrl.value);
 
-      setValidated(true);
+        setValidated(true);
 
-      if (!localStorage.getItem('user')) {
-          alert('No user details found. Please login and try again');
-          return;
-      }
+        if (!localStorage.getItem('user')) {
+            alert('No user details found. Please login and try again');
+            return;
+        }
 
-      const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(localStorage.getItem('user'));
 
-      const dates = {};
+        const dates = {};
 
-      if (form.elements.startDate?.value.length > 0) {
-          dates.startDateTime = new Date(Date.now());
-      } else {
-          setValidated(false);
-          return;
-      }
+        if (form.elements.startDate?.value.length > 0) {
+            dates.startDateTime = new Date(Date.now());
+        } else {
+            return;
+        }
 
-      if (form.elements.endDate?.value.length > 0) {
-          dates.endDateTime = Date.parse(form.elements.endDate.value);
-      }
+        if (form.elements.endDate?.value.length > 0) {
+            dates.endDateTime = Date.parse(form.elements.endDate.value);
+        }
 
-      const priceRange = { currency: 'USD' };
+        const priceRange = { currency: 'USD' };
 
-      if (form.elements.price?.value.length > 0) {
-          priceRange.min = parseInt(form.elements.price.value).toFixed(2);
-          priceRange.max = priceRange.min;
-      } else {
-          priceRange.min = 0;
-          priceRange.max = priceRange.min;
-      }
+        if (form.elements.price?.value.length > 0) {
+            priceRange.min = parseInt(form.elements.price.value).toFixed(2);
+            priceRange.max = priceRange.min;
+        } else {
+            priceRange.min = 0;
+            priceRange.max = priceRange.min;
+        }
 
-      Axios.post(`http://localhost:4000/users/${user.id}/create`, {
-              name: form.elements.name.value,
-              description: form.elements.description.value,
-              location: form.elements.location.value,
-              dates,
-              priceRanges: [priceRange],
-              genres: [],
-              images: [],
-          })
-          .then(response => {
-              if (!response.data || !response.data['eventId']) {
-                  alert('Failed to add event');
-                  return;
-              }
+        Axios.post(`http://eventmonkey.xyz:4000/users/${user.id}/create`, {
+                name: form.elements.name.value,
+                description: form.elements.description.value,
+                location: form.elements.location.value,
+                dates,
+                priceRanges: [priceRange],
+                genres: [],
+                images: [],
+            })
+            .then(response => {
+                if (!response.data || !response.data['eventId']) {
+                    alert('Failed to add event');
+                    return;
+                }
 
-              alert('Added new event');
-              handleClose();
-          })
-          .catch(error => {
-              if (error.response.data && error.response.data.message) {
-                  console.error(error.response.data.message);
-                  alert(JSON.stringify(error.response.data.message));
-              }
-          });
-  }
+                alert('Added new event');
+                handleClose();
+            })
+            .catch(error => {
+                if (error.response.data && error.response.data.message) {
+                    console.error(error.response.data.message);
+                    alert(JSON.stringify(error.response.data.message));
+                }
+            });
+    }
 
   return (
     <>
