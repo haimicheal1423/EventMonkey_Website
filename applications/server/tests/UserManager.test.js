@@ -2115,3 +2115,162 @@ describe('adding to friends list', () => {
         expect(result.message).toBe(`User ${friendName} does not exist`);
     });
 });
+
+describe('removing from friends list', () => {
+    test('removing an existing friend', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendId = 111;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'user@mail.com',
+                password: 'secret',
+                profileImageId: 123,
+            }));
+
+        jest.spyOn(dataSource, 'getUserId')
+            .mockImplementationOnce(async() => friendId);
+
+        jest.spyOn(dataSource, 'removeFromFriends')
+            .mockImplementationOnce(async() => Promise.resolve());
+
+        const result = await manager.removeFromFriends(userId, friendName);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledWith(friendName);
+
+        expect(dataSource.removeFromFriends)
+            .toHaveBeenCalledWith(userId, friendId);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe('success');
+    });
+
+    test('using an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ORGANIZER,
+                username: 'username',
+                email: 'user@mail.com',
+                password: 'secret',
+                profileImageId: 123,
+            }));
+
+        jest.spyOn(dataSource, 'getUserId');
+        jest.spyOn(dataSource, 'removeFromFriends');
+
+        const result = await manager.removeFromFriends(userId, friendName);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.removeFromFriends)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
+
+    test('using a non-existing user', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'getUserId');
+        jest.spyOn(dataSource, 'removeFromFriends');
+
+        const result = await manager.removeFromFriends(userId, friendName);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.removeFromFriends)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User(${userId}) does not exist`);
+    });
+
+    test('removing a non-existing friend', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'user@mail.com',
+                password: 'secret',
+                profileImageId: 123,
+            }));
+
+        jest.spyOn(dataSource, 'getUserId')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'removeFromFriends');
+
+        const result = await manager.removeFromFriends(userId, friendName);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledWith(friendName);
+
+        expect(dataSource.removeFromFriends)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User ${friendName} does not exist`);
+    });
+});
