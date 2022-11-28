@@ -20,8 +20,8 @@ function Dashboard() {
                 <h2 className="dashboard-title">Welcome Sajan!</h2>
                 <h6 className="dashboard-subtitle">This is your personalized dashboard..</h6>
                 <Button className="logout-btn" onClick={() => {
-                    localStorage.setItem('token',false);
-                    navigate('/');
+                    localStorage.setItem('token',"");
+                    window.location.href = '/';
                 }}>logout</Button>
                 <hr/>
             </div>

@@ -18,8 +18,8 @@ function Login() {
         e.preventDefault();
         if(email && password){
             Axios.post(`http://localhost:4000/users/login`,{email,password}).then((response) => {
-                navigate('/dashboard');
-                localStorage.setItem('token',true);
+                localStorage.setItem('token',"Token-123");
+                window.location.href = '/dashboard';
             }).catch(e => {
                 alert(JSON.stringify(e.response.data));
             });
@@ -29,7 +29,7 @@ function Login() {
     }
 
     useEffect(() => {
-        if(localStorage.getItem('token') === true ){
+        if(localStorage.getItem('token')){
             navigate('/dashboard');
         }
     },[localStorage.getItem('token')])
@@ -45,7 +45,7 @@ function Login() {
                             <Form.Label>Email</Form.Label>
                             <Form.Control type="email" placeholder="" value={email} onChange={(e)=>setEmail(e.target.value)} />
                         </Form.Group>
-                    
+
                         <Form.Group className="mb-3" controlId="formBasicPassword">
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" placeholder="" value={password} onChange={(e)=>setPassword(e.target.value)} />
