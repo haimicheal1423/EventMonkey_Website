@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "<h1 align='center'>\r CSC648-01-fall22-team02 Repository",
   "main": "index.js",
-  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CSC-648-SFSU/csc648-01-fa22-team02.git"
@@ -18,5 +20,10 @@
   "coverageReporters": [
     "text",
     "text-summary"
-  ]
+  ],
+  "devDependencies": {
+    "@jest/globals": "^29.3.1",
+    "jest": "^29.3.1"
+  },
+  "type": "module"
 }
