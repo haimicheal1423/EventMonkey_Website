@@ -1192,3 +1192,104 @@ describe('removing from favorites', () => {
         expect(result.message).toBe(`User(${userId}) does not exist`);
     });
 });
+
+describe('getting interests list', () => {
+    test('getting the interests list for a valid attendee', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ATTENDEE;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => {
+                return { type, username, email, password, profileImageId }
+            });
+
+        jest.spyOn(dataSource, 'getInterestList')
+            .mockImplementationOnce(async() => 'mock-interests-list');
+
+        jest.spyOn(manager, 'checkUserType');
+
+        const result = await manager.getInterests(userId);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getInterestList)
+            .toHaveBeenCalledWith(userId);
+
+        expect(result.message).toBeUndefined();
+        expect(result).toBe('mock-interests-list');
+    });
+
+    test('getting the interests list using an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const type = TYPE_ORGANIZER;
+        const username = 'username';
+        const email = 'email';
+        const password = 'secret';
+        const profileImageId = 123;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                type, username, email, password, profileImageId
+            }));
+
+        jest.spyOn(dataSource, 'getInterestList');
+
+        const result = await manager.getInterests(userId);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getInterestList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
+
+    test('getting the interests list for a non-existing attendee', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'getInterestList');
+
+        const result = await manager.getInterests(userId);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledTimes(1);
+
+        expect(dataSource.getInterestList)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User(${userId}) does not exist`);
+    });
+});
