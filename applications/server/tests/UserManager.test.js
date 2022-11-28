@@ -1833,3 +1833,285 @@ describe('getting friends list', () => {
             .toBe(`User(${userId}) does not exist`);
     });
 });
+
+describe('adding to friends list', () => {
+    test('adding an existing attendee user by username', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendId = 111;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            // this mock gets called first
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'user@mail.com',
+                password: 'secret',
+                profileImageId: 123,
+            }))
+            // this mock gets called second
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                username: friendName,
+                email: 'friend@mail.com',
+                password: 'secret',
+                profileImageId: 456,
+            }))
+            // this mock gets called third
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                username: friendName,
+                email: 'friend@mail.com',
+                password: 'secret',
+                profileImageId: 456,
+            }));
+
+        jest.spyOn(dataSource, 'getUserId')
+            .mockImplementationOnce(async() => friendId);
+
+        jest.spyOn(dataSource, 'addToFriends')
+            .mockImplementationOnce(async() => true);
+
+        jest.spyOn(dataSource, 'getImage')
+            .mockImplementationOnce(async() => undefined);
+
+        const result = await manager.addToFriends(userId, friendName);
+
+        // three calls, twice for checkUserType using userId and friendId,
+        // then the third time for getting friend details
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledTimes(3);
+
+        // checkUserType on userId
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledWith(friendName);
+
+        // checkUserType on friendId
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(friendId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(friendId, TYPE_ATTENDEE);
+
+        // get friend details
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(friendId);
+
+        expect(dataSource.addToFriends)
+            .toHaveBeenCalledWith(userId, friendId);
+
+        expect(result.message).toBeUndefined();
+
+        expect(result).toStrictEqual({
+            userId: friendId,
+            username: friendName,
+            profileImage: undefined
+        });
+    });
+
+    test('adding an existing Organizer user type by username', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendId = 111;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            // this mock gets called first
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'user@mail.com',
+                password: 'secret',
+                profileImageId: 123,
+            }))
+            // this mock gets called second
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ORGANIZER,
+                username: friendName,
+                email: 'friend@mail.com',
+                password: 'secret',
+                profileImageId: 456,
+            }));
+
+        jest.spyOn(dataSource, 'getUserId')
+            .mockImplementationOnce(async() => friendId);
+
+        jest.spyOn(dataSource, 'addToFriends')
+            .mockImplementationOnce(async() => true);
+
+        jest.spyOn(dataSource, 'getImage')
+            .mockImplementationOnce(async() => undefined);
+
+        const result = await manager.addToFriends(userId, friendName);
+
+        // twice for checkUserType using userId and friendId
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledTimes(2);
+
+        // checkUserType on userId
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledWith(friendName);
+
+        // checkUserType on friendId
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(friendId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(friendId, TYPE_ATTENDEE);
+
+        expect(dataSource.addToFriends)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User(${friendId}) is not type ${TYPE_ATTENDEE}`);
+    });
+
+    test('using an Organizer user type', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ORGANIZER,
+                username: 'username',
+                email: 'user@mail.com',
+                password: 'secret',
+                profileImageId: 123,
+            }));
+
+        jest.spyOn(dataSource, 'getUserId');
+        jest.spyOn(dataSource, 'addToFriends');
+        jest.spyOn(dataSource, 'getImage');
+
+        const result = await manager.addToFriends(userId, friendName);
+
+        // should fail after checkUserType using userId
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledTimes(1);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.addToFriends)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ATTENDEE}`);
+    });
+
+    test('using a non-existing user', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'getUserId');
+        jest.spyOn(dataSource, 'addToFriends');
+        jest.spyOn(dataSource, 'getImage');
+
+        const result = await manager.addToFriends(userId, friendName);
+
+        // should fail after checkUserType using userId
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledTimes(1);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledTimes(0);
+
+        expect(dataSource.addToFriends)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User(${userId}) does not exist`);
+    });
+
+    test('using a non-existing friend', async() => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new UserManager(dataSource);
+
+        const userId = 999;
+        const friendName = 'friend-name';
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'user@mail.com',
+                password: 'secret',
+                profileImageId: 123,
+            }));
+
+        jest.spyOn(dataSource, 'getUserId')
+            .mockImplementationOnce(async() => undefined);
+
+        jest.spyOn(dataSource, 'addToFriends');
+        jest.spyOn(dataSource, 'getImage');
+
+        const result = await manager.addToFriends(userId, friendName);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledTimes(1);
+
+        expect(dataSource.getUserDetails)
+            .toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getUserId)
+            .toHaveBeenCalledWith(friendName);
+
+        expect(dataSource.addToFriends)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe(`User ${friendName} does not exist`);
+    });
+});
