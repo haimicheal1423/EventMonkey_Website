@@ -38,8 +38,8 @@ function EventSearch() {
     // const [url, setUrl] = useState('http://eventmonkey.xyz:4000/events/')
 
     useEffect(() => {
-        if (searchParams.has('source') || searchParams.has('limit')
-                || searchParams.has('keyword') || searchParams.has('genres')) {
+        if (searchParams.get('source') || searchParams.get('limit')
+                || searchParams.get('keyword') || searchParams.get('genres')) {
             Axios.get(`http://eventmonkey.xyz:4000/events/search?${searchParams}`)
                 .then(response => void setEvents(response.data))
                 .catch(e => alert(JSON.stringify(e.response.data)));
@@ -147,7 +147,9 @@ function priceRange(event) {
                 return (
                     <Card.Text key={range.currency}>
                         Price: {
-                            range.min === range.max
+                            range.min === 0
+                            ? 'Free'
+                            : range.min === range.max
                                 ? max
                                 : `${min} - ${max}`
                         }
