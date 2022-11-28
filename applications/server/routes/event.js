@@ -1,84 +1,103 @@
 import { Router } from 'express';
-import { Database } from "../helpers/Database.js";
+import status from "http-status";
+
 import { EventManager } from "../helpers/EventManager.js";
+import { emDBSource } from "../helpers/Database.js";
+
+export const eventManager = new EventManager(emDBSource);
 export const router = Router();
 
+router.get('/',
+    (req, res) => getAllEventMonkeyEvents(req, res)
+);
 
-const eventManager = new EventManager();
+router.get('/search',
+    (req, res) => searchEvent(req, res)
+);
 
-router.get('/', async function(req,res){
+router.get('/:eventId',
+    (req, res) => getEventById(req, res)
+);
+
+router.get('/recommended/:userId',
+    (req, res) => getRecommendedEvents(req, res)
+);
+
+async function getAllEventMonkeyEvents(req, res) {
     try {
-        const sqlQuery = 'SELECT * FROM Event';
-        const rows = await Database.query(sqlQuery, req.params.id);
-        res.status(200).json(rows);
+        const events = await eventManager.getAllEvents();
+        res.status(status.OK).json(events);
     } catch (error) {
-        res.status(400).send(error.message)
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
     }
-});
+}
 
-router.get('/', async function(req, res) {
+async function searchEvent(req, res) {
     try {
         const searchRequest = {};
 
-        if (req.query.source) {
-            searchRequest.source = req.query.source;
+        if (req.query['source']) {
+            searchRequest.source = req.query['source'];
         }
 
-        if (req.query.limit) {
-            searchRequest.limit = req.query.limit;
+        if (req.query['limit']) {
+            searchRequest.limit = req.query['limit'];
         }
 
-        if (req.query.eventId) {
-            searchRequest.eventId = req.query.eventId;
+        if (req.query['genres']) {
+            searchRequest.genres = req.query['genres'];
         }
 
-        if (req.query.genre) {
-            searchRequest.genre = req.query.genre;
-        }
-
-        if (req.query.userId) {
-            searchRequest.userId = req.query.userId;
-        }
-
-        if (req.query.keyword) {
-            searchRequest.keyword = req.query.keyword;
+        if (req.query['keyword']) {
+            searchRequest.keyword = req.query['keyword'];
         }
 
         const result = await eventManager.search(searchRequest);
 
-        res.status(200).json(result);
+        res.status(status.OK).json(result);
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
     }
-});
+}
 
-router.post('/create', async function(req, res) {
+async function getEventById(req, res) {
     try {
-        if (!req.query.userId) {
-            res.status(400).send('No user id found');
-            return;
+        const eventId = req.params['eventId'];
+        const source = req.query['source'];
+        const result = await eventManager.findEventById({ source, eventId });
+
+        if (result) {
+            res.status(status.OK).json(result);
+        } else {
+            res.status(status.BAD_REQUEST)
+                .send(`Event(${eventId}) does not exist`);
+        }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
+    }
+}
+
+async function getRecommendedEvents(req, res) {
+    try {
+        const userId = parseInt(req.params['userId']);
+        let limit = parseInt(req.query['limit']);
+
+        if (isNaN(limit)) {
+            limit = undefined;
         }
 
-        const userId = req.query.userId;
-        const name = req.body.name;
-        const description = req.body.description;
-        const dates = req.body.dates;
-        const priceRanges = req.body.priceRanges;
-        const genres = req.body.genres;
-        const images = req.body.images;
+        const result = await eventManager.getRecommendedEvents(userId, limit);
 
-        const eventId = await eventManager.createEvent(
-            userId,
-            name,
-            description,
-            dates,
-            priceRanges,
-            genres,
-            images
-        );
-
-        res.status(200).json({ eventId });
+        if (result.message) {
+            res.status(status.BAD_REQUEST).json({ message: result.message });
+        } else {
+            res.status(status.OK).json(result);
+        }
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
+        console.error(error);
     }
-});
+}

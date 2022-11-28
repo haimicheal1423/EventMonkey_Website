@@ -5,11 +5,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install modules
+      - name: Install server modules
+        working-directory: ./applications/server/
         run: npm ci
       - name: Running tests
-        working-directory: applications/server/tests/
+        working-directory: ./
         run:
-          npx jest --coverage --coverageReporters json-summary
+          node --experimental-vm-modules ./applications/server/node_modules/jest/bin/jest.js --coverage --coverageReporters json-summary
       - name: Jest Coverage Comment
         uses: MishaKav/jest-coverage-comment@main
+
+# working-directory: applications/server/tests/
