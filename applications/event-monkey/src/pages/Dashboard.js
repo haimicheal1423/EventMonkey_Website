@@ -67,7 +67,7 @@ function Dashboard() {
         return <>Loading...</>;
     }
 
-    const addFriend = e => {
+    const addFriend = () => {
         if (!username) {
             // no input
             return;
@@ -83,7 +83,7 @@ function Dashboard() {
             .catch(axiosError(`Failed to add friend ${username}`, addErrorMessage));
     };
 
-    const removeFriend = e => {
+    const removeFriend = () => {
         if (!username) {
             // no input
             return;
@@ -108,7 +108,7 @@ function Dashboard() {
             .catch(axiosError(`Failed to remove friend ${username}`, addErrorMessage));
     };
 
-    const addInterest = e => {
+    const addInterest = () => {
         if (!interest) {
             // no input
             return;
@@ -124,7 +124,7 @@ function Dashboard() {
             .catch(axiosError(`Failed to add interest ${interest}`, addErrorMessage));
     };
 
-    const removeInterest = e => {
+    const removeInterest = () => {
         if (!interest) {
             // no input
             return;
@@ -148,7 +148,7 @@ function Dashboard() {
             .catch(axiosError(`Failed to remove interest ${interest}`, addErrorMessage));
     };
 
-    const removeCreatedEvent = e => {
+    const removeCreatedEvent = () => {
         if (eventId === undefined) {
             // no input
             return;
@@ -160,8 +160,6 @@ function Dashboard() {
             addErrorMessage(`Event id ${eventId} is not a number`);
             return;
         }
-
-        console.log(numId, typeof numId);
 
         if (!createdEventList.some(event => event.id === numId)) {
             // not in the list
@@ -196,7 +194,7 @@ function Dashboard() {
                 <h6 className="dashboard-subtitle">This is your personalized dashboard...</h6>
                 <Button className="logout-btn" onClick={() => {
                     localStorage.removeItem('user');
-                    localStorage.setItem('token',"");
+                    localStorage.removeItem('token');
                     window.location.href = '/';
                 }}>logout</Button>
                 <hr/>
