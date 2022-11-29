@@ -244,28 +244,30 @@ function renderForType(userType,
                     </Card>
                 )}
             />
+            <hr/>
 
-            <SectionList
-                sectionName='Recommended Just For You!'
-                components={recommendedEvents?.length && recommendedEvents.map(event => {
+            <h5 className='text-left' style={{color: 'chocolate'}}>Recommended Just For You!</h5>
+            <div className='mt-2 d-flex overflow-auto'>
+                {recommendedEvents?.length && recommendedEvents.map(event => {
                     return simpleEventCard(event);
                 })}
-            />
+            </div>
+            <hr/>
 
             <div className="tsn-container">
-                <h6>Try Something New</h6>
+                <h5>Try Something New</h5>
                 {/* carousel here? */}
                 <hr/>
             </div>
 
             <div className="category-container">
-                <h6>Browse by Category</h6>
+                <h5>Browse by Category</h5>
                 {/* carousel here? */}
                 <hr/>
             </div>
 
             <div className="recent-container">
-                <h6>Recent Events</h6>
+                <h5>Recent Events</h5>
                 {/* carousel here? */}
                 <hr/>
             </div>
