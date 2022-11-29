@@ -2,25 +2,29 @@ import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/esm/Container';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
-import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import Axios from 'axios';
 
 import '../assets/css/dashboard.css'
 
 import George from '../assets/profileImages/george-avatar.jpeg'
-import Col from "react-bootstrap/Col";
-import { simpleEventCard } from "./Event";
+import { ErrorAlert } from "../components/ErrorAlert.js"
+import { simpleEventCard } from "./Event.js";
+import { axiosError } from "../utils.js";
 
 
 function Dashboard() {
-    const navigate = useNavigate();
     const [user, setUser] = useState(undefined);
     const [recommendedEvents, setRecommendedEvents] = useState([]);
+    const [errorMessages, setErrorMessages] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [interestsList, setInterestsList] = useState([]);
     const [username, setUsername] = useState(null);
     const [interest, setInterest] = useState(null);
+
+    const addErrorMessage = message => {
+        setErrorMessages(prev => prev.concat(message));
+    };
 
     useEffect(() => {
         setUser(JSON.parse(localStorage.getItem('user')));
@@ -41,7 +45,7 @@ function Dashboard() {
             //     return void setFriendsList(data);
             // })
             .then(response => void setFriendsList(response.data))
-            .catch(e => alert(e.data));
+            .catch(axiosError(`Failed to load user friends list`, addErrorMessage));
 
         Axios.get(`/users/${user.id}/interests`)
             // .then(response => {
@@ -53,7 +57,7 @@ function Dashboard() {
             //     return void setInterestsList(data);
             // })
             .then(response => void setInterestsList(response.data))
-            .catch(e => alert(e.data));
+            .catch(axiosError(`Failed to load user interests`, addErrorMessage));
     }, [user]);
 
     useEffect(() => {
@@ -63,7 +67,7 @@ function Dashboard() {
 
         Axios.get(`/events/recommended/${user.id}`)
             .then(response => void setRecommendedEvents(response.data))
-            .catch(e => alert(e.data));
+            .catch(axiosError(`Failed to load recommended events`, addErrorMessage));
     }, [interestsList, friendsList]);
 
     if (!user) {
@@ -83,7 +87,7 @@ function Dashboard() {
 
         Axios.put(`/users/${user.id}/add_friend/${username}`)
             .then(response => void setFriendsList(friendsList.concat(response.data)))
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to add friend ${username}`, addErrorMessage));
     };
 
     const removeFriend = e => {
@@ -108,7 +112,7 @@ function Dashboard() {
                 }
                 return Promise.resolve();
             })
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to remove friend ${username}`, addErrorMessage));
     };
 
     const addInterest = e => {
@@ -124,7 +128,7 @@ function Dashboard() {
 
         Axios.put(`/users/${user.id}/add_interest/${interest}`)
             .then(response => void setInterestsList(interestsList.concat(response.data)))
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to add interest ${interest}`, addErrorMessage));
     };
 
     const removeInterest = e => {
@@ -148,11 +152,20 @@ function Dashboard() {
                     }));
                 }
             })
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to remove interest ${interest}`, addErrorMessage));
     };
 
     return (
         <Container>
+            {errorMessages.map((error, index) => {
+                return (
+                    <ErrorAlert
+                        key={`error-${index}`}
+                        // header='Server Error'
+                        message={error}
+                    />
+                )
+            })}
             <div className="welcome-container">
                 <img className="welcome-img shadow" src={user.profileImage ? user.profileImage.url : George} alt=""/>
                 <h2 className="dashboard-title">Welcome {user.username}!</h2>

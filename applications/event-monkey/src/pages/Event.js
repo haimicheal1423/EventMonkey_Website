@@ -8,6 +8,7 @@ import Container from "react-bootstrap/Container";
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from "react-router-dom";
 
+import { axiosError } from "../utils";
 import ModalEM from '../components/Modal'
 import BannerEM from '../components/Banner'
 import George from '../assets/profileImages/george-avatar.jpeg'
@@ -20,7 +21,7 @@ function SingleEvent() {
     useEffect(() => {
         Axios.get(`/events/${eventId}`)
             .then(response => void setEvent(response.data))
-            .catch(e => alert(JSON.stringify(e.response.data)));
+            .catch(axiosError(`Failed to load event ${eventId}`, alert));
     }, [eventId]);
 
     return (
@@ -43,11 +44,11 @@ function EventSearch() {
                 || searchParams.get('keyword') || searchParams.get('genres')) {
             Axios.get(`/events/search?${searchParams}`)
                 .then(response => void setEvents(response.data))
-                .catch(e => alert(JSON.stringify(e.response.data)));
+                .catch(axiosError(`Failed to search events using ${searchParams}`, alert));
         } else {
             Axios.get("/events")
                 .then(response => void setEvents(response.data))
-                .catch(e => alert(JSON.stringify(e.response.data)));
+                .catch(axiosError('Failed to load all events', alert));
         }
     }, [searchParams]);
 
