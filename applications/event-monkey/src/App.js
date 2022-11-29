@@ -40,10 +40,11 @@ const ProtectRoute = ({ children }) => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/trysomethingnew" element={<TrySomethingNew />} />
-          <Route path="/event" element={<ProtectRoute><Event /></ProtectRoute>} />
+          <Route path="/event" element={<ProtectRoute><EventSearch /></ProtectRoute>} />
+          <Route path="/event/search" element={<ProtectRoute><EventSearch /></ProtectRoute>} />
+          <Route path="/event/id/:eventId" element={<ProtectRoute><SingleEvent /></ProtectRoute>} />
           <Route path="/dashboard" element={<ProtectRoute><Dashboard /></ProtectRoute>} />
           <Route path="/profile" element={<ProtectRoute><Profile /></ProtectRoute>} />
-
         </Routes>
 
         <hr/>
