@@ -40,11 +40,11 @@ function EventSearch() {
     useEffect(() => {
         if (searchParams.has('source') || searchParams.has('limit')
                 || searchParams.has('keyword') || searchParams.has('genres')) {
-            Axios.get(`http://localhost:4000/events/search?${searchParams}`)
+Axios.get(`http://eventmonkey.xyz:4000/events/search?${searchParams}`)
                 .then(response => void setEvents(response.data))
                 .catch(e => alert(JSON.stringify(e.response.data)));
         } else {
-            Axios.get("http://localhost:4000/events")
+            Axios.get("http://eventmonkey.xyz:4000/events")
                 .then(response => void setEvents(response.data))
                 .catch(e => alert(JSON.stringify(e.response.data)));
         }
