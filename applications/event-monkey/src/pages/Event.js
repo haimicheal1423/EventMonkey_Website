@@ -93,16 +93,22 @@ function eventCard(event) {
             <Card.Body>
                 <Card.Title>{event.name}</Card.Title>
                 <Card.Text>
-                    {event.description.length > 90
-                        ? event.description.substring(0, 87) + ' [...]'
-                        : event.description}
+                    {!event.description || event.description.length === 0
+                        ? 'No description available'
+                        : event.description.length > 90
+                            ? event.description.substring(0, 87) + ' [...]'
+                            : event.description}
                 </Card.Text>
             </Card.Body>
             <ListGroup className="list-group-flush">
                 {priceRange(event)}
                 {eventDate(event)}
                 <ListGroup.Item>
-                    <Card.Text>{event.location}</Card.Text>
+                    <Card.Text>{
+                        !event.location || event.location.length === 0
+                            ? 'Unknown location'
+                            : event.location}
+                    </Card.Text>
                 </ListGroup.Item>
             </ListGroup>
             <Card.Body>

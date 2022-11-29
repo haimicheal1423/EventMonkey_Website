@@ -41,12 +41,20 @@ export default function ModalEM() {
 
         setValidated(true);
 
-        if (!localStorage.getItem('user')) {
+        if (localStorage.getItem('user') === null) {
             alert('No user details found. Please login and try again');
             return;
         }
 
         const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!(form.elements.name?.value.length > 0)) {
+            return;
+        }
+
+        if (!(form.elements.location?.value.length > 0)) {
+            return;
+        }
 
         const dates = {};
 
