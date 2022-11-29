@@ -12,15 +12,16 @@ import { ErrorAlert } from "../components/ErrorAlert.js"
 import { simpleEventCard } from "./Event.js";
 import { axiosError } from "../utils.js";
 
-
 function Dashboard() {
     const [user, setUser] = useState(undefined);
     const [recommendedEvents, setRecommendedEvents] = useState([]);
+    const [createdEventList, setCreatedEventList] = useState([]);
     const [errorMessages, setErrorMessages] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [interestsList, setInterestsList] = useState([]);
     const [username, setUsername] = useState(null);
     const [interest, setInterest] = useState(null);
+    const [eventId, setEventId] = useState(undefined);
 
     const addErrorMessage = message => {
         setErrorMessages(prev => prev.concat(message));
@@ -35,29 +36,19 @@ function Dashboard() {
             return;
         }
 
-        Axios.get(`/users/${user.id}/friends`)
-            // .then(response => {
-            //     const data = [];
-            //     for (let i = 0; i < 10; i++) {
-            //         data.push(...response.data);
-            //     }
-            //     data.forEach((u, idx) => u.id = idx)
-            //     return void setFriendsList(data);
-            // })
-            .then(response => void setFriendsList(response.data))
-            .catch(axiosError(`Failed to load user friends list`, addErrorMessage));
+        if (user.type.toUpperCase() === 'ATTENDEE') {
+            Axios.get(`/users/${user.id}/friends`)
+                .then(response => void setFriendsList(response.data))
+                .catch(axiosError(`Failed to load friends list`, addErrorMessage));
 
-        Axios.get(`/users/${user.id}/interests`)
-            // .then(response => {
-            //     const data = [];
-            //     for (let i = 0; i < 10; i++) {
-            //         data.push(...response.data);
-            //     }
-            //     data.forEach((g, idx) => g.id = idx)
-            //     return void setInterestsList(data);
-            // })
-            .then(response => void setInterestsList(response.data))
-            .catch(axiosError(`Failed to load user interests`, addErrorMessage));
+            Axios.get(`/users/${user.id}/interests`)
+                .then(response => void setInterestsList(response.data))
+                .catch(axiosError(`Failed to load interests list`, addErrorMessage));
+        } else if (user.type.toUpperCase() === 'ORGANIZER') {
+            Axios.get(`/users/${user.id}/created_events`)
+                .then(response => void setCreatedEventList(response.data))
+                .catch(axiosError(`Failed to load owned events`, addErrorMessage));
+        }
     }, [user]);
 
     useEffect(() => {
@@ -65,9 +56,11 @@ function Dashboard() {
             return;
         }
 
-        Axios.get(`/events/recommended/${user.id}`)
-            .then(response => void setRecommendedEvents(response.data))
-            .catch(axiosError(`Failed to load recommended events`, addErrorMessage));
+        if (user.type.toUpperCase() === 'ATTENDEE') {
+            Axios.get(`/events/recommended/${user.id}`)
+                .then(response => void setRecommendedEvents(response.data))
+                .catch(axiosError(`Failed to load recommended events`, addErrorMessage));
+        }
     }, [interestsList, friendsList]);
 
     if (!user) {
@@ -155,6 +148,30 @@ function Dashboard() {
             .catch(axiosError(`Failed to remove interest ${interest}`, addErrorMessage));
     };
 
+    const removeCreatedEvent = e => {
+        if (eventId === undefined) {
+            // no input
+            return;
+        }
+
+        const numId = parseInt(eventId.toString());
+
+        if (!createdEventList.some(event => event.id === numId)) {
+            // not in the list
+            return;
+        }
+
+        Axios.delete(`/users/${user.id}/delete/${numId}`)
+            .then(response => {
+                if (response.data.message === 'success') {
+                    setCreatedEventList(createdEventList.filter(event => {
+                        return event.id !== numId;
+                    }));
+                }
+            })
+            .catch(axiosError(`Failed to remove interest ${interest}`, addErrorMessage));
+    };
+
     return (
         <Container>
             {errorMessages.map((error, index) => {
@@ -178,6 +195,23 @@ function Dashboard() {
                 <hr/>
             </div>
 
+            {renderForType(user.type,
+                interestsList, addInterest, removeInterest, setInterest,
+                setUsername, friendsList, addFriend, removeFriend,
+                recommendedEvents,
+                createdEventList, removeCreatedEvent, setEventId
+            )}
+        </Container>
+    );
+}
+
+function renderForType(userType,
+                       interestsList, addInterest, removeInterest, setInterest,
+                       setUsername, friendsList, addFriend, removeFriend,
+                       recommendedEvents,
+                       createdEventList, removeCreatedEvent, setEventId) {
+    if (userType.toUpperCase() === 'ATTENDEE') {
+        return <>
             <SectionList
                 sectionName='Interests'
                 placeHolderText='Enter genre name'
@@ -206,20 +240,16 @@ function Dashboard() {
                 )}
             />
 
+            <SectionList
+                sectionName='Recommended Just For You!'
+                components={recommendedEvents?.length && recommendedEvents.map(event => {
+                    return simpleEventCard(event);
+                })}
+            />
+
             <div className="tsn-container">
                 <h6>Try Something New</h6>
                 {/* carousel here? */}
-                <hr/>
-            </div>
-
-            <div className="rec-container">
-                <h6>Recommended Just For You!</h6>
-
-                <div className='mt-2 d-flex overflow-auto'>
-                    {recommendedEvents?.length && recommendedEvents.map(event => {
-                        return simpleEventCard(event);
-                    })}
-                </div>
                 <hr/>
             </div>
 
@@ -234,34 +264,25 @@ function Dashboard() {
                 {/* carousel here? */}
                 <hr/>
             </div>
+        </>;
+    }
 
-            {/* <Row>
-                <Col></Col>
-                <Col>
-                    <Card style={{ width: '18rem'}}>
-                        <Card.Img variant="top" src="holder.js/100px180?text=Image cap" />
-                        <Card.Body>
-                            <Card.Title>Welcome Sajan!</Card.Title>
-                            <Card.Text>
-                                Some quick example text to build on the card title and make up the
-                                bulk of the card's content.
-                            </Card.Text>
-                        </Card.Body>
-                        <ListGroup className="list-group-flush">
-                            <ListGroup.Item>Sajan Gururng</ListGroup.Item>
-                            <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
-                            <ListGroup.Item  onClick={() => {
-                                localStorage.setItem('token',false);
-                                navigate('/');
-                            }}>Logout</ListGroup.Item>
-                        </ListGroup>
-                    </Card>
-                </Col>
-                <Col></Col>
-            </Row> */}
+    if (userType.toUpperCase() === 'ORGANIZER') {
+        return <>
+            <SectionList
+                sectionName='Your Events'
+                placeHolderText='Enter event id'
+                setText={setEventId}
+                handleRemove={removeCreatedEvent}
+                components={createdEventList.map(event => {
+                    return simpleEventCard(event, true);
+                })}
+            />
+            <hr/>
+        </>;
+    }
 
-        </Container>
-    );
+    return <p>Unknown user type: {userType}</p>
 }
 
 function SectionList(props) {
@@ -270,13 +291,15 @@ function SectionList(props) {
             <Row>
                 <h5 className='my-3'>{props.sectionName}</h5>
             </Row>
-            <Row>
-                <form className='d-flex'>
-                    <input type='text' className='form-control border-warning' placeholder={props.placeHolderText} onChange={e => props.setText(e.target.value)}/>
-                    <Button variant='primary' className='ml-2' onClick={props.handleAdd}>Add</Button>
-                    <Button variant='danger' className='ml-2' onClick={props.handleRemove}>Remove</Button>
-                </form>
-            </Row>
+            {(props.handleAdd || props.handleRemove) &&
+                <Row>
+                    <form className='d-flex'>
+                        <input type='text' className='form-control border-warning' placeholder={props.placeHolderText} onChange={e => props.setText(e.target.value)}/>
+                        {props.handleAdd && <Button variant='primary' className='ml-2' onClick={props.handleAdd}>Add</Button>}
+                        {props.handleRemove && <Button variant='danger' className='ml-2' onClick={props.handleRemove}>Remove</Button>}
+                    </form>
+                </Row>
+            }
             <Row className='mt-2 d-flex flex-wrap overflow-auto' style={{ maxHeight: '24rem' }}>
                 {props.components}
             </Row>

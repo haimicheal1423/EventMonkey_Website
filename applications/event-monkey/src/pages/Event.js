@@ -70,12 +70,12 @@ function EventSearch() {
     );
 }
 
-export function simpleEventCard(event) {
+export function simpleEventCard(event, showId) {
     return (
         <Card key={event.id} className="m-3 p-3" style={{ minWidth: '18rem', maxWidth: '18rem' }}>
             <Card.Img variant="top" src={eventImage(event)} />
             <Card.Body>
-                <Card.Title>{event.name}</Card.Title>
+                <Card.Title>{showId ? `[id: ${event.id}] ${event.name}` : event.name}</Card.Title>
                 <Card.Link href={`/event/id/${event.id}`}>View Details</Card.Link>
             </Card.Body>
         </Card>
