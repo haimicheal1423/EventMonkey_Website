@@ -154,7 +154,14 @@ function Dashboard() {
             return;
         }
 
-        const numId = parseInt(eventId.toString());
+        const numId = Number(eventId);
+
+        if (isNaN(numId)) {
+            addErrorMessage(`Event id ${eventId} is not a number`);
+            return;
+        }
+
+        console.log(numId, typeof numId);
 
         if (!createdEventList.some(event => event.id === numId)) {
             // not in the list
