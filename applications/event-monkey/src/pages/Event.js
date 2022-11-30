@@ -17,7 +17,7 @@ function SingleEvent() {
     const [event, setEvent] = useState(undefined);
 
     useEffect(() => {
-        Axios.get(`http://localhost:4000/events/${eventId}`)
+        Axios.get(`http://eventmonkey.xyz:4000/events/${eventId}`)
             .then(response => void setEvent(response.data))
             .catch(e => alert(JSON.stringify(e.response.data)));
     }, [eventId]);
@@ -35,12 +35,12 @@ function EventSearch() {
     const columnsPerRow = 4;
     const [searchParams] = useSearchParams();
     const [events, setEvents] = useState([]);
-    // const [url, setUrl] = useState('http://localhost:4000/events/')
+    // const [url, setUrl] = useState('http://eventmonkey.xyz:4000/events/')
 
     useEffect(() => {
         if (searchParams.has('source') || searchParams.has('limit')
                 || searchParams.has('keyword') || searchParams.has('genres')) {
-Axios.get(`http://eventmonkey.xyz:4000/events/search?${searchParams}`)
+            Axios.get(`http://eventmonkey.xyz:4000/events/search?${searchParams}`)
                 .then(response => void setEvents(response.data))
                 .catch(e => alert(JSON.stringify(e.response.data)));
         } else {
