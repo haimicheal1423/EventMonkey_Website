@@ -2,22 +2,30 @@ import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/esm/Container';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
-import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import Axios from 'axios';
 
 import '../assets/css/dashboard.css'
 
 import George from '../assets/profileImages/george-avatar.jpeg'
-
+import { ErrorAlert } from "../components/ErrorAlert.js"
+import { simpleEventCard } from "./Event.js";
+import { axiosError } from "../utils.js";
 
 function Dashboard() {
-    const navigate = useNavigate();
     const [user, setUser] = useState(undefined);
+    const [recommendedEvents, setRecommendedEvents] = useState([]);
+    const [createdEventList, setCreatedEventList] = useState([]);
+    const [errorMessages, setErrorMessages] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [interestsList, setInterestsList] = useState([]);
     const [username, setUsername] = useState(null);
     const [interest, setInterest] = useState(null);
+    const [eventId, setEventId] = useState(undefined);
+
+    const addErrorMessage = message => {
+        setErrorMessages(prev => prev.concat(message));
+    };
 
     useEffect(() => {
         setUser(JSON.parse(localStorage.getItem('user')));
@@ -28,36 +36,38 @@ function Dashboard() {
             return;
         }
 
-        Axios.get(`http://eventmonkey.xyz:4000/users/${user.id}/friends`)
-            // .then(response => {
-            //     const data = [];
-            //     for (let i = 0; i < 10; i++) {
-            //         data.push(...response.data);
-            //     }
-            //     data.forEach((u, idx) => u.id = idx)
-            //     return void setFriendsList(data);
-            // })
-            .then(response => void setFriendsList(response.data))
-            .catch(e => alert(e.data));
+        if (user.type.toUpperCase() === 'ATTENDEE') {
+            Axios.get(`/users/${user.id}/friends`)
+                .then(response => void setFriendsList(response.data))
+                .catch(axiosError(`Failed to load friends list`, addErrorMessage));
 
-        Axios.get(`http://eventmonkey.xyz:4000/users/${user.id}/interests`)
-            // .then(response => {
-            //     const data = [];
-            //     for (let i = 0; i < 10; i++) {
-            //         data.push(...response.data);
-            //     }
-            //     data.forEach((g, idx) => g.id = idx)
-            //     return void setInterestsList(data);
-            // })
-            .then(response => void setInterestsList(response.data))
-            .catch(e => alert(e.data));
+            Axios.get(`/users/${user.id}/interests`)
+                .then(response => void setInterestsList(response.data))
+                .catch(axiosError(`Failed to load interests list`, addErrorMessage));
+        } else if (user.type.toUpperCase() === 'ORGANIZER') {
+            Axios.get(`/users/${user.id}/created_events`)
+                .then(response => void setCreatedEventList(response.data))
+                .catch(axiosError(`Failed to load owned events`, addErrorMessage));
+        }
     }, [user]);
+
+    useEffect(() => {
+        if (!user) {
+            return;
+        }
+
+        if (user.type.toUpperCase() === 'ATTENDEE') {
+            Axios.get(`/events/recommended/${user.id}`)
+                .then(response => void setRecommendedEvents(response.data))
+                .catch(axiosError(`Failed to load recommended events`, addErrorMessage));
+        }
+    }, [interestsList, friendsList]);
 
     if (!user) {
         return <>Loading...</>;
     }
 
-    const addFriend = e => {
+    const addFriend = () => {
         if (!username) {
             // no input
             return;
@@ -68,12 +78,12 @@ function Dashboard() {
             return;
         }
 
-        Axios.put(`http://eventmonkey.xyz:4000/users/${user.id}/add_friend/${username}`)
+        Axios.put(`/users/${user.id}/add_friend/${username}`)
             .then(response => void setFriendsList(friendsList.concat(response.data)))
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to add friend ${username}`, addErrorMessage));
     };
 
-    const removeFriend = e => {
+    const removeFriend = () => {
         if (!username) {
             // no input
             return;
@@ -86,7 +96,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.delete(`http://eventmonkey.xyz:4000/users/${user.id}/remove_friend/${username}`)
+        Axios.delete(`/users/${user.id}/remove_friend/${username}`)
             .then(response => {
                 if (response.data.message === 'success') {
                     setFriendsList(friendsList.filter(friend => {
@@ -95,10 +105,10 @@ function Dashboard() {
                 }
                 return Promise.resolve();
             })
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to remove friend ${username}`, addErrorMessage));
     };
 
-    const addInterest = e => {
+    const addInterest = () => {
         if (!interest) {
             // no input
             return;
@@ -109,12 +119,12 @@ function Dashboard() {
             return;
         }
 
-        Axios.put(`http://eventmonkey.xyz:4000/users/${user.id}/add_interest/${interest}`)
+        Axios.put(`/users/${user.id}/add_interest/${interest}`)
             .then(response => void setInterestsList(interestsList.concat(response.data)))
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to add interest ${interest}`, addErrorMessage));
     };
 
-    const removeInterest = e => {
+    const removeInterest = () => {
         if (!interest) {
             // no input
             return;
@@ -127,7 +137,7 @@ function Dashboard() {
             return;
         }
 
-        Axios.delete(`http://eventmonkey.xyz:4000/users/${user.id}/remove_interest/${interest}`)
+        Axios.delete(`/users/${user.id}/remove_interest/${interest}`)
             .then(response => {
                 if (response.data.message === 'success') {
                     setInterestsList(interestsList.filter(genre => {
@@ -135,23 +145,78 @@ function Dashboard() {
                     }));
                 }
             })
-            .catch(error => alert(error.response.data.message));
+            .catch(axiosError(`Failed to remove interest ${interest}`, addErrorMessage));
+    };
+
+    const removeCreatedEvent = () => {
+        if (eventId === undefined) {
+            // no input
+            return;
+        }
+
+        const numId = Number(eventId);
+
+        if (isNaN(numId)) {
+            addErrorMessage(`Event id ${eventId} is not a number`);
+            return;
+        }
+
+        if (!createdEventList.some(event => event.id === numId)) {
+            // not in the list
+            return;
+        }
+
+        Axios.delete(`/users/${user.id}/delete/${numId}`)
+            .then(response => {
+                if (response.data.message === 'success') {
+                    setCreatedEventList(createdEventList.filter(event => {
+                        return event.id !== numId;
+                    }));
+                }
+            })
+            .catch(axiosError(`Failed to remove interest ${interest}`, addErrorMessage));
     };
 
     return (
         <Container>
+            {errorMessages.map((error, index) => {
+                return (
+                    <ErrorAlert
+                        key={`error-${index}`}
+                        // header='Server Error'
+                        message={error}
+                    />
+                )
+            })}
             <div className="welcome-container">
                 <img className="welcome-img shadow" src={user.profileImage ? user.profileImage.url : George} alt=""/>
                 <h2 className="dashboard-title">Welcome {user.username}!</h2>
                 <h6 className="dashboard-subtitle">This is your personalized dashboard...</h6>
                 <Button className="logout-btn" onClick={() => {
                     localStorage.removeItem('user');
-                    localStorage.setItem('token',"");
+                    localStorage.removeItem('token');
                     window.location.href = '/';
                 }}>logout</Button>
                 <hr/>
             </div>
 
+            {renderForType(user.type,
+                interestsList, addInterest, removeInterest, setInterest,
+                setUsername, friendsList, addFriend, removeFriend,
+                recommendedEvents,
+                createdEventList, removeCreatedEvent, setEventId
+            )}
+        </Container>
+    );
+}
+
+function renderForType(userType,
+                       interestsList, addInterest, removeInterest, setInterest,
+                       setUsername, friendsList, addFriend, removeFriend,
+                       recommendedEvents,
+                       createdEventList, removeCreatedEvent, setEventId) {
+    if (userType.toUpperCase() === 'ATTENDEE') {
+        return <>
             <SectionList
                 sectionName='Interests'
                 placeHolderText='Enter genre name'
@@ -179,58 +244,52 @@ function Dashboard() {
                     </Card>
                 )}
             />
+            <hr/>
+
+            <h5 className='text-left' style={{color: 'chocolate'}}>Recommended Just For You!</h5>
+            <div className='mt-2 d-flex overflow-auto'>
+                {recommendedEvents?.length && recommendedEvents.map(event => {
+                    return simpleEventCard(event);
+                })}
+            </div>
+            <hr/>
 
             <div className="tsn-container">
-                <h6>Try Something New</h6>
-                {/* carousel here? */}
-                <hr/>
-            </div>
-
-            <div className="rec-container">
-                <h6>Recommended Just For You!</h6>
+                <h5>Try Something New</h5>
                 {/* carousel here? */}
                 <hr/>
             </div>
 
             <div className="category-container">
-                <h6>Browse by Category</h6>
+                <h5>Browse by Category</h5>
                 {/* carousel here? */}
                 <hr/>
             </div>
 
             <div className="recent-container">
-                <h6>Recent Events</h6>
+                <h5>Recent Events</h5>
                 {/* carousel here? */}
                 <hr/>
             </div>
+        </>;
+    }
 
-            {/* <Row>
-                <Col></Col>
-                <Col>
-                    <Card style={{ width: '18rem'}}>
-                        <Card.Img variant="top" src="holder.js/100px180?text=Image cap" />
-                        <Card.Body>
-                            <Card.Title>Welcome Sajan!</Card.Title>
-                            <Card.Text>
-                                Some quick example text to build on the card title and make up the
-                                bulk of the card's content.
-                            </Card.Text>
-                        </Card.Body>
-                        <ListGroup className="list-group-flush">
-                            <ListGroup.Item>Sajan Gururng</ListGroup.Item>
-                            <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
-                            <ListGroup.Item  onClick={() => {
-                                localStorage.setItem('token',false);
-                                navigate('/');
-                            }}>Logout</ListGroup.Item>
-                        </ListGroup>
-                    </Card>
-                </Col>
-                <Col></Col>
-            </Row> */}
+    if (userType.toUpperCase() === 'ORGANIZER') {
+        return <>
+            <SectionList
+                sectionName='Your Events'
+                placeHolderText='Enter event id'
+                setText={setEventId}
+                handleRemove={removeCreatedEvent}
+                components={createdEventList.map(event => {
+                    return simpleEventCard(event, true);
+                })}
+            />
+            <hr/>
+        </>;
+    }
 
-        </Container>
-    );
+    return <p>Unknown user type: {userType}</p>
 }
 
 function SectionList(props) {
@@ -239,13 +298,15 @@ function SectionList(props) {
             <Row>
                 <h5 className='my-3'>{props.sectionName}</h5>
             </Row>
-            <Row>
-                <form className='d-flex'>
-                    <input type='text' className='form-control border-warning' placeholder={props.placeHolderText} onChange={e => props.setText(e.target.value)}/>
-                    <Button variant='primary' className='ml-2' onClick={props.handleAdd}>Add</Button>
-                    <Button variant='danger' className='ml-2' onClick={props.handleRemove}>Remove</Button>
-                </form>
-            </Row>
+            {(props.handleAdd || props.handleRemove) &&
+                <Row>
+                    <form className='d-flex'>
+                        <input type='text' className='form-control border-warning' placeholder={props.placeHolderText} onChange={e => props.setText(e.target.value)}/>
+                        {props.handleAdd && <Button variant='primary' className='ml-2' onClick={props.handleAdd}>Add</Button>}
+                        {props.handleRemove && <Button variant='danger' className='ml-2' onClick={props.handleRemove}>Remove</Button>}
+                    </form>
+                </Row>
+            }
             <Row className='mt-2 d-flex flex-wrap overflow-auto' style={{ maxHeight: '24rem' }}>
                 {props.components}
             </Row>

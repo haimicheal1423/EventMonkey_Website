@@ -17,16 +17,14 @@ import TrySomethingNew from './pages/TrySomethingNew';
 import Profile from './pages/Profile';
 import { isLoggedIn } from './utils';
 
-
-
 function App() {
 
-const ProtectRoute = ({ children }) => {
-    if(!isLoggedIn()){
-        return <Navigate to="/" replace/>
+    const ProtectRoute = ({ children }) => {
+        if (!isLoggedIn()) {
+            return <Navigate to="/" replace/>
+        }
+        return children;
     }
-    return children;
-}
 
   return (
     <>

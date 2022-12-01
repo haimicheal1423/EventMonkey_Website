@@ -1,15 +1,17 @@
+import Axios from 'axios';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Card from 'react-bootstrap/Card';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Container from "react-bootstrap/Container";
+
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Card from 'react-bootstrap/Card';
-import Axios from 'axios';
-import George from '../assets/profileImages/george-avatar.jpeg'
 
+import { axiosError } from "../utils";
 import ModalEM from '../components/Modal'
 import BannerEM from '../components/Banner'
+import George from '../assets/profileImages/george-avatar.jpeg'
 import '../assets/css/event.css'
 
 function SingleEvent() {
@@ -17,9 +19,9 @@ function SingleEvent() {
     const [event, setEvent] = useState(undefined);
 
     useEffect(() => {
-        Axios.get(`http://eventmonkey.xyz:4000/events/${eventId}`)
+        Axios.get(`/events/${eventId}`)
             .then(response => void setEvent(response.data))
-            .catch(e => alert(JSON.stringify(e.response.data)));
+            .catch(axiosError(`Failed to load event ${eventId}`, alert));
     }, [eventId]);
 
     return (
@@ -35,18 +37,18 @@ function EventSearch() {
     const columnsPerRow = 4;
     const [searchParams] = useSearchParams();
     const [events, setEvents] = useState([]);
-    // const [url, setUrl] = useState('http://eventmonkey.xyz:4000/events/')
+    // const [url, setUrl] = useState('/events/')
 
     useEffect(() => {
-        if (searchParams.has('source') || searchParams.has('limit')
-                || searchParams.has('keyword') || searchParams.has('genres')) {
-            Axios.get(`http://eventmonkey.xyz:4000/events/search?${searchParams}`)
+        if (searchParams.get('source') || searchParams.get('limit')
+                || searchParams.get('keyword') || searchParams.get('genres')) {
+            Axios.get(`/events/search?${searchParams}`)
                 .then(response => void setEvents(response.data))
-                .catch(e => alert(JSON.stringify(e.response.data)));
+                .catch(axiosError(`Failed to search events using ${searchParams}`, alert));
         } else {
-            Axios.get("http://eventmonkey.xyz:4000/events")
+            Axios.get("/events")
                 .then(response => void setEvents(response.data))
-                .catch(e => alert(JSON.stringify(e.response.data)));
+                .catch(axiosError('Failed to load all events', alert));
         }
     }, [searchParams]);
 
@@ -59,12 +61,24 @@ function EventSearch() {
 
             <ModalEM/>
 
-            <div className='mt-2 d-flex flex-wrap overflow-auto'>
+            <div className='mt-2 d-flex flex-wrap justify-content-center overflow-auto'>
                 {events?.length && events.map(event => {
-                    return <Col>{eventCard(event)}</Col>
+                    return simpleEventCard(event);
                 })}
             </div>
         </div>
+    );
+}
+
+export function simpleEventCard(event, showId) {
+    return (
+        <Card key={event.id} className="m-3 p-3" style={{ minWidth: '18rem', maxWidth: '18rem' }}>
+            <Card.Img variant="top" src={eventImage(event)} />
+            <Card.Body>
+                <Card.Title>{showId ? `[id: ${event.id}] ${event.name}` : event.name}</Card.Title>
+                <Card.Link href={`/event/id/${event.id}`}>View Details</Card.Link>
+            </Card.Body>
+        </Card>
     );
 }
 
@@ -79,20 +93,26 @@ function eventCard(event) {
             <Card.Body>
                 <Card.Title>{event.name}</Card.Title>
                 <Card.Text>
-                    {event.description.length > 90
-                        ? event.description.substring(0, 87) + ' [...]'
-                        : event.description}
+                    {!event.description || event.description.length === 0
+                        ? 'No description available'
+                        : event.description.length > 90
+                            ? event.description.substring(0, 87) + ' [...]'
+                            : event.description}
                 </Card.Text>
             </Card.Body>
             <ListGroup className="list-group-flush">
                 {priceRange(event)}
                 {eventDate(event)}
                 <ListGroup.Item>
-                    <Card.Text>{event.location}</Card.Text>
+                    <Card.Text>{
+                        !event.location || event.location.length === 0
+                            ? 'Unknown location'
+                            : event.location}
+                    </Card.Text>
                 </ListGroup.Item>
             </ListGroup>
             <Card.Body>
-                <Card.Link href="#">Card Link</Card.Link>
+                <Card.Link href={`/event/id/${event.id}`}>View Details</Card.Link>
                 <Card.Link href="#">Another Link</Card.Link>
             </Card.Body>
         </Card>
@@ -135,7 +155,9 @@ function priceRange(event) {
                 return (
                     <Card.Text key={range.currency}>
                         Price: {
-                            range.min === range.max
+                            range.min === 0
+                            ? 'Free'
+                            : range.min === range.max
                                 ? max
                                 : `${min} - ${max}`
                         }
