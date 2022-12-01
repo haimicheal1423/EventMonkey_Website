@@ -45,11 +45,14 @@ export class Genre {
     }
 
     static verifyGenre(genre) {
-        if (!genre) {
+        if (genre === undefined) {
             throw new Error('Genre undefined');
         }
-        if (!genre['name']) {
+        if (genre['name'] === undefined) {
             throw new Error('Genre name undefined');
+        }
+        if (genre.name.length > 255) {
+            throw new Error('Genre name must be less than 255 characters');
         }
     }
 }

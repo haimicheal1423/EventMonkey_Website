@@ -35,27 +35,27 @@
 
 .tsn-container {
     margin: auto;
-    text-align: center;
+    text-align: left;
     justify-content: center;
     color: chocolate;
 }
 
 .rec-container {
     margin: auto;
-    text-align: center;
+    text-align: left;
     justify-content: center;
     color: chocolate;
 }
 .category-container {
     margin: auto;
-    text-align: center;
+    text-align: left;
     justify-content: center;
     color: chocolate;
 }
 
 .recent-container {
     margin: auto;
-    text-align: center;
+    text-align: left;
     justify-content: center;
     color: chocolate;
 }
