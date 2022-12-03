@@ -27,7 +27,7 @@ export class EventSource {
     /**
      * Finds a single {@link Event} by matching the given event id.
      *
-     * @param {number} eventId the EventMonkey event id
+     * @param {number|string} eventId the event id
      *
      * @returns {Promise<Event>} the event
      * @abstract
@@ -96,7 +96,7 @@ export class TicketMasterSource extends EventSource {
      * @returns {Promise<Response>}
      * @private
      */
-    apiRequest_(baseUrl, values = {}) {
+    async apiRequest_(baseUrl, values = {}) {
         const entries = Object.entries(values);
 
         if (entries.length === 0) {
@@ -112,7 +112,8 @@ export class TicketMasterSource extends EventSource {
 
         // join the url with query parameters in the form
         // baseUrl?key1=val1&key2=val2...&keyN=valN
-        return fetch(`${baseUrl}?${params}`);
+        const response = await fetch(`${baseUrl}?${params}`);
+        return await response.json();
     }
 
     /**
@@ -129,12 +130,10 @@ export class TicketMasterSource extends EventSource {
     async ticketMasterEventRequest_(values = {}, limit) {
         // make an api request using the events url and api key, then spread out
         // the optional query parameters
-        const response = await this.apiRequest_(
+        const json = await this.apiRequest_(
             'https://app.ticketmaster.com/discovery/v2/events',
             { apikey: process.env.TICKETMASTER_API_KEY, ...values }
         );
-
-        const json = await response.json()
 
         if (!json['_embedded']) {
             // response does not contain _embedded data
@@ -306,15 +305,21 @@ export class TicketMasterSource extends EventSource {
     /**
      * Finds a single {@link Event} by matching the given event id.
      *
-     * @param {number} eventId the EventMonkey event id
+     * @param {string} eventId the TicketMaster event id
      *
      * @returns {Promise<Event>} the event
      */
     async findByEventId(eventId) {
-        return this.ticketMasterEventRequest_({
+        const events = await this.ticketMasterEventRequest_({
             id: eventId,
             size: 1
         }, 1);
+
+        if (!events || events.length < 1) {
+            return undefined;
+        }
+
+        return events[0];
     }
 
     /**
@@ -523,7 +528,7 @@ export class CompositeSource extends EventSource {
     /**
      * Finds a single {@link Event} by matching the given event id.
      *
-     * @param {number} eventId the EventMonkey event id
+     * @param {number|string} eventId the EventMonkey event id
      *
      * @returns {Promise<Event>} the event
      */

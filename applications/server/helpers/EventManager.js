@@ -119,7 +119,7 @@ export class EventManager {
         const workList = [];
 
         if (genres) {
-            const names = genres.split(",");
+            const names = Array.isArray(genres) ? genres : genres.split(",");
             workList.push(eventSource.findByGenre(names, limit));
         }
 
