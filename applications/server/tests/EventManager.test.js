@@ -3,9 +3,250 @@ import { EventMonkeyDataSource } from '../helpers/Database.js';
 import { EventManager } from '../helpers/EventManager.js';
 import { TYPE_ATTENDEE, TYPE_ORGANIZER } from '../models/User.js';
 import { Genre } from '../models/Genre.js';
-import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER } from '../models/Event.js';
+import { Image } from '../models/Image.js';
+import { SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, Event } from '../models/Event.js';
 
 describe('searching events', () => {
+    test('searching the event monkey source', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const source = SOURCE_EVENT_MONKEY;
+        const limit = 20;
+        const genres = ['mock-genre'];
+        const keyword = 'mock-keyword';
+
+        const expectedEventList = [
+            'mock-event-by-genre',
+            'mock-event-by-keyword'
+        ];
+
+        jest.spyOn(manager.eventMonkey_, 'findByGenre')
+            .mockImplementationOnce(async () => ['mock-event-by-genre']);
+
+        jest.spyOn(manager.eventMonkey_, 'findByKeyword')
+            .mockImplementationOnce(async () => ['mock-event-by-keyword']);
+
+        jest.spyOn(manager.ticketMaster_, 'findByGenre');
+        jest.spyOn(manager.ticketMaster_, 'findByKeyword');
+
+        jest.spyOn(manager.composite_, 'findByGenre');
+        jest.spyOn(manager.composite_, 'findByKeyword');
+
+        const result = await manager.search({ source, limit, genres, keyword });
+
+        expect(manager.eventMonkey_.findByGenre)
+            .toHaveBeenCalledWith(genres, limit);
+
+        expect(manager.eventMonkey_.findByKeyword)
+            .toHaveBeenCalledWith(keyword, limit);
+
+        expect(manager.ticketMaster_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.ticketMaster_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(manager.composite_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.composite_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(result).toStrictEqual(expectedEventList);
+    });
+
+    test('searching the ticket master source', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const source = SOURCE_TICKET_MASTER;
+        const limit = 20;
+        const genres = ['mock-genre'];
+        const keyword = 'mock-keyword';
+
+        const expectedEventList = [
+            'mock-event-by-genre',
+            'mock-event-by-keyword'
+        ];
+
+        jest.spyOn(manager.eventMonkey_, 'findByGenre');
+        jest.spyOn(manager.eventMonkey_, 'findByKeyword');
+
+        jest.spyOn(manager.ticketMaster_, 'findByGenre')
+            .mockImplementationOnce(async () => ['mock-event-by-genre']);
+
+        jest.spyOn(manager.ticketMaster_, 'findByKeyword')
+            .mockImplementationOnce(async () => ['mock-event-by-keyword']);
+
+        jest.spyOn(manager.composite_, 'findByGenre');
+        jest.spyOn(manager.composite_, 'findByKeyword');
+
+        const result = await manager.search({ source, limit, genres, keyword });
+
+        expect(manager.eventMonkey_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.eventMonkey_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(manager.ticketMaster_.findByGenre)
+            .toHaveBeenCalledWith(genres, limit);
+
+        expect(manager.ticketMaster_.findByKeyword)
+            .toHaveBeenCalledWith(keyword, limit);
+
+        expect(manager.composite_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.composite_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(result).toStrictEqual(expectedEventList);
+    });
+
+    test('searching with undefined source and limit', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const genres = ['mock-genre'];
+        const keyword = 'mock-keyword';
+
+        const expectedEventList = [
+            'mock-event-by-genre',
+            'mock-event-by-keyword'
+        ];
+
+        jest.spyOn(manager.eventMonkey_, 'findByGenre');
+        jest.spyOn(manager.eventMonkey_, 'findByKeyword');
+
+        jest.spyOn(manager.ticketMaster_, 'findByGenre');
+        jest.spyOn(manager.ticketMaster_, 'findByKeyword');
+
+        jest.spyOn(manager.composite_, 'findByGenre')
+            .mockImplementationOnce(async () => ['mock-event-by-genre']);
+        jest.spyOn(manager.composite_, 'findByKeyword')
+            .mockImplementationOnce(async () => ['mock-event-by-keyword']);
+
+        const result = await manager.search({ genres, keyword });
+
+        expect(manager.eventMonkey_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.eventMonkey_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(manager.ticketMaster_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.ticketMaster_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(manager.composite_.findByGenre)
+            .toHaveBeenCalledWith(genres, 20);
+        expect(manager.composite_.findByKeyword)
+            .toHaveBeenCalledWith(keyword, 20);
+
+        expect(result).toStrictEqual(expectedEventList);
+    });
+
+    test('searching the event monkey source using a single genre', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const source = SOURCE_EVENT_MONKEY;
+        const limit = 20;
+        const genres = 'mock-genre';
+
+        const expectedEventList = [
+            'mock-event-by-genre'
+        ];
+
+        jest.spyOn(manager.eventMonkey_, 'findByGenre')
+            .mockImplementationOnce(async () => ['mock-event-by-genre']);
+
+        jest.spyOn(manager.eventMonkey_, 'findByKeyword');
+
+        jest.spyOn(manager.ticketMaster_, 'findByGenre');
+        jest.spyOn(manager.ticketMaster_, 'findByKeyword');
+
+        jest.spyOn(manager.composite_, 'findByGenre');
+        jest.spyOn(manager.composite_, 'findByKeyword');
+
+        const result = await manager.search({ source, limit, genres });
+
+        expect(manager.eventMonkey_.findByGenre)
+            .toHaveBeenCalledWith([genres], limit);
+
+        expect(manager.eventMonkey_.findByKeyword).toHaveBeenCalledTimes(0)
+
+        expect(manager.ticketMaster_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.ticketMaster_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(manager.composite_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.composite_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(result).toStrictEqual(expectedEventList);
+    });
+
+    test('searching the event monkey source using a genre array', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const source = SOURCE_EVENT_MONKEY;
+        const limit = 20;
+        const genres = ['mock-genre'];
+
+        const expectedEventList = [
+            'mock-event-by-genre'
+        ];
+
+        jest.spyOn(manager.eventMonkey_, 'findByGenre')
+            .mockImplementationOnce(async () => ['mock-event-by-genre']);
+
+        jest.spyOn(manager.eventMonkey_, 'findByKeyword');
+
+        jest.spyOn(manager.ticketMaster_, 'findByGenre');
+        jest.spyOn(manager.ticketMaster_, 'findByKeyword');
+
+        jest.spyOn(manager.composite_, 'findByGenre');
+        jest.spyOn(manager.composite_, 'findByKeyword');
+
+        const result = await manager.search({ source, limit, genres });
+
+        expect(manager.eventMonkey_.findByGenre)
+            .toHaveBeenCalledWith(genres, limit);
+
+        expect(manager.eventMonkey_.findByKeyword).toHaveBeenCalledTimes(0)
+
+        expect(manager.ticketMaster_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.ticketMaster_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(manager.composite_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.composite_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(result).toStrictEqual(expectedEventList);
+    });
+
+    test('searching the event monkey source using only keyword', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const source = SOURCE_EVENT_MONKEY;
+        const limit = 20;
+        const keyword = 'mock-keyword';
+
+        const expectedEventList = [
+            'mock-event-by-keyword'
+        ];
+
+        jest.spyOn(manager.eventMonkey_, 'findByGenre');
+        jest.spyOn(manager.eventMonkey_, 'findByKeyword')
+            .mockImplementationOnce(async () => ['mock-event-by-keyword']);
+
+        jest.spyOn(manager.ticketMaster_, 'findByGenre');
+        jest.spyOn(manager.ticketMaster_, 'findByKeyword');
+
+        jest.spyOn(manager.composite_, 'findByGenre');
+        jest.spyOn(manager.composite_, 'findByKeyword');
+
+        const result = await manager.search({ source, limit, keyword });
+
+        expect(manager.eventMonkey_.findByKeyword)
+            .toHaveBeenCalledWith(keyword, limit);
+
+        expect(manager.eventMonkey_.findByGenre).toHaveBeenCalledTimes(0)
+
+        expect(manager.ticketMaster_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.ticketMaster_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(manager.composite_.findByGenre).toHaveBeenCalledTimes(0);
+        expect(manager.composite_.findByKeyword).toHaveBeenCalledTimes(0);
+
+        expect(result).toStrictEqual(expectedEventList);
+    });
 });
 
 describe('checking user types', () => {
@@ -173,6 +414,71 @@ describe('get recommended events', () => {
 
         expect(manager.composite_.findByGenre)
             .toHaveBeenCalledWith(genreNames, limit);
+
+        expect(result).toHaveLength(3);
+        expect(result).toEqual(expectedEventList);
+    });
+
+    test('using undefined limit', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const expectedEventList = [
+            'mock-event-1',
+            'mock-event-2',
+            'mock-event-3'
+        ];
+
+        const userInterests = [
+            Genre.create('mock-user-interest-1'),
+            Genre.create('mock-user-interest-2')
+        ];
+
+        const friendInterests = [
+            Genre.create('mock-friend-interest-1'),
+            Genre.create('mock-friend-interest-2')
+        ];
+
+        const genres = userInterests.concat(friendInterests);
+        const genreNames = genres.map(genre => genre.name);
+
+        const userId = 999;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                userId,
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'email',
+                password: 'secret',
+                profileImageId: undefined
+            }));
+
+        jest.spyOn(dataSource, 'getInterestList')
+            .mockImplementationOnce(async () => userInterests);
+
+        jest.spyOn(dataSource, 'getFriendInterests')
+            .mockImplementationOnce(async () => friendInterests);
+
+        jest.spyOn(manager.composite_, 'findByGenre')
+            .mockImplementationOnce(async () => {
+                return ['mock-event-1', 'mock-event-2', 'mock-event-3'];
+            });
+
+        const result = await manager.getRecommendedEvents(userId)
+
+        expect(dataSource.getUserDetails).toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ATTENDEE);
+
+        expect(dataSource.getInterestList).toHaveBeenCalledWith(userId);
+        expect(dataSource.getFriendInterests).toHaveBeenCalledWith(userId);
+
+        expect(manager.composite_.findByGenre)
+            .toHaveBeenCalledWith(genreNames, 20);
 
         expect(result).toHaveLength(3);
         expect(result).toEqual(expectedEventList);
@@ -589,7 +895,7 @@ describe('find by event id', () => {
 });
 
 describe('get created events', () => {
-    test('using organizer user type', async () => {
+    test('using an Organizer user type', async () => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new EventManager(dataSource);
 
@@ -650,7 +956,7 @@ describe('get created events', () => {
         expect(result).toEqual(expectedEventList);
     });
 
-    test('using attendee user type', async () => {
+    test('using an Attendee user type', async () => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new EventManager(dataSource);
 
@@ -681,7 +987,7 @@ describe('get created events', () => {
 });
 
 describe('get favorite events', () => {
-    test('using attendee user type', async () => {
+    test('using an Attendee user type', async () => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new EventManager(dataSource);
 
@@ -769,7 +1075,7 @@ describe('get favorite events', () => {
         expect(result).toEqual(expectedEventList);
     });
 
-    test('using organizer user type', async () => {
+    test('using an Organizer user type', async () => {
         const dataSource = new EventMonkeyDataSource();
         const manager = new EventManager(dataSource);
 
@@ -800,7 +1106,303 @@ describe('get favorite events', () => {
 });
 
 describe('creating events', () => {
+    test('using an Attendee user type', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const userId = 999;
+
+        jest.spyOn(dataSource, 'addGenresToEvent');
+        jest.spyOn(dataSource, 'addImagesToEvent');
+        jest.spyOn(dataSource, 'addToEventMonkeyList');
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                userId,
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'email',
+                password: 'secret',
+                profileImageId: undefined
+            }));
+
+        const name = 'mock-name';
+        const description = 'mock-description';
+        const location = 'mock-location';
+        const dates = 'mock-dates';
+        const priceRanges = 'mock-priceRanges';
+        const genres = ['mock-genre'];
+        const images = ['mock-image'];
+
+        const result = await manager.createEvent(userId, name, description,
+                                                 location, dates, priceRanges,
+                                                 genres, images);
+
+        expect(dataSource.getUserDetails).toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ORGANIZER);
+
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ORGANIZER}`);
+    });
+
+    test('using an Organizer to create a valid event', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const userId = 999;
+        const expectedEventId = 777;
+
+        jest.spyOn(Event, 'verifyName').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyDescription').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyLocation').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyDates').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyPriceRanges').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyGenres').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyImages').mockImplementationOnce(() => {});
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                userId,
+                type: TYPE_ORGANIZER,
+                username: 'username',
+                email: 'email',
+                password: 'secret',
+                profileImageId: undefined
+            }));
+
+        jest.spyOn(dataSource, 'addEventDetails')
+            .mockImplementationOnce(async () => expectedEventId);
+
+        jest.spyOn(dataSource, 'addGenresToEvent')
+            .mockImplementationOnce(async () => new Map());
+
+        jest.spyOn(dataSource, 'addImagesToEvent')
+            .mockImplementationOnce(async () => new Map());
+
+        jest.spyOn(dataSource, 'addToEventMonkeyList')
+            .mockImplementationOnce(async () => true);
+
+        const name = 'mock-name';
+        const description = 'mock-description';
+        const location = 'mock-location';
+        const dates = 'mock-dates';
+        const priceRanges = 'mock-priceRanges';
+        const genres = [Genre.create('mock-genre')];
+        const images = [Image.create('1_1', 1, 1, 'mock-image')];
+
+        const result = await manager.createEvent(userId, name, description,
+                                                 location, dates, priceRanges,
+                                                 genres, images);
+
+        expect(dataSource.getUserDetails).toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ORGANIZER);
+
+        expect(Event.verifyName).toHaveBeenCalledWith(name);
+        expect(Event.verifyDescription).toHaveBeenCalledWith(description);
+        expect(Event.verifyLocation).toHaveBeenCalledWith(location);
+        expect(Event.verifyDates).toHaveBeenCalledWith(dates);
+        expect(Event.verifyPriceRanges).toHaveBeenCalledWith(priceRanges);
+        expect(Event.verifyGenres).toHaveBeenCalledWith(genres);
+        expect(Event.verifyImages).toHaveBeenCalledWith(images);
+
+        expect(dataSource.addEventDetails).toHaveBeenCalledTimes(1);
+
+        expect(dataSource.addGenresToEvent)
+            .toHaveBeenCalledWith(expectedEventId, genres);
+
+        expect(dataSource.addImagesToEvent)
+            .toHaveBeenCalledWith(expectedEventId, images);
+
+        expect(dataSource.addToEventMonkeyList)
+            .toHaveBeenCalledWith(userId, expectedEventId);
+
+        expect(result.message).toBeUndefined();
+        expect(result).toEqual({ eventId: expectedEventId });
+    });
+
+    test('failing to add event details', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const userId = 999;
+
+        jest.spyOn(Event, 'verifyName').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyDescription').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyLocation').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyDates').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyPriceRanges').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyGenres').mockImplementationOnce(() => {});
+        jest.spyOn(Event, 'verifyImages').mockImplementationOnce(() => {});
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                userId,
+                type: TYPE_ORGANIZER,
+                username: 'username',
+                email: 'email',
+                password: 'secret',
+                profileImageId: undefined
+            }));
+
+        jest.spyOn(dataSource, 'addEventDetails')
+            .mockImplementationOnce(async () => undefined);
+
+        const name = 'mock-name';
+        const description = 'mock-description';
+        const location = 'mock-location';
+        const dates = 'mock-dates';
+        const priceRanges = 'mock-priceRanges';
+        const genres = [Genre.create('mock-genre')];
+        const images = [Image.create('1_1', 1, 1, 'mock-image')];
+
+        const result = await manager.createEvent(userId, name, description,
+                                                 location, dates, priceRanges,
+                                                 genres, images);
+
+        expect(dataSource.getUserDetails).toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ORGANIZER);
+
+        expect(Event.verifyName).toHaveBeenCalledWith(name);
+        expect(Event.verifyDescription).toHaveBeenCalledWith(description);
+        expect(Event.verifyLocation).toHaveBeenCalledWith(location);
+        expect(Event.verifyDates).toHaveBeenCalledWith(dates);
+        expect(Event.verifyPriceRanges).toHaveBeenCalledWith(priceRanges);
+        expect(Event.verifyGenres).toHaveBeenCalledWith(genres);
+        expect(Event.verifyImages).toHaveBeenCalledWith(images);
+
+        expect(dataSource.addEventDetails).toHaveBeenCalledTimes(1);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe('Failed to add event details');
+    });
 });
 
 describe('deleting events', () => {
+    test('using an Attendee user type', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const userId = 999;
+        const eventId = 777;
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                userId,
+                type: TYPE_ATTENDEE,
+                username: 'username',
+                email: 'email',
+                password: 'secret',
+                profileImageId: undefined
+            }));
+
+        const result = await manager.deleteEvent(userId, eventId);
+
+        expect(dataSource.getUserDetails).toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ORGANIZER);
+
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) is not type ${TYPE_ORGANIZER}`);
+    });
+
+    test('using an Organizer to delete one of their events', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const userId = 999;
+        const eventId = 777;
+
+        jest.spyOn(dataSource, 'getEventMonkeyList')
+            .mockImplementationOnce(async () => [eventId]);
+        jest.spyOn(dataSource, 'removeEventDetails')
+            .mockImplementationOnce(async () => {});
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                userId,
+                type: TYPE_ORGANIZER,
+                username: 'username',
+                email: 'email',
+                password: 'secret',
+                profileImageId: undefined
+            }));
+
+        const result = await manager.deleteEvent(userId, eventId);
+
+        expect(dataSource.getUserDetails).toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ORGANIZER);
+
+        expect(dataSource.getEventMonkeyList)
+            .toHaveBeenCalledWith(userId);
+
+        expect(dataSource.removeEventDetails)
+            .toHaveBeenCalledWith(eventId);
+
+        expect(result.message).toBeDefined();
+        expect(result.message).toBe('success');
+    });
+
+    test('using an Organizer to delete an event they do not own', async () => {
+        const dataSource = new EventMonkeyDataSource();
+        const manager = new EventManager(dataSource);
+
+        const userId = 999;
+        const eventId = 777;
+
+        jest.spyOn(dataSource, 'getEventMonkeyList')
+            .mockImplementationOnce(async () => []);
+
+        jest.spyOn(dataSource, 'removeEventDetails')
+            .mockImplementationOnce(async () => {});
+
+        jest.spyOn(manager, 'checkUserType');
+
+        jest.spyOn(dataSource, 'getUserDetails')
+            .mockImplementationOnce(async() => ({
+                userId,
+                type: TYPE_ORGANIZER,
+                username: 'username',
+                email: 'email',
+                password: 'secret',
+                profileImageId: undefined
+            }));
+
+        const result = await manager.deleteEvent(userId, eventId);
+
+        expect(dataSource.getUserDetails).toHaveBeenCalledWith(userId);
+
+        expect(manager.checkUserType)
+            .toHaveBeenCalledWith(userId, TYPE_ORGANIZER);
+
+        expect(dataSource.getEventMonkeyList)
+            .toHaveBeenCalledWith(userId);
+
+        expect(dataSource.removeEventDetails)
+            .toHaveBeenCalledTimes(0);
+
+        expect(result.message).toBeDefined();
+        expect(result.message)
+            .toBe(`User(${userId}) does not own Event(${eventId})`);
+    });
 });
