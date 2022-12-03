@@ -55,9 +55,10 @@ export class Event {
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
      */
-    constructor(source, name, description, location, dates, priceRanges,
+    constructor(source, id, name, description, location, dates, priceRanges,
                 images = [], genres = []) {
         this.source = source;
+        this.id = id;
         this.name = name;
         this.description = description;
         this.location = location;

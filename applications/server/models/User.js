@@ -71,6 +71,7 @@ export class User {
      */
     addEvent(event) {
         for (const sourceList of this.eventList) {
+            console.log('Made it inside addEvent for loop');
             if (sourceList.source === event.source) {
                 sourceList.eventIds.push(event.id);
                 break;
