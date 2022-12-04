@@ -8,11 +8,12 @@ import Container from "react-bootstrap/Container";
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from "react-router-dom";
 
-import { axiosError } from "../utils";
+import { axiosError } from '../utils';
 import ModalEM from '../components/Modal'
 import BannerEM from '../components/Banner'
 import George from '../assets/profileImages/george-avatar.jpeg'
 import '../assets/css/event.css'
+import Button from 'react-bootstrap/Button';
 
 function SingleEvent() {
     const { eventId } = useParams();
@@ -63,20 +64,32 @@ function EventSearch() {
 
             <div className='mt-2 d-flex flex-wrap justify-content-center overflow-auto'>
                 {events?.length && events.map(event => {
-                    return simpleEventCard(event);
+                    return (
+                        <EventCard
+                            event={event}
+                            canFavorite={true}
+                            onFavorite={() => {
+                                alert('Unimplemented functionality');
+                            }}
+                        />
+                    );
                 })}
             </div>
         </div>
     );
 }
 
-export function simpleEventCard(event, showId) {
+export function EventCard(props) {
     return (
-        <Card key={event.id} className="m-3 p-3" style={{ minWidth: '18rem', maxWidth: '18rem' }}>
-            <Card.Img variant="top" src={eventImage(event)} />
+        <Card key={props.event.id} className="m-3 p-3" style={{ minWidth: '18rem', maxWidth: '18rem' }}>
+            <Card.Img variant="top" src={eventImage(props.event)} />
             <Card.Body>
-                <Card.Title>{showId ? `[id: ${event.id}] ${event.name}` : event.name}</Card.Title>
-                <Card.Link href={`/event/id/${event.id}`}>View Details</Card.Link>
+                <Card.Title>{props.event.name}</Card.Title>
+                <Card.Link href={`/event/id/${props.event.id}`}>View Details</Card.Link>
+                {!props.hideLink && props.event.url && <Card.Link href={props.event.url}>External Link</Card.Link>}
+                {props.canFavorite && <Button variant='primary' onClick={props.onFavorite}>Add to favorites</Button>}
+                {props.canRemove && <Button variant='danger' onClick={props.onRemove}>Remove</Button>}
+                {props.canDelete && <Button variant='danger' onClick={props.onDelete}>Delete</Button>}
             </Card.Body>
         </Card>
     );
