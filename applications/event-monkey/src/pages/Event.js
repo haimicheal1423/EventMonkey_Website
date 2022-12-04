@@ -8,7 +8,7 @@ import Container from "react-bootstrap/Container";
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from "react-router-dom";
 
-import { axiosError } from '../utils';
+import { axiosError, getUser, isLoggedIn, isUserAttendee } from '../utils';
 import ModalEM from '../components/Modal'
 import BannerEM from '../components/Banner'
 import George from '../assets/profileImages/george-avatar.jpeg'
@@ -53,6 +53,62 @@ function EventSearch() {
         }
     }, [searchParams]);
 
+    const [userEventList, setUserEventList] = useState([]);
+
+    useEffect(() => {
+        const user = getUser();
+
+        if (user !== null) {
+            Axios.get(`/users/${user.id}/favorites`)
+                 .then(response => void setUserEventList(response.data.map(ev => ev.id)))
+                 .catch(axiosError(`Failed to load favorite events`, alert));
+        }
+    }, []);
+
+    const addFavorite = (event) => {
+        const user = getUser();
+
+        if (user === null) {
+            return;
+        }
+
+        if (userEventList.some(evId => evId === event.id)) {
+            // already in the list
+            return;
+        }
+
+        Axios.put(`/users/${user.id}/add_favorite/${event.id}`)
+             .then(response => {
+                 if (response.data.message === 'success') {
+                     setUserEventList(prev => prev.concat(event.id));
+                 }
+                 return Promise.resolve();
+             })
+             .catch(axiosError('Failed to add event favorite', alert));
+    };
+
+    const removeFavorite = (event) => {
+        const user = getUser();
+
+        if (user === null) {
+            return;
+        }
+
+        if (!userEventList.some(evId => evId === event.id)) {
+            // not in the list
+            return;
+        }
+
+        Axios.delete(`/users/${user.id}/remove_favorite/${event.id}`)
+             .then(response => {
+                 if (response.data.message === 'success') {
+                     setUserEventList(prev => prev.filter(evId => evId !== event.id));
+                 }
+                 return Promise.resolve();
+             })
+             .catch(axiosError('Failed to remove event favorite', alert));
+    };
+
     return (
         <div className='m-3'>
             <h5 className="events-title">Events</h5>
@@ -63,17 +119,20 @@ function EventSearch() {
             <ModalEM/>
 
             <div className='mt-2 d-flex flex-wrap justify-content-center overflow-auto'>
-                {events?.length && events.map(event => {
-                    return (
-                        <EventCard
-                            event={event}
-                            canFavorite={true}
-                            onFavorite={() => {
-                                alert('Unimplemented functionality');
-                            }}
-                        />
-                    );
-                })}
+                {events?.length > 0 && events.map(event => (
+                    <EventCard
+                        key={event.id}
+                        event={event}
+                        canFavorite={isUserAttendee() && !userEventList.some(evId => evId === event.id)}
+                        onFavorite={() => {
+                            addFavorite(event);
+                        }}
+                        canRemove={isUserAttendee() && userEventList.some(evId => evId === event.id)}
+                        onRemove={() => {
+                            removeFavorite(event);
+                        }}
+                    />
+                ))}
             </div>
         </div>
     );
@@ -85,11 +144,11 @@ export function EventCard(props) {
             <Card.Img variant="top" src={eventImage(props.event)} />
             <Card.Body>
                 <Card.Title>{props.event.name}</Card.Title>
-                <Card.Link href={`/event/id/${props.event.id}`}>View Details</Card.Link>
+                <Button className='m-2' href={`/event/id/${props.event.id}`}>Details</Button>
                 {!props.hideLink && props.event.url && <Card.Link href={props.event.url}>External Link</Card.Link>}
-                {props.canFavorite && <Button variant='primary' onClick={props.onFavorite}>Add to favorites</Button>}
-                {props.canRemove && <Button variant='danger' onClick={props.onRemove}>Remove</Button>}
-                {props.canDelete && <Button variant='danger' onClick={props.onDelete}>Delete</Button>}
+                {props.canFavorite && <Button onClick={props.onFavorite}>Favorite</Button>}
+                {props.canRemove && <Button variant='danger' onClick={props.onRemove}>Unfavorite</Button>}
+                {props.canDelete && <Button onClick={props.onDelete}>Delete</Button>}
             </Card.Body>
         </Card>
     );

@@ -183,31 +183,44 @@ function Dashboard() {
                     setCreatedEventList(createdEventList.filter(event => {
                         return event.id !== numId;
                     }));
+                    user.eventList = createdEventList;
                 }
             })
             .catch(axiosError(`Failed to delete event ${interest}`, addErrorMessage));
     };
 
     const addFavorite = (event) => {
+        if (favoriteEvents.some(other => event.id === other.id)) {
+            // already in the list
+            return;
+        }
+
         Axios.put(`/users/${user.id}/add_favorite/${event.id}`)
              .then(response => {
                  if (response.data.message === 'success') {
                      setFavoriteEvents(prev => prev.concat(event));
+                     user.eventList = favoriteEvents;
                  }
                  return Promise.resolve();
              })
-             .catch(axiosError(`Failed to remove friend ${username}`, addErrorMessage));
+             .catch(axiosError(`Failed to add event favorite`, addErrorMessage));
     };
 
     const removeFavorite = (event) => {
+        if (!favoriteEvents.some(other => event.id === other.id)) {
+            // not in the list
+            return;
+        }
+
         Axios.delete(`/users/${user.id}/remove_favorite/${event.id}`)
              .then(response => {
                  if (response.data.message === 'success') {
                      setFavoriteEvents(prev => prev.filter(ev => ev.id !== event.id));
+                     user.eventList = favoriteEvents;
                  }
                  return Promise.resolve();
              })
-             .catch(axiosError(`Failed to remove friend ${username}`, addErrorMessage));
+             .catch(axiosError(`Failed to remove event favorite`, addErrorMessage));
     };
 
     return (
@@ -286,6 +299,7 @@ function renderForType(userType,
                 {favoriteEvents?.length > 0 && favoriteEvents.map(event => {
                     return (
                         <EventCard
+                            key={event.id}
                             event={event}
                             canRemove={true}
                             onRemove={() => {
