@@ -4,17 +4,25 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import React, { useEffect, useState } from 'react';
 import Axios from 'axios';
+import { Navigate } from 'react-router-dom'
 
 import '../assets/css/dashboard.css'
 
 import George from '../assets/profileImages/george-avatar.jpeg'
 import { ErrorAlert } from "../components/ErrorAlert.js"
-import { simpleEventCard } from "./Event.js";
-import { axiosError } from "../utils.js";
+import { EventCard } from './Event.js';
+import {
+    axiosError,
+    getUser,
+    isLoggedIn,
+    isUserAttendee,
+    isUserOrganizer,
+} from '../utils.js';
 
 function Dashboard() {
-    const [user, setUser] = useState(undefined);
+    const [user, setUser] = useState(getUser());
     const [recommendedEvents, setRecommendedEvents] = useState([]);
+    const [favoriteEvents, setFavoriteEvents] = useState([]);
     const [createdEventList, setCreatedEventList] = useState([]);
     const [errorMessages, setErrorMessages] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
@@ -28,23 +36,23 @@ function Dashboard() {
     };
 
     useEffect(() => {
-        setUser(JSON.parse(localStorage.getItem('user')));
+        setUser(getUser());
     }, []);
 
     useEffect(() => {
-        if (!user) {
-            return;
-        }
-
-        if (user.type.toUpperCase() === 'ATTENDEE') {
+        if (isUserAttendee()) {
             Axios.get(`/users/${user.id}/friends`)
-                .then(response => void setFriendsList(response.data))
-                .catch(axiosError(`Failed to load friends list`, addErrorMessage));
+                 .then(response => void setFriendsList(response.data))
+                 .catch(axiosError(`Failed to load friends list`, addErrorMessage));
 
             Axios.get(`/users/${user.id}/interests`)
-                .then(response => void setInterestsList(response.data))
-                .catch(axiosError(`Failed to load interests list`, addErrorMessage));
-        } else if (user.type.toUpperCase() === 'ORGANIZER') {
+                 .then(response => void setInterestsList(response.data))
+                 .catch(axiosError(`Failed to load interests list`, addErrorMessage));
+
+            Axios.get(`/users/${user.id}/favorites`)
+                 .then(response => void setFavoriteEvents(response.data))
+                 .catch(axiosError(`Failed to load favorite events`, addErrorMessage));
+        } else if (isUserOrganizer()) {
             Axios.get(`/users/${user.id}/created_events`)
                 .then(response => void setCreatedEventList(response.data))
                 .catch(axiosError(`Failed to load owned events`, addErrorMessage));
@@ -52,18 +60,21 @@ function Dashboard() {
     }, [user]);
 
     useEffect(() => {
-        if (!user) {
+        if (!isUserAttendee()) {
             return;
         }
 
-        if (user.type.toUpperCase() === 'ATTENDEE') {
-            Axios.get(`/events/recommended/${user.id}`)
-                .then(response => void setRecommendedEvents(response.data))
-                .catch(axiosError(`Failed to load recommended events`, addErrorMessage));
-        }
+        Axios.get(`/events/recommended/${user.id}`)
+            .then(response => void setRecommendedEvents(response.data))
+            .catch(axiosError(`Failed to load recommended events`, addErrorMessage));
     }, [interestsList, friendsList]);
 
     if (!user) {
+        if (!isLoggedIn()) {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            return <Navigate to="/login" replace/>
+        }
         return <>Loading...</>;
     }
 
@@ -172,9 +183,44 @@ function Dashboard() {
                     setCreatedEventList(createdEventList.filter(event => {
                         return event.id !== numId;
                     }));
+                    user.eventList = createdEventList;
                 }
             })
-            .catch(axiosError(`Failed to remove interest ${interest}`, addErrorMessage));
+            .catch(axiosError(`Failed to delete event ${interest}`, addErrorMessage));
+    };
+
+    const addFavorite = (event) => {
+        if (favoriteEvents.some(other => event.id === other.id)) {
+            // already in the list
+            return;
+        }
+
+        Axios.put(`/users/${user.id}/add_favorite/${event.id}`)
+             .then(response => {
+                 if (response.data.message === 'success') {
+                     setFavoriteEvents(prev => prev.concat(event));
+                     user.eventList = favoriteEvents;
+                 }
+                 return Promise.resolve();
+             })
+             .catch(axiosError(`Failed to add event favorite`, addErrorMessage));
+    };
+
+    const removeFavorite = (event) => {
+        if (!favoriteEvents.some(other => event.id === other.id)) {
+            // not in the list
+            return;
+        }
+
+        Axios.delete(`/users/${user.id}/remove_favorite/${event.id}`)
+             .then(response => {
+                 if (response.data.message === 'success') {
+                     setFavoriteEvents(prev => prev.filter(ev => ev.id !== event.id));
+                     user.eventList = favoriteEvents;
+                 }
+                 return Promise.resolve();
+             })
+             .catch(axiosError(`Failed to remove event favorite`, addErrorMessage));
     };
 
     return (
@@ -203,6 +249,7 @@ function Dashboard() {
             {renderForType(user.type,
                 interestsList, addInterest, removeInterest, setInterest,
                 setUsername, friendsList, addFriend, removeFriend,
+                favoriteEvents, addFavorite, removeFavorite,
                 recommendedEvents,
                 createdEventList, removeCreatedEvent, setEventId
             )}
@@ -213,6 +260,7 @@ function Dashboard() {
 function renderForType(userType,
                        interestsList, addInterest, removeInterest, setInterest,
                        setUsername, friendsList, addFriend, removeFriend,
+                       favoriteEvents, addFavorite, removeFavorite,
                        recommendedEvents,
                        createdEventList, removeCreatedEvent, setEventId) {
     if (userType.toUpperCase() === 'ATTENDEE') {
@@ -246,10 +294,41 @@ function renderForType(userType,
             />
             <hr/>
 
+            <h5 className='text-left' style={{color: 'chocolate'}}>Favorites</h5>
+            <div className='mt-2 d-flex overflow-auto'>
+                {favoriteEvents?.length > 0 && favoriteEvents.map(event => {
+                    return (
+                        <EventCard
+                            key={event.id}
+                            event={event}
+                            canRemove={true}
+                            onRemove={() => {
+                                removeFavorite(event);
+                            }}
+                        />
+                    );
+                })}
+            </div>
+            <hr/>
+
             <h5 className='text-left' style={{color: 'chocolate'}}>Recommended Just For You!</h5>
             <div className='mt-2 d-flex overflow-auto'>
-                {recommendedEvents?.length && recommendedEvents.map(event => {
-                    return simpleEventCard(event);
+                {recommendedEvents?.length > 0 && recommendedEvents.map(event => {
+                    const isFavorite = favoriteEvents.some(ev => ev.id === event.id);
+                    return (
+                        <EventCard
+                            key={event.id}
+                            event={event}
+                            canFavorite={!isFavorite}
+                            onFavorite={() => {
+                                addFavorite(event);
+                            }}
+                            canRemove={isFavorite}
+                            onRemove={() => {
+                                removeFavorite(event);
+                            }}
+                        />
+                    );
                 })}
             </div>
             <hr/>
@@ -260,32 +339,44 @@ function renderForType(userType,
                 <hr/>
             </div>
 
-            <div className="category-container">
-                <h5>Browse by Category</h5>
-                {/* carousel here? */}
-                <hr/>
-            </div>
+            {/*<div className="category-container">*/}
+            {/*    <h5>Browse by Category</h5>*/}
+            {/*    /!* carousel here? *!/*/}
+            {/*    <hr/>*/}
+            {/*</div>*/}
 
-            <div className="recent-container">
-                <h5>Recent Events</h5>
-                {/* carousel here? */}
-                <hr/>
-            </div>
+            {/*<div className="recent-container">*/}
+            {/*    <h5>Recent Events</h5>*/}
+            {/*    /!* carousel here? *!/*/}
+            {/*    <hr/>*/}
+            {/*</div>*/}
+
+            <hr/>
+            <hr/>
+            <hr/>
+            <hr/>
+
         </>;
     }
 
     if (userType.toUpperCase() === 'ORGANIZER') {
         return <>
-            <SectionList
-                sectionName='Your Events'
-                placeHolderText='Enter event id'
-                setText={setEventId}
-                handleRemove={removeCreatedEvent}
-                components={createdEventList.map(event => {
-                    return simpleEventCard(event, true);
+            <h5 className='text-left' style={{color: 'chocolate'}}>Your Events</h5>
+            <div className='mt-2 d-flex overflow-auto'>
+                {createdEventList?.length && createdEventList.map(event => {
+                    return (
+                        <EventCard
+                            key={event.id}
+                            event={event}
+                            canDelete={true}
+                            onDelete={() => {
+                                setEventId(event.id);
+                                removeCreatedEvent();
+                            }}
+                        />
+                    );
                 })}
-            />
-            <hr/>
+            </div>
         </>;
     }
 
