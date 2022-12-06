@@ -93,13 +93,8 @@ export class User {
      * @param {Event} event the event to remove (matching by event id)
      */
     removeEvent(event) {
-        for (const userEvents of this.eventList) {
-            if (userEvents.id === event.id) {
-                this.eventList = this.eventList
-                    .filter(elem => elem.id !== event.id);
-                break;
-            }
-        }
+        this.eventList = this.eventList
+            .filter(elem => elem.id !== event.id);
 //        for (const sourceList of this.eventList) {
 //            if (sourceList.source === event.source) {
 //                const index = sourceList.eventIds.indexOf(event.id);
