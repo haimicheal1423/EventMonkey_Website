@@ -46,6 +46,33 @@ export class Event {
     genres;
 
     /**
+     * @param {number|string} id
+     * @param {string} source
+     * @param {string} name
+     * @param {string} description
+     * @param {string} location
+     * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
+     * @param {{ currency: string, min: number, max: number }[]} priceRanges
+     * @param {Image[]} [images]
+     * @param {Genre[]} [genres]
+     *
+     * @return {Event} an event object
+     */
+    static fromJson({ id, source, name, description, location, dates,
+                      priceRanges, images, genres }) {
+        if (dates.startDateTime) {
+            dates.startDateTime = new Date(dates.startDateTime);
+        }
+        if (dates.endDateTime) {
+            dates.endDateTime = new Date(dates.endDateTime);
+        }
+        const event = new Event(source, name, description, location, dates,
+                                priceRanges, images, genres);
+        event.id = id;
+        return event;
+    }
+
+    /**
      * @param {string} source
      * @param {string} name
      * @param {string} description

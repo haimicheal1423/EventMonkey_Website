@@ -68,6 +68,10 @@ router.delete('/:userId/remove_friend/:username',
     (req, res) => removeFromFriends(req, res)
 );
 
+router.get('/:userId/try_something_new',
+(req, res)=> trySomethingNew(req,res)
+);
+
 async function getUser(req, res) {
     try {
         const userId = parseInt(req.params['id']);
@@ -360,6 +364,27 @@ async function removeFromFriends(req, res) {
         } else {
             res.status(status.BAD_REQUEST).json(result);
         }
+    } catch (error) {
+        res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
+        console.error(error);
+    }
+}
+
+async function trySomethingNew(req, res) {
+    try {
+        const userId = parseInt(req.params['userId']);
+
+        const genres = await userManager.getInterests(userId);
+
+        if (!genres.message) {
+            // result should be Genre[] at this point
+            const events = await eventManager.trySomethingNew(genres);
+            // maybe verify events is correct format here
+        res.status(status.OK).json(events);
+        } else {
+            res.status(status.BAD_REQUEST).json(genres);
+        }
+
     } catch (error) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message)
         console.error(error);
