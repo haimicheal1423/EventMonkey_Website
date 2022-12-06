@@ -7,6 +7,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import './Modal.css'
 import Axios from "axios";
 import { Col, Row } from "react-bootstrap";
+import { isUserOrganizer } from '../utils';
 
 //Modal = Fades bg and central popup.
 export default function ModalEM() {
@@ -81,6 +82,7 @@ export default function ModalEM() {
         Axios.post(`/users/${user.id}/create`, {
                 name: form.elements.name.value,
                 description: form.elements.description.value,
+                url: form.elements.externalUrl.value,
                 location: form.elements.location.value,
                 dates,
                 priceRanges: [priceRange],
@@ -106,11 +108,11 @@ export default function ModalEM() {
 
   return (
     <>
-      <div className="event-button-container">
-        <Button className="event-button" onClick={handleShow}>
-          Add Event Form
-        </Button>
-      </div>
+        {isUserOrganizer() && <div className="event-button-container">
+            <Button className="event-button" onClick={handleShow}>
+                Add Event Form
+            </Button>
+        </div>}
 
       <Modal className='p-0' fullscreen='sm-down' show={showModal} onHide={handleClose}>
         <Modal.Header>
@@ -189,6 +191,7 @@ export default function ModalEM() {
             <Form.Group className="mb-3" controlId="validateExternalUrl">
               <Form.Label>Event Link (Optional)</Form.Label>
               <Form.Control
+                  type='url'
                   name='externalUrl'
                   rows={1}
                   placeholder='https://www.ticketmaster.com/golden-state-warriors-vs-boston-celtics-san-francisco-california-12-10-2022/event/1C005D0C9F3A27E9'

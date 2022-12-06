@@ -4,7 +4,6 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import React, { useEffect, useState } from 'react';
 import Axios from 'axios';
-import { Navigate } from 'react-router-dom'
 
 import '../assets/css/dashboard.css'
 
@@ -14,7 +13,6 @@ import { EventCard } from './Event.js';
 import {
     axiosError,
     getUser,
-    isLoggedIn,
     isUserAttendee,
     isUserOrganizer,
 } from '../utils.js';
@@ -47,15 +45,16 @@ function Dashboard() {
                  .catch(axiosError(`Failed to load friends list`, addErrorMessage));
 
             Axios.get(`/users/${user.id}/interests`)
-                .then(response => void setInterestsList(response.data))
-                .catch(axiosError(`Failed to load interests list`, addErrorMessage));
+                 .then(response => void setInterestsList(response.data))
+                 .catch(axiosError(`Failed to load interests list`, addErrorMessage));
 
             Axios.get(`/users/${user.id}/favorites`)
-                .then(response => void setFavoriteEvents(response.data))
-                .catch(axiosError(`Failed to load favorite events`, addErrorMessage));
+                 .then(response => void setFavoriteEvents(response.data))
+                 .catch(axiosError(`Failed to load favorite events`, addErrorMessage));
+
             Axios.get(`/users/${user.id}/try_something_new`)
-                .then(response => void setTrySomthingNew(response.data))
-                .catch(axiosError(`Failed to load try something new events`, addErrorMessage));
+                 .then(response => void setTrySomthingNew(response.data))
+                 .catch(axiosError(`Failed to load try something new events`, addErrorMessage));
 
         } else if (isUserOrganizer()) {
             Axios.get(`/users/${user.id}/created_events`)
@@ -72,14 +71,9 @@ function Dashboard() {
         Axios.get(`/events/recommended/${user.id}`)
             .then(response => void setRecommendedEvents(response.data))
             .catch(axiosError(`Failed to load recommended events`, addErrorMessage));
-    }, [interestsList, friendsList]);
+    }, [user.id, interestsList, friendsList]);
 
     if (!user) {
-        if (!isLoggedIn()) {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            return <Navigate to="/login" replace />
-        }
         return <>Loading...</>;
     }
 
@@ -201,14 +195,14 @@ function Dashboard() {
         }
 
         Axios.put(`/users/${user.id}/add_favorite/${event.id}`)
-            .then(response => {
-                if (response.data.message === 'success') {
-                    setFavoriteEvents(prev => prev.concat(event));
-                    user.eventList = favoriteEvents;
-                }
-                return Promise.resolve();
-            })
-            .catch(axiosError(`Failed to add event favorite`, addErrorMessage));
+             .then(response => {
+                 if (response.data.message === 'success') {
+                     setFavoriteEvents(prev => prev.concat(event));
+                     user.eventList = favoriteEvents;
+                 }
+                 return Promise.resolve();
+             })
+             .catch(axiosError(`Failed to add event favorite`, addErrorMessage));
     };
 
     const removeFavorite = (event) => {
@@ -218,14 +212,14 @@ function Dashboard() {
         }
 
         Axios.delete(`/users/${user.id}/remove_favorite/${event.id}`)
-            .then(response => {
-                if (response.data.message === 'success') {
-                    setFavoriteEvents(prev => prev.filter(ev => ev.id !== event.id));
-                    user.eventList = favoriteEvents;
-                }
-                return Promise.resolve();
-            })
-            .catch(axiosError(`Failed to remove event favorite`, addErrorMessage));
+             .then(response => {
+                 if (response.data.message === 'success') {
+                     setFavoriteEvents(prev => prev.filter(ev => ev.id !== event.id));
+                     user.eventList = favoriteEvents;
+                 }
+                 return Promise.resolve();
+             })
+             .catch(axiosError(`Failed to remove event favorite`, addErrorMessage));
     };
 
     return (
@@ -240,7 +234,7 @@ function Dashboard() {
                 )
             })}
             <div className="welcome-container">
-                <img className="welcome-img shadow" src={user.profileImage ? user.profileImage.url : George} alt="" />
+                <img className="welcome-img shadow" src={user.profileImage ? user.profileImage.url : George} alt=""/>
                 <h2 className="dashboard-title">Welcome {user.username}!</h2>
                 <h6 className="dashboard-subtitle">This is your personalized dashboard...</h6>
                 <Button className="logout-btn" onClick={() => {
@@ -263,11 +257,11 @@ function Dashboard() {
 }
 
 function renderForType(userType,
-    interestsList, addInterest, removeInterest, setInterest,
-    setUsername, friendsList, addFriend, removeFriend,
-    favoriteEvents, addFavorite, removeFavorite,
-    recommendedEvents, trySomethingNew,
-    createdEventList, removeCreatedEvent, setEventId) {
+                       interestsList, addInterest, removeInterest, setInterest,
+                       setUsername, friendsList, addFriend, removeFriend,
+                       favoriteEvents, addFavorite, removeFavorite,
+                       recommendedEvents, trySomethingNew,
+                       createdEventList, removeCreatedEvent, setEventId) {
     if (userType.toUpperCase() === 'ATTENDEE') {
         return <>
             <SectionList

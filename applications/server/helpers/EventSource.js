@@ -295,6 +295,7 @@ export class TicketMasterSource extends EventSource {
             SOURCE_TICKET_MASTER,
             eventObj['name'],
             description,
+            eventObj['url'],
             location,
             date,
             priceRange,
@@ -406,6 +407,7 @@ export class EventMonkeySource extends EventSource {
             SOURCE_EVENT_MONKEY,
             eventDetails.name,
             eventDetails.description,
+            eventDetails.url,
             eventDetails.location,
             eventDetails.dates,
             eventDetails.priceRanges
