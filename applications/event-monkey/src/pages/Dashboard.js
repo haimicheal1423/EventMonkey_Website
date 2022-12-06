@@ -43,8 +43,8 @@ function Dashboard() {
     useEffect(() => {
         if (isUserAttendee()) {
             Axios.get(`/users/${user.id}/friends`)
-                .then(response => void setFriendsList(response.data))
-                .catch(axiosError(`Failed to load friends list`, addErrorMessage));
+                 .then(response => void setFriendsList(response.data))
+                 .catch(axiosError(`Failed to load friends list`, addErrorMessage));
 
             Axios.get(`/users/${user.id}/interests`)
                 .then(response => void setInterestsList(response.data))
