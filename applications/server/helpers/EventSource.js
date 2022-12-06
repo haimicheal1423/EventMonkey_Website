@@ -62,6 +62,10 @@ export class EventSource {
     findByKeyword(searchText, limit) {
         throw new Error('Unimplemented abstract function');
     }
+
+    findExcludingGenre(names) {
+        throw new Error('Unimplemented abstract function');
+    }
 }
 
 /**
@@ -352,6 +356,14 @@ export class TicketMasterSource extends EventSource {
             size: limit
         }, limit);
     }
+    async findExcludingGenre(names, limit) {
+        const excludedNames = names.map(name => `-${name}`).join(',')
+        return this.ticketMasterEventRequest_({
+            classificationName: excludedNames,
+            size: limit
+        }, limit);
+    }
+
 }
 
 /**
@@ -420,6 +432,22 @@ export class EventMonkeySource extends EventSource {
         await Promise.all([loadGenres(), loadImages()])
 
         return event;
+    }
+    async findExcludingGenre(names, limit) {
+        const eventIds = await this.dataSource_.getEventIdExcludingGenres(names);
+        console.log(limit);
+        console.log(Math.min(eventIds.length, limit))
+        // limit the event ids now before querying for event details
+        eventIds.length = Math.min(eventIds.length, limit);
+
+        // construct all events by event id asynchronously
+        const events = await Promise.all(
+            eventIds.map(eventId => {
+                return this.findByEventId(eventId);
+            })
+        );
+
+        return events.filter(event => event !== undefined);
     }
 
     /**
@@ -579,6 +607,12 @@ export class CompositeSource extends EventSource {
     findByKeyword(searchText, limit) {
         return this.accumulate_(source => {
             return source.findByKeyword(searchText, limit);
+        }, limit);
+    }
+
+    findExcludingGenre(names, limit) {
+        return this.accumulate_(source => {
+            return source.findExcludingGenre(names, limit);
         }, limit);
     }
 }
