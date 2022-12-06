@@ -62,6 +62,7 @@ export class User {
         this.username = username;
         this.profileImage = profileImage;
         this.eventList = eventList;
+        this.allowedSources = [SOURCE_EVENT_MONKEY]
     }
 
     /**
@@ -70,13 +71,19 @@ export class User {
      * @param {Event} event the event to add
      */
     addEvent(event) {
-        for (const sourceList of this.eventList) {
-            console.log('Made it inside addEvent for loop');
-            if (sourceList.source === event.source) {
-                sourceList.eventIds.push(event.id);
+        for (const source of this.allowedSources) {
+            if (source === event.source) {
+                this.eventList.push(event);
                 break;
             }
         }
+//        for (const sourceList of this.eventList) {
+//            console.log('Made it inside addEvent for loop');
+//            if (sourceList.source === event.source) {
+//                sourceList.eventIds.push(event.id);
+//                break;
+//            }
+//        }
     }
 
     /**
@@ -86,13 +93,20 @@ export class User {
      * @param {Event} event the event to remove (matching by event id)
      */
     removeEvent(event) {
-        for (const sourceList of this.eventList) {
-            if (sourceList.source === event.source) {
-                const index = sourceList.eventIds.indexOf(event.id);
-                sourceList.eventIds.splice(index, 1);
+        for (const userEvents of this.eventList) {
+            if (userEvents.id === event.id) {
+                this.eventList = this.eventList
+                    .filter(elem => elem.id !== event.id);
                 break;
             }
         }
+//        for (const sourceList of this.eventList) {
+//            if (sourceList.source === event.source) {
+//                const index = sourceList.eventIds.indexOf(event.id);
+//                sourceList.eventIds.splice(index, 1);
+//                break;
+//            }
+//        }
     }
 }
 

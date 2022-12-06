@@ -166,7 +166,7 @@ describe('Testing User Class Functions: Attendee', () => {
     let tempImage = new Image(12345, '16:9', 1920, 1080, 'test_fake_img.png');
     let tempGenre = new Genre(1234567890, 'Miscellaneous Genre');
     let testEvent = new Event(
-        SOURCE_TICKET_MASTER, 62234, 'Test Event Name',
+        SOURCE_EVENT_MONKEY, 62234, 'Test Event Name',
         'This test event\'s description', 'Event Location',
         {startDateTime: 'standIn', endDateTime: 'standIn'},
         [{currency: '$', min: 50, max: 100}]
