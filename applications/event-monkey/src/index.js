@@ -8,8 +8,8 @@ import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-// axios.defaults.baseURL = 'http://eventmonkey.xyz:4000/';
-axios.defaults.baseURL = 'http://localhost:4000/';
+axios.defaults.baseURL = 'http://eventmonkey.xyz:4000/';
+// axios.defaults.baseURL = 'http://localhost:4000/';
 
 root.render(
   <React.StrictMode>
