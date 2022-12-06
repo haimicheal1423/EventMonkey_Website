@@ -424,4 +424,10 @@ export class EventManager {
 
         return { message: 'success' };
     }
+
+    async trySomethingNew(genres){
+        const names = genres.map(genre => genre.name);
+        const eventList = await this.composite_.findExcludingGenre(names, 20);
+        return eventList;
+    }
 }

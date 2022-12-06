@@ -574,6 +574,10 @@ export class DataSource {
     async getImage(imageId) {
         throw new Error('Unimplemented abstract function');
     }
+
+    async getEventIdExcludingGenres(names) {
+        throw new Error('Unimplemented abstract function');
+    }
 }
 
 export class EventMonkeyDataSource extends DataSource {
@@ -1498,6 +1502,26 @@ export class EventMonkeyDataSource extends DataSource {
         }
         return imageMap;
     }
+
+    async getEventIdExcludingGenres(names) {
+        // creates a single string of genre names separated by whitespace, where
+        // each name is prefixed with the MariaDB NOT (-) symbol indicating that
+        // the word must not be matched within any genre
+        const excludeList = names.reduce((acc, name) => acc + ` -${name}`, '')
+                                 .trim();
+
+        const result = await Database.query(
+            `SELECT DISTINCT egl.event_id
+             FROM Event_Genre_List egl
+             INNER JOIN Genre genre
+                USING (genre_id)
+             WHERE MATCH(genre.name) AGAINST (? IN BOOLEAN MODE)`,
+            excludeList
+        )
+
+        return result.map(row => row['event_id']);
+    }
+
 }
 
 /**

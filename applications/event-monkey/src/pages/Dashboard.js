@@ -30,6 +30,7 @@ function Dashboard() {
     const [username, setUsername] = useState(null);
     const [interest, setInterest] = useState(null);
     const [eventId, setEventId] = useState(undefined);
+    const [trySomethingNew, setTrySomthingNew] = useState([]);
 
     const addErrorMessage = message => {
         setErrorMessages(prev => prev.concat(message));
@@ -46,12 +47,16 @@ function Dashboard() {
                  .catch(axiosError(`Failed to load friends list`, addErrorMessage));
 
             Axios.get(`/users/${user.id}/interests`)
-                 .then(response => void setInterestsList(response.data))
-                 .catch(axiosError(`Failed to load interests list`, addErrorMessage));
+                .then(response => void setInterestsList(response.data))
+                .catch(axiosError(`Failed to load interests list`, addErrorMessage));
 
             Axios.get(`/users/${user.id}/favorites`)
-                 .then(response => void setFavoriteEvents(response.data))
-                 .catch(axiosError(`Failed to load favorite events`, addErrorMessage));
+                .then(response => void setFavoriteEvents(response.data))
+                .catch(axiosError(`Failed to load favorite events`, addErrorMessage));
+            Axios.get(`/users/${user.id}/try_something_new`)
+                .then(response => void setTrySomthingNew(response.data))
+                .catch(axiosError(`Failed to load try something new events`, addErrorMessage));
+
         } else if (isUserOrganizer()) {
             Axios.get(`/users/${user.id}/created_events`)
                 .then(response => void setCreatedEventList(response.data))
@@ -73,7 +78,7 @@ function Dashboard() {
         if (!isLoggedIn()) {
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            return <Navigate to="/login" replace/>
+            return <Navigate to="/login" replace />
         }
         return <>Loading...</>;
     }
@@ -196,14 +201,14 @@ function Dashboard() {
         }
 
         Axios.put(`/users/${user.id}/add_favorite/${event.id}`)
-             .then(response => {
-                 if (response.data.message === 'success') {
-                     setFavoriteEvents(prev => prev.concat(event));
-                     user.eventList = favoriteEvents;
-                 }
-                 return Promise.resolve();
-             })
-             .catch(axiosError(`Failed to add event favorite`, addErrorMessage));
+            .then(response => {
+                if (response.data.message === 'success') {
+                    setFavoriteEvents(prev => prev.concat(event));
+                    user.eventList = favoriteEvents;
+                }
+                return Promise.resolve();
+            })
+            .catch(axiosError(`Failed to add event favorite`, addErrorMessage));
     };
 
     const removeFavorite = (event) => {
@@ -213,14 +218,14 @@ function Dashboard() {
         }
 
         Axios.delete(`/users/${user.id}/remove_favorite/${event.id}`)
-             .then(response => {
-                 if (response.data.message === 'success') {
-                     setFavoriteEvents(prev => prev.filter(ev => ev.id !== event.id));
-                     user.eventList = favoriteEvents;
-                 }
-                 return Promise.resolve();
-             })
-             .catch(axiosError(`Failed to remove event favorite`, addErrorMessage));
+            .then(response => {
+                if (response.data.message === 'success') {
+                    setFavoriteEvents(prev => prev.filter(ev => ev.id !== event.id));
+                    user.eventList = favoriteEvents;
+                }
+                return Promise.resolve();
+            })
+            .catch(axiosError(`Failed to remove event favorite`, addErrorMessage));
     };
 
     return (
@@ -235,7 +240,7 @@ function Dashboard() {
                 )
             })}
             <div className="welcome-container">
-                <img className="welcome-img shadow" src={user.profileImage ? user.profileImage.url : George} alt=""/>
+                <img className="welcome-img shadow" src={user.profileImage ? user.profileImage.url : George} alt="" />
                 <h2 className="dashboard-title">Welcome {user.username}!</h2>
                 <h6 className="dashboard-subtitle">This is your personalized dashboard...</h6>
                 <Button className="logout-btn" onClick={() => {
@@ -243,26 +248,26 @@ function Dashboard() {
                     localStorage.removeItem('token');
                     window.location.href = '/';
                 }}>logout</Button>
-                <hr/>
+                <hr />
             </div>
 
             {renderForType(user.type,
                 interestsList, addInterest, removeInterest, setInterest,
                 setUsername, friendsList, addFriend, removeFriend,
                 favoriteEvents, addFavorite, removeFavorite,
-                recommendedEvents,
-                createdEventList, removeCreatedEvent, setEventId
+                recommendedEvents, trySomethingNew,
+                createdEventList, removeCreatedEvent, setEventId,
             )}
         </Container>
     );
 }
 
 function renderForType(userType,
-                       interestsList, addInterest, removeInterest, setInterest,
-                       setUsername, friendsList, addFriend, removeFriend,
-                       favoriteEvents, addFavorite, removeFavorite,
-                       recommendedEvents,
-                       createdEventList, removeCreatedEvent, setEventId) {
+    interestsList, addInterest, removeInterest, setInterest,
+    setUsername, friendsList, addFriend, removeFriend,
+    favoriteEvents, addFavorite, removeFavorite,
+    recommendedEvents, trySomethingNew,
+    createdEventList, removeCreatedEvent, setEventId) {
     if (userType.toUpperCase() === 'ATTENDEE') {
         return <>
             <SectionList
@@ -277,7 +282,7 @@ function renderForType(userType,
                     </div>
                 )}
             />
-            <hr/>
+            <hr />
 
             <SectionList
                 sectionName='Friends'
@@ -287,14 +292,14 @@ function renderForType(userType,
                 handleRemove={removeFriend}
                 components={friendsList.map(friend =>
                     <Card key={`${friend.username}-${friend.id}`} className='mr-3 my-3' style={{ maxWidth: '12rem' }}>
-                        <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : George}/>
+                        <Card.Img variant='top' src={friend.profileImage ? friend.profileImage.url : George} />
                         <Card.Footer>{friend.username}</Card.Footer>
                     </Card>
                 )}
             />
-            <hr/>
+            <hr />
 
-            <h5 className='text-left' style={{color: 'chocolate'}}>Favorites</h5>
+            <h5 className='text-left' style={{ color: 'chocolate' }}>Favorites</h5>
             <div className='mt-2 d-flex overflow-auto'>
                 {favoriteEvents?.length > 0 && favoriteEvents.map(event => {
                     return (
@@ -309,9 +314,9 @@ function renderForType(userType,
                     );
                 })}
             </div>
-            <hr/>
+            <hr />
 
-            <h5 className='text-left' style={{color: 'chocolate'}}>Recommended Just For You!</h5>
+            <h5 className='text-left' style={{ color: 'chocolate' }}>Recommended Just For You!</h5>
             <div className='mt-2 d-flex overflow-auto'>
                 {recommendedEvents?.length > 0 && recommendedEvents.map(event => {
                     const isFavorite = favoriteEvents.some(ev => ev.id === event.id);
@@ -331,37 +336,36 @@ function renderForType(userType,
                     );
                 })}
             </div>
-            <hr/>
+            <hr />
 
-            <div className="tsn-container">
-                <h5>Try Something New</h5>
-                {/* carousel here? */}
-                <hr/>
+            <h5 className='text-left' style={{ color: 'chocolate' }}> Try Something New!</h5>
+            <div className='mt-2 d-flex overflow-auto'>
+                {trySomethingNew?.length > 0 && trySomethingNew.map(event => {
+                    const isFavorite = favoriteEvents.some(ev => ev.id === event.id);
+                    return (
+                        <EventCard
+                            key={event.id}
+                            event={event}
+                            canFavorite={!isFavorite}
+                            onFavorite={() => {
+                                addFavorite(event);
+                            }}
+                            canRemove={isFavorite}
+                            onRemove={() => {
+                                removeFavorite(event);
+                            }}
+                        />
+                    );
+                })}
             </div>
-
-            {/*<div className="category-container">*/}
-            {/*    <h5>Browse by Category</h5>*/}
-            {/*    /!* carousel here? *!/*/}
-            {/*    <hr/>*/}
-            {/*</div>*/}
-
-            {/*<div className="recent-container">*/}
-            {/*    <h5>Recent Events</h5>*/}
-            {/*    /!* carousel here? *!/*/}
-            {/*    <hr/>*/}
-            {/*</div>*/}
-
-            <hr/>
-            <hr/>
-            <hr/>
-            <hr/>
+            <hr />
 
         </>;
     }
 
     if (userType.toUpperCase() === 'ORGANIZER') {
         return <>
-            <h5 className='text-left' style={{color: 'chocolate'}}>Your Events</h5>
+            <h5 className='text-left' style={{ color: 'chocolate' }}>Your Events</h5>
             <div className='mt-2 d-flex overflow-auto'>
                 {createdEventList?.length && createdEventList.map(event => {
                     return (
@@ -385,14 +389,14 @@ function renderForType(userType,
 
 function SectionList(props) {
     return (
-        <Container style={{color: 'chocolate'}}>
+        <Container style={{ color: 'chocolate' }}>
             <Row>
                 <h5 className='my-3'>{props.sectionName}</h5>
             </Row>
             {(props.handleAdd || props.handleRemove) &&
                 <Row>
                     <form className='d-flex'>
-                        <input type='text' className='form-control border-warning' placeholder={props.placeHolderText} onChange={e => props.setText(e.target.value)}/>
+                        <input type='text' className='form-control border-warning' placeholder={props.placeHolderText} onChange={e => props.setText(e.target.value)} />
                         {props.handleAdd && <Button variant='primary' className='ml-2' onClick={props.handleAdd}>Add</Button>}
                         {props.handleRemove && <Button variant='danger' className='ml-2' onClick={props.handleRemove}>Remove</Button>}
                     </form>
