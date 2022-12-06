@@ -19,6 +19,7 @@ describe('EventMonkey source', () => {
             const eventDetails = {
                 name: 'mock-name',
                 description: 'mock-description',
+                url: 'mock-url',
                 location: 'mock-location',
                 dates: 'mock-dates',
                 priceRanges: 'mock-price-ranges'
@@ -31,6 +32,7 @@ describe('EventMonkey source', () => {
                 SOURCE_EVENT_MONKEY,
                 eventDetails.name,
                 eventDetails.description,
+                eventDetails.url,
                 eventDetails.location,
                 eventDetails.dates,
                 eventDetails.priceRanges,

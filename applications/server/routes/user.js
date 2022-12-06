@@ -142,6 +142,7 @@ async function createEvent(req, res) {
             userId,
             req.body['name'],
             req.body['description'],
+            req.body['url'],
             req.body['location'],
             req.body['dates'],
             req.body['priceRanges'],
