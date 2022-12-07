@@ -455,6 +455,7 @@ export class DataSource {
      * @returns {Promise<{
      *         name: string,
      *         description: string,
+     *         url: string,
      *         location: string,
      *         dates: { startDateTime: Date, [endDateTime]: Date },
      *         priceRanges: { currency: string, min: number, max: number }[],
@@ -1036,10 +1037,11 @@ export class EventMonkeyDataSource extends DataSource {
 
         // insert event details to the Event table
         const result = await Database.query(
-            `INSERT INTO Event(name, description, location, dates, price_ranges)
-             VALUES (?, ?, ?, ?, ?)`, [
+            `INSERT INTO Event(name, description, url, location, dates, price_ranges)
+             VALUES (?, ?, ?, ?, ?, ?)`, [
                 event.name,
                 nullable(event.description),
+                nullable(event.url),
                 event.location,
                 nullable(JSON.stringify(event.dates)),
                 nullable(JSON.stringify(event.priceRanges))
@@ -1151,6 +1153,7 @@ export class EventMonkeyDataSource extends DataSource {
      *     undefined | {
      *         name: string,
      *         description: string,
+     *         url: string,
      *         location: string,
      *         dates: { startDateTime: Date, [endDateTime]: Date },
      *         priceRanges: { currency: string, min: number, max: number }[],
@@ -1158,7 +1161,7 @@ export class EventMonkeyDataSource extends DataSource {
      */
     async getEventDetails(eventId) {
         const result = await Database.query(
-            `SELECT name, description, location, dates, price_ranges
+            `SELECT name, description, url, location, dates, price_ranges
              FROM Event
              WHERE event_id = ?`,
             eventId
@@ -1170,6 +1173,7 @@ export class EventMonkeyDataSource extends DataSource {
 
         const name = result[0]['name'];
         const description = result[0]['description'];
+        const url = result[0]['url'];
         const location = result[0]['location'];
         const dates = JSON.parse(result[0]['dates']);
         let priceRanges = [];
@@ -1184,6 +1188,7 @@ export class EventMonkeyDataSource extends DataSource {
         return {
             name,
             description,
+            url,
             location,
             dates,
             priceRanges
@@ -1317,7 +1322,7 @@ export class EventMonkeyDataSource extends DataSource {
             return undefined;
         }
 
-        return Genre.createWithId(result.insertId, name);
+        return Genre.createWithId(Number(result.insertId), name);
     }
 
     /**

@@ -142,6 +142,7 @@ async function createEvent(req, res) {
             userId,
             req.body['name'],
             req.body['description'],
+            req.body['url'],
             req.body['location'],
             req.body['dates'],
             req.body['priceRanges'],
@@ -380,7 +381,7 @@ async function trySomethingNew(req, res) {
             // result should be Genre[] at this point
             const events = await eventManager.trySomethingNew(genres);
             // maybe verify events is correct format here
-        res.status(status.OK).json(events);
+            res.status(status.OK).json(events);
         } else {
             res.status(status.BAD_REQUEST).json(genres);
         }

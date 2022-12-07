@@ -295,6 +295,7 @@ export class TicketMasterSource extends EventSource {
             SOURCE_TICKET_MASTER,
             eventObj['name'],
             description,
+            eventObj['url'],
             location,
             date,
             priceRange,
@@ -406,6 +407,7 @@ export class EventMonkeySource extends EventSource {
             SOURCE_EVENT_MONKEY,
             eventDetails.name,
             eventDetails.description,
+            eventDetails.url,
             eventDetails.location,
             eventDetails.dates,
             eventDetails.priceRanges
@@ -435,8 +437,7 @@ export class EventMonkeySource extends EventSource {
     }
     async findExcludingGenre(names, limit) {
         const eventIds = await this.dataSource_.getEventIdExcludingGenres(names);
-        console.log(limit);
-        console.log(Math.min(eventIds.length, limit))
+
         // limit the event ids now before querying for event details
         eventIds.length = Math.min(eventIds.length, limit);
 

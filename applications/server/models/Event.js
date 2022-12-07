@@ -31,6 +31,9 @@ export class Event {
     description;
 
     /** @type {string} */
+    url;
+
+    /** @type {string} */
     location;
 
     /** @type {{ startDateTime: Date, [endDateTime]: Date }} */
@@ -50,6 +53,7 @@ export class Event {
      * @param {string} source
      * @param {string} name
      * @param {string} description
+     * @param {string} [url]
      * @param {string} location
      * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
@@ -58,7 +62,7 @@ export class Event {
      *
      * @return {Event} an event object
      */
-    static fromJson({ id, source, name, description, location, dates,
+    static fromJson({ id, source, name, description, url, location, dates,
                       priceRanges, images, genres }) {
         if (dates.startDateTime) {
             dates.startDateTime = new Date(dates.startDateTime);
@@ -66,7 +70,7 @@ export class Event {
         if (dates.endDateTime) {
             dates.endDateTime = new Date(dates.endDateTime);
         }
-        const event = new Event(source, name, description, location, dates,
+        const event = new Event(source, name, description, url, location, dates,
                                 priceRanges, images, genres);
         event.id = id;
         return event;
@@ -76,17 +80,19 @@ export class Event {
      * @param {string} source
      * @param {string} name
      * @param {string} description
+     * @param {string} [url]
      * @param {string} location
      * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
      */
-    constructor(source, name, description, location, dates, priceRanges,
+    constructor(source, name, description, url, location, dates, priceRanges,
                 images = [], genres = []) {
         this.source = source;
         this.name = name;
         this.description = description;
+        this.url = url;
         this.location = location;
         this.dates = dates;
         this.priceRanges = priceRanges;

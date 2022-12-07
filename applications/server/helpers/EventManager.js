@@ -319,6 +319,7 @@ export class EventManager {
      * @param {number} userId
      * @param {string} name
      * @param {string} description
+     * @param {string} url
      * @param {string} location
      * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
@@ -328,8 +329,8 @@ export class EventManager {
      * @returns {Promise<{ eventId: number } | { message: string }>} a promise
      *     for the generated event id, or a failure message
      */
-    async createEvent(userId, name, description, location, dates, priceRanges,
-                      genres, images) {
+    async createEvent(userId, name, description, url, location, dates,
+                      priceRanges, genres, images) {
         const failMessage = await this.checkUserType(userId, TYPE_ORGANIZER);
 
         if (failMessage) {
@@ -353,6 +354,7 @@ export class EventManager {
             SOURCE_EVENT_MONKEY,
             name,
             description,
+            url,
             location,
             dates,
             priceRanges,

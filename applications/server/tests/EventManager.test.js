@@ -1191,13 +1191,14 @@ describe('creating events', () => {
 
         const name = 'mock-name';
         const description = 'mock-description';
+        const url = 'mock-url';
         const location = 'mock-location';
         const dates = 'mock-dates';
         const priceRanges = 'mock-priceRanges';
         const genres = [Genre.create('mock-genre')];
         const images = [Image.create('1_1', 1, 1, 'mock-image')];
 
-        const result = await manager.createEvent(userId, name, description,
+        const result = await manager.createEvent(userId, name, description, url,
                                                  location, dates, priceRanges,
                                                  genres, images);
 
