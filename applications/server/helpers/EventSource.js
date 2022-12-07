@@ -437,8 +437,7 @@ export class EventMonkeySource extends EventSource {
     }
     async findExcludingGenre(names, limit) {
         const eventIds = await this.dataSource_.getEventIdExcludingGenres(names);
-        console.log(limit);
-        console.log(Math.min(eventIds.length, limit))
+
         // limit the event ids now before querying for event details
         eventIds.length = Math.min(eventIds.length, limit);
 

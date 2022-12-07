@@ -1322,7 +1322,7 @@ export class EventMonkeyDataSource extends DataSource {
             return undefined;
         }
 
-        return Genre.createWithId(result.insertId, name);
+        return Genre.createWithId(Number(result.insertId), name);
     }
 
     /**
