@@ -23,7 +23,7 @@ export default function BannerEM() {
                 type='text'
                 name='keyword'
                 placeholder='Get started with EventMonkey!'
-                style={{width: '17rem', margin: '0.25rem'}}
+                style={{width: '20rem', margin: '0.25rem'}}
                 onChange={e => setSearchText(e.target.value)}
               />
 

@@ -25,13 +25,6 @@ export default function Home() {
             <br/>  
 
           <hr/>
-
-          <h2>Events Around You</h2>
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere quaerat numquam quasi est totam, voluptatibus blanditiis sunt, maiores dolorem cum hic dolores veritatis expedita tempora! Doloremque exercitationem necessitatibus natus fugiat!</p>
-            <br/>
-            <br/>  
-            <br/>  
-            <br/>  
         </div>
     </>
   )

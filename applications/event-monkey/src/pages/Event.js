@@ -255,8 +255,6 @@ function EventSearch() {
 
     return (
         <div className='m-3'>
-            <h5 className="events-title">Events</h5>
-
             <BannerEM/>
             <hr/>
 
