@@ -11,33 +11,35 @@ import {
   MDBBtn
 } from 'mdb-react-ui-kit';
 
+import GitHubIcon from '@mui/icons-material/GitHub';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import InfoIcon from '@mui/icons-material/Info';
+
 export default function FooterEM() {
   return (
     <MDBFooter className='text-center' color='white'>
       <MDBContainer className='p-4'>
         <section className='mb-4'>
           <MDBBtn outline color="light" floating className='m-1' href='#!' role='button'>
-            <MDBIcon fab icon='facebook-f' />
+            <FacebookIcon fontSize="small"/>
           </MDBBtn>
 
           <MDBBtn outline color="light" floating className='m-1' href='#!' role='button'>
-            <MDBIcon fab icon='twitter' />
+            <TwitterIcon fontSize="small"/>
           </MDBBtn>
 
           <MDBBtn outline color="light" floating className='m-1' href='#!' role='button'>
-            <MDBIcon fab icon='google' />
+            <InstagramIcon fontSize="small" />
           </MDBBtn>
 
           <MDBBtn outline color="light" floating className='m-1' href='#!' role='button'>
-            <MDBIcon fab icon='instagram' />
+            <GitHubIcon fontSize="small" />
           </MDBBtn>
 
           <MDBBtn outline color="light" floating className='m-1' href='#!' role='button'>
-            <MDBIcon fab icon='linkedin-in' />
-          </MDBBtn>
-
-          <MDBBtn outline color="light" floating className='m-1' href='#!' role='button'>
-            <MDBIcon fab icon='github' />
+            <InfoIcon fontSize="small"  />
           </MDBBtn>
         </section>
 

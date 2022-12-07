@@ -3,3 +3,7 @@ footer {
     background-color: chocolate;
     padding-top: 300;
 }
+
+.ripple {
+    padding: 4px;
+}
