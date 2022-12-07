@@ -1,5 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import { Event } from '../models/Event.js';
+import { EventList } from '../models/Event.js';
 import { Genre } from '../models/Genre.js';
 import { Image } from '../models/Image.js';
 import { Attendee } from '../models/User.js';
@@ -158,16 +159,20 @@ describe('Testing Event Class Functions', () => {
 /**
  * Tests the addEvent and removeEvent of the Attendee class.
  */
+// userId, email, password, username, profileImage, eventList = [], interests = []
 describe('Testing User Class Functions: Attendee', () => {
     const userAttendee = new Attendee;
 
     // Test objects
     let tempImage = new Image(12345, '16:9', 1920, 1080, 'test_fake_img.png');
     let tempGenre = new Genre(1234567890, 'Miscellaneous Genre');
-    let testEvent = new Event(SOURCE_TICKET_MASTER, 62234, 'Event Name',
-        'This test event\'s description; with ticket master as the source.',
-        {startDateTime: 'standIn dateTime', endDateTime: 'standIn dateTime'},
-        [{currency: '$', min: 50, max: 100}], [tempImage], [tempGenre]);
+    let testEvent = new Event(
+        SOURCE_TICKET_MASTER, 'Test Event Name',
+        'This test event\'s description', 'Event Location',
+        {startDateTime: 'standIn', endDateTime: 'standIn'},
+        [{currency: '$', min: 50, max: 100}]
+    );
+    testEvent.id = 62234;
 
     /**
      * It is assumed that the Event object was correctly filled in.
@@ -182,7 +187,8 @@ describe('Testing User Class Functions: Attendee', () => {
         // console.log('Before 1st: ', userAttendee.eventList);
         userAttendee.removeEvent(testEvent);
         expect(userAttendee.eventList)
-            .toStrictEqual([]);
+            .toStrictEqual([new EventList(SOURCE_EVENT_MONKEY, []),
+            new EventList(SOURCE_TICKET_MASTER, [])]);
         // console.log('After 1st: ', userAttendee.eventList);
     });
 
@@ -194,13 +200,14 @@ describe('Testing User Class Functions: Attendee', () => {
      * Before Test: userAttendee.eventList = []
      * After Test: userAttendee.eventList = [testEvent]
      */
-//    test('Testing addEvent function: adding to eventList', () => {
-//        // console.log('Before 2nd: ', userAttendee.eventList);
-//        userAttendee.addEvent(testEvent);
-//        expect(userAttendee.eventList)
-//            .toStrictEqual([testEvent]);
-//        // console.log('After 2nd: ', userAttendee.eventList);
-//    });
+    test('Testing addEvent function: adding to eventList', () => {
+        // console.log('Before 2nd: ', userAttendee.eventList);
+        userAttendee.addEvent(testEvent);
+        expect(userAttendee.eventList)
+            .toStrictEqual([new EventList(SOURCE_EVENT_MONKEY, []),
+            new EventList(SOURCE_TICKET_MASTER, [62234])]);
+        // console.log('After 2nd: ', userAttendee.eventList);
+    });
 
     /**
      * It is assumed that the Event object was correctly filled in.
@@ -215,7 +222,8 @@ describe('Testing User Class Functions: Attendee', () => {
         // console.log('Before 3rd: ', userAttendee.eventList);
         userAttendee.removeEvent(testEvent);
         expect(userAttendee.eventList)
-            .toStrictEqual([]);
+            .toStrictEqual([new EventList(SOURCE_EVENT_MONKEY, []),
+            new EventList(SOURCE_TICKET_MASTER, [])]);
         // console.log('After 3rd: ', userAttendee.eventList);
     });
 
@@ -230,10 +238,13 @@ describe('Testing User Class Functions: Organizer', () => {
     // Test objects
     let tempImage = new Image(12345, '16:9', 1920, 1080, 'test_fake_img.png');
     let tempGenre = new Genre(1234567890, 'Miscellaneous Genre');
-    let testEvent = new Event(SOURCE_EVENT_MONKEY, 62234, 'Event Name',
-        'This test event\'s description; with event monkey as the source.',
-        {startDateTime: 'standIn dateTime', endDateTime: 'standIn dateTime'},
-        [{currency: '$', min: 50, max: 100}], [tempImage], [tempGenre]);
+    let testEvent = new Event(
+        SOURCE_EVENT_MONKEY, 'Test Event Name',
+        'This test event\'s description', 'Event Location',
+        {startDateTime: 'standIn', endDateTime: 'standIn'},
+        [{currency: '$', min: 50, max: 100}]
+    );
+    testEvent.id = 62234;
 
     /**
      * It is assumed that the Event object was correctly filled in.
@@ -248,7 +259,7 @@ describe('Testing User Class Functions: Organizer', () => {
         // console.log('Before 1st: ', userOrganizer.eventList);
         userOrganizer.removeEvent(testEvent);
         expect(userOrganizer.eventList)
-            .toStrictEqual([]);
+            .toStrictEqual([new EventList(SOURCE_EVENT_MONKEY, [])]);
         // console.log('After 1st: ', userOrganizer.eventList);
     });
 
@@ -260,13 +271,13 @@ describe('Testing User Class Functions: Organizer', () => {
      * Before Test: userOrganizer.eventList = []
      * After Test: userOrganizer.eventList = [testEvent]
      */
-//    test('Testing addEvent function: adding to eventList', () => {
-//        // console.log('Before 2nd: ', userOrganizer.eventList);
-//        userOrganizer.addEvent(testEvent);
-//        expect(userOrganizer.eventList)
-//            .toStrictEqual([testEvent]);
-//        // console.log('After 2nd: ', userOrganizer.eventList);
-//    });
+    test('Testing addEvent function: adding to eventList', () => {
+        // console.log('Before 2nd: ', userOrganizer.eventList);
+        userOrganizer.addEvent(testEvent);
+        expect(userOrganizer.eventList)
+            .toStrictEqual([new EventList(SOURCE_EVENT_MONKEY, [62234])]);
+        // console.log('After 2nd: ', userOrganizer.eventList);
+    });
 
     /**
      * It is assumed that the Event object was correctly filled in.
@@ -281,8 +292,11 @@ describe('Testing User Class Functions: Organizer', () => {
         // console.log('Before 3rd: ', userOrganizer.eventList);
         userOrganizer.removeEvent(testEvent);
         expect(userOrganizer.eventList)
-            .toStrictEqual([]);
+            .toStrictEqual([new EventList(SOURCE_EVENT_MONKEY, [])]);
         // console.log('After 3rd: ', userOrganizer.eventList);
     });
 
 });
+
+//new EventList(SOURCE_EVENT_MONKEY, []),
+//            new EventList(SOURCE_TICKET_MASTER, [])];
