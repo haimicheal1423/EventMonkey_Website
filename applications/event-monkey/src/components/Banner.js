@@ -1,9 +1,9 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import './Banner.css';
 
 import Button from 'react-bootstrap/Button';
 import { useNavigate } from 'react-router-dom';
+import Form from "react-bootstrap/Form";
 
 export default function BannerEM() {
 
@@ -11,23 +11,35 @@ export default function BannerEM() {
     const navigate = useNavigate();
 
     return (
-        <div className="banner container">
-            <h1 className="bannerTitle">Still looking for your next event?</h1>
-            <form className='bannerForm d-flex input-group'>
-                <input
-                    type='search'
-                    className='bannerSearch form-control border-warning'
-                    placeholder='Get started with EventMonkey!'
-                    onChange={(e) => setSearchText(e.target.value)} />
+      <div className="banner container">
+        <h1 className="bannerTitle">Still looking for your next event?</h1>
 
-                <Button
-                    className='search-button'
-                    onClick={() => navigate(`/event/search?keyword=${searchText}`)}>Search</Button> {' '}
-                <Button
-                    variant='success'
-                    onClick={() => navigate(`/event`)}>View All Events</Button>{' '}
-            </form>
+        <form className='bannerForm input-group'>
 
-        </div>
+          <Form.Group className="bannerSearch border-warning" controlId='searchBar'>
+            <div className='d-flex flex-wrap justify-content-center'>
+
+              <Form.Control
+                type='text'
+                name='keyword'
+                placeholder='Get started with EventMonkey!'
+                style={{width: '17rem', margin: '0.25rem'}}
+                onChange={e => setSearchText(e.target.value)}
+              />
+
+              <div>
+                <Button className='search-button m-1' onClick={() => navigate(`/event/search?keyword=${searchText}`)}>
+                  Search
+                </Button>
+
+                <Button variant='success' className='m-1' onClick={() => navigate(`/event`)}>
+                  View All Events
+                </Button>
+              </div>
+
+            </div>
+          </Form.Group>
+        </form>
+      </div>
     );
 }

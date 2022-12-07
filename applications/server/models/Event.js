@@ -31,6 +31,9 @@ export class Event {
     description;
 
     /** @type {string} */
+    url;
+
+    /** @type {string} */
     location;
 
     /** @type {{ startDateTime: Date, [endDateTime]: Date }} */
@@ -46,21 +49,51 @@ export class Event {
     genres;
 
     /**
+     * @param {number|string} id
      * @param {string} source
      * @param {string} name
      * @param {string} description
+     * @param {string} [url]
+     * @param {string} location
+     * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
+     * @param {{ currency: string, min: number, max: number }[]} priceRanges
+     * @param {Image[]} [images]
+     * @param {Genre[]} [genres]
+     *
+     * @return {Event} an event object
+     */
+    static fromJson({ id, source, name, description, url, location, dates,
+                      priceRanges, images, genres }) {
+        if (dates.startDateTime) {
+            dates.startDateTime = new Date(dates.startDateTime);
+        }
+        if (dates.endDateTime) {
+            dates.endDateTime = new Date(dates.endDateTime);
+        }
+        const event = new Event(source, name, description, url, location, dates,
+                                priceRanges, images, genres);
+        event.id = id;
+        return event;
+    }
+
+    /**
+     * @param {string} source
+     * @param {string} name
+     * @param {string} description
+     * @param {string} [url]
      * @param {string} location
      * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
      * @param {Image[]} [images]
      * @param {Genre[]} [genres]
      */
-    constructor(source, id, name, description, location, dates, priceRanges,
+    constructor(source, name, description, url, location, dates, priceRanges,
                 images = [], genres = []) {
         this.source = source;
         this.id = id;
         this.name = name;
         this.description = description;
+        this.url = url;
         this.location = location;
         this.dates = dates;
         this.priceRanges = priceRanges;
@@ -132,7 +165,7 @@ export class Event {
     }
 
     static verifyName(name) {
-        if (!name) {
+        if (name === undefined || name === null) {
             throw new Error('Event name required');
         }
 
@@ -143,7 +176,7 @@ export class Event {
     }
 
     static verifyLocation(location) {
-        if (!location) {
+        if (location === undefined || location === null) {
             throw new Error('Event location required');
         }
 
@@ -154,21 +187,23 @@ export class Event {
     }
 
     static verifyDescription(description) {
-        if (description) {
-            // mariadb text is 65535 chars max
-            if (description.length > 65535) {
-                throw new Error('Event description must be less than 65535'
-                              + ' characters');
-            }
+        if (description === undefined || description === null) {
+            // descriptions are optional
+            return;
+        }
+
+        if (description.length > 65535) {
+            throw new Error('Event description must be less than 65535'
+                + ' characters');
         }
     }
 
     static verifyDates(dates) {
-        if (!dates) {
+        if (dates === undefined || dates === null) {
             throw new Error('Event dates required');
         }
 
-        if (!dates['startDateTime']) {
+        if (dates['startDateTime'] === undefined) {
             throw new Error('Start date time required');
         }
 
@@ -179,7 +214,7 @@ export class Event {
     }
 
     static verifyPriceRanges(priceRanges) {
-        if (!priceRanges) {
+        if (priceRanges === undefined || priceRanges === null) {
             // events can be free (price range is undefined or empty array)
             return;
         }
@@ -193,22 +228,28 @@ export class Event {
             return;
         }
 
-        if (!priceRanges['currency']) {
-            throw new Error('Missing currency in price range');
-        }
+        priceRanges.forEach(range => {
+            if (range['currency'] === undefined) {
+                throw new Error('Missing currency in price range');
+            }
 
-        if (!priceRanges['min']) {
-            throw new Error('Missing min price in price range');
-        }
+            if (range['min'] === undefined) {
+                throw new Error('Missing min price in price range');
+            }
 
-        if (JSON.stringify(priceRanges).length > 65535) {
-            throw new Error('Event price ranges text must be less than'
-                + ' 65535 characters');
-        }
+            if (range['max'] === undefined) {
+                range['max'] = range['min'];
+            }
+
+            if (JSON.stringify(range).length > 65535) {
+                throw new Error('Event price ranges text must be less than'
+                    + ' 65535 characters');
+            }
+        });
     }
 
     static verifyGenres(genres) {
-        if (!genres) {
+        if (genres === undefined || genres === null) {
             // genres are optional
             return;
         }
@@ -217,17 +258,11 @@ export class Event {
             throw new Error('Event genres must be an array');
         }
 
-        genres.forEach(genre => {
-            Genre.verifyGenre(genre);
-
-            if (genre.name.length > 255) {
-                throw new Error('Image ratio must be less than 255 characters');
-            }
-        });
+        genres.forEach(genre => Genre.verifyGenre(genre));
     }
 
     static verifyImages(images) {
-        if (!images) {
+        if (images === undefined || images === null) {
             // images are optional
             return;
         }
@@ -236,17 +271,7 @@ export class Event {
             throw new Error('Event images must be an array');
         }
 
-        images.forEach(image => {
-            Image.verifyImage(image);
-
-            if (image.ratio.length > 255) {
-                throw new Error('Image ratio must be less than 255 characters');
-            }
-
-            if (image.url.length > 255) {
-                throw new Error('Image url must be less than 255 characters');
-            }
-        });
+        images.forEach(image => Image.verifyImage(image));
     }
 }
 

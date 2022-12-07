@@ -119,7 +119,7 @@ export class EventManager {
         const workList = [];
 
         if (genres) {
-            const names = genres.split(",");
+            const names = Array.isArray(genres) ? genres : genres.split(",");
             workList.push(eventSource.findByGenre(names, limit));
         }
 
@@ -171,14 +171,19 @@ export class EventManager {
             return { message: failMessage.message };
         }
 
-        const interests = await this.dataSource_.getInterestList(userId);
+        const genres = [];
+        const fromUser = await this.dataSource_.getInterestList(userId);
         const fromFriends = await this.dataSource_.getFriendInterests(userId);
 
-        if (fromFriends && fromFriends.length) {
-            interests.push(...fromFriends);
+        if (fromUser && fromUser.length) {
+            genres.push(...fromUser);
         }
 
-        const genreNames = interests.map(genre => genre.name);
+        if (fromFriends && fromFriends.length) {
+            genres.push(...fromFriends);
+        }
+
+        const genreNames = genres.map(genre => genre.name);
         return await this.composite_.findByGenre(genreNames, limit);
     }
 
@@ -205,27 +210,6 @@ export class EventManager {
             default:
                 return await this.composite_.findByEventId(eventId);
         }
-    }
-
-    /**
-     * Finds a list of events associated with a user. If the user is an
-     * {@link Organizer}, the events are all created and owned by that user. If
-     * the user is an {@link Attendee}, the event list is that user's favorite
-     * list.
-     *
-     * @param {number} userId the user id
-     *
-     * @returns {Promise<Event[]>} the user's event list
-     */
-    async findEventsByUserId(userId) {
-        // an Event[][] list once the promise resolves
-        const list = await Promise.all([
-            this.eventMonkeyEventList_(userId),
-            this.ticketMasterEventList_(userId),
-        ]);
-
-        // flatten to Event[]
-        return list.flat(1);
     }
 
     /**
@@ -293,7 +277,8 @@ export class EventManager {
             return { message: failMessage.message };
         }
 
-        return await this.findEventsByUserId(userId);
+        const events = await this.eventMonkeyEventList_(userId);
+        return events.filter(event => event !== undefined);
     }
 
     /**
@@ -315,7 +300,15 @@ export class EventManager {
             return { message: failMessage.message };
         }
 
-        return await this.findEventsByUserId(userId);
+        // an Event[][] list once the promise resolves
+        const list = await Promise.all([
+           this.eventMonkeyEventList_(userId),
+           this.ticketMasterEventList_(userId),
+       ]);
+
+        // flatten to Event[]
+        const events = list.flat(1);
+        return events.filter(event => event !== undefined);
     }
 
     /**
@@ -326,6 +319,7 @@ export class EventManager {
      * @param {number} userId
      * @param {string} name
      * @param {string} description
+     * @param {string} url
      * @param {string} location
      * @param {{ startDateTime: Date, [endDateTime]: Date }} dates
      * @param {{ currency: string, min: number, max: number }[]} priceRanges
@@ -335,8 +329,8 @@ export class EventManager {
      * @returns {Promise<{ eventId: number } | { message: string }>} a promise
      *     for the generated event id, or a failure message
      */
-    async createEvent(userId, name, description, location, dates, priceRanges,
-                      genres, images) {
+    async createEvent(userId, name, description, url, location, dates,
+                      priceRanges, genres, images) {
         const failMessage = await this.checkUserType(userId, TYPE_ORGANIZER);
 
         if (failMessage) {
@@ -360,6 +354,7 @@ export class EventManager {
             SOURCE_EVENT_MONKEY,
             name,
             description,
+            url,
             location,
             dates,
             priceRanges,
@@ -377,10 +372,6 @@ export class EventManager {
 
         // cast BigInt into regular number
         event.id = Number(eventId);
-
-        if (event.source !== SOURCE_EVENT_MONKEY) {
-            return { message: `Event source must be ${SOURCE_EVENT_MONKEY}` };
-        }
 
         // asynchronously associate all event genres and images, as well as
         // associating the event with the user
@@ -434,5 +425,11 @@ export class EventManager {
         await this.dataSource_.removeEventDetails(eventId);
 
         return { message: 'success' };
+    }
+
+    async trySomethingNew(genres){
+        const names = genres.map(genre => genre.name);
+        const eventList = await this.composite_.findExcludingGenre(names, 20);
+        return eventList;
     }
 }

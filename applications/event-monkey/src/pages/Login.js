@@ -16,7 +16,7 @@ function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (email && password) {
-            Axios.post(`http://eventmonkey.xyz:4000/users/login`, { email, password })
+            Axios.post(`/users/login`, { email, password })
                 .then(response => {
                     localStorage.setItem('user', JSON.stringify(response.data));
                     localStorage.setItem('token',"Token-123");
