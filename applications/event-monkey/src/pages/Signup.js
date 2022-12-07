@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react'
+import { useNavigate } from "react-router-dom";
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -8,9 +8,10 @@ import Container from 'react-bootstrap/Container';
 import Axios from 'axios';
 
 import '../assets/css/signup.css'
+import { Dropdown, DropdownButton } from "react-bootstrap";
 
 export default function Signup() {
-    const [type, setType] = useState('');
+    const [type, setType] = useState('Attendee or Organizer');
     const [username, setUserName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,7 +19,7 @@ export default function Signup() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (email && password) {
-            Axios.post(`http://eventmonkey.xyz:4000/users/register`, {type, username, email, password }).then((response) => {
+            Axios.post(`/users/register`, {type, username, email, password }).then((response) => {
                 navigate('/login');
             }).catch(e => {
                 alert(JSON.stringify(e.response.data));
@@ -37,7 +38,10 @@ export default function Signup() {
                         <hr/>
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label>Type</Form.Label>
-                            <Form.Control type="text" placeholder="Attendee or Organizer" value={type} onChange={(e) => setType(e.target.value)} />
+                            <DropdownButton title={type} onSelect={setType}>
+                                <Dropdown.Item eventKey='Attendee'>Attendee</Dropdown.Item>
+                                <Dropdown.Item eventKey='Organizer'>Organizer</Dropdown.Item>
+                            </DropdownButton>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label>Username</Form.Label>

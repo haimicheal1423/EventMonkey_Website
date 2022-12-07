@@ -100,4 +100,5 @@ async function getRecommendedEvents(req, res) {
         res.status(status.INTERNAL_SERVER_ERROR).send(error.message);
         console.error(error);
     }
+
 }

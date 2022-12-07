@@ -81,20 +81,28 @@ export class Image {
             throw new Error('Image undefined')
         }
 
-        if (!image['ratio']) {
+        if (image['ratio'] === undefined) {
             throw new Error('Image missing ratio')
         }
 
-        if (!image['width']) {
+        if (image['width'] === undefined) {
             throw new Error('Image missing width')
         }
 
-        if (!image['height']) {
+        if (image['height'] === undefined) {
             throw new Error('Image missing height')
         }
 
-        if (!image['url']) {
+        if (image['url'] === undefined) {
             throw new Error('Image missing url')
+        }
+
+        if (image.ratio.length > 255) {
+            throw new Error('Image ratio must be less than 255 characters');
+        }
+
+        if (image.url.length > 255) {
+            throw new Error('Image url must be less than 255 characters');
         }
     }
 }

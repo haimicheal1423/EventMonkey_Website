@@ -1,6 +1,6 @@
 import './App.css';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import NavbarEM from './components/Navbar.js';
@@ -17,16 +17,14 @@ import TrySomethingNew from './pages/TrySomethingNew';
 import Profile from './pages/Profile';
 import { isLoggedIn } from './utils';
 
-
-
 function App() {
 
-const ProtectRoute = ({ children }) => {
-    if(!isLoggedIn()){
-        return <Navigate to="/" replace/>
+    const ProtectRoute = ({ children }) => {
+        if (!isLoggedIn()) {
+            return <Navigate to="/login" replace/>
+        }
+        return children;
     }
-    return children;
-}
 
   return (
     <>
@@ -40,9 +38,9 @@ const ProtectRoute = ({ children }) => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/trysomethingnew" element={<TrySomethingNew />} />
-          <Route path="/event" element={<ProtectRoute><EventSearch /></ProtectRoute>} />
-          <Route path="/event/search" element={<ProtectRoute><EventSearch /></ProtectRoute>} />
-          <Route path="/event/id/:eventId" element={<ProtectRoute><SingleEvent /></ProtectRoute>} />
+          <Route path="/event" element={<EventSearch />} />
+          <Route path="/event/search" element={<EventSearch />} />
+          <Route path="/event/id/:eventId" element={<SingleEvent />} />
           <Route path="/dashboard" element={<ProtectRoute><Dashboard /></ProtectRoute>} />
           <Route path="/profile" element={<ProtectRoute><Profile /></ProtectRoute>} />
         </Routes>

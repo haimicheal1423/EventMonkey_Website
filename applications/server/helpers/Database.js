@@ -455,6 +455,7 @@ export class DataSource {
      * @returns {Promise<{
      *         name: string,
      *         description: string,
+     *         url: string,
      *         location: string,
      *         dates: { startDateTime: Date, [endDateTime]: Date },
      *         priceRanges: { currency: string, min: number, max: number }[],
@@ -572,6 +573,10 @@ export class DataSource {
      * @abstract
      */
     async getImage(imageId) {
+        throw new Error('Unimplemented abstract function');
+    }
+
+    async getEventIdExcludingGenres(names) {
         throw new Error('Unimplemented abstract function');
     }
 }
@@ -1032,10 +1037,11 @@ export class EventMonkeyDataSource extends DataSource {
 
         // insert event details to the Event table
         const result = await Database.query(
-            `INSERT INTO Event(name, description, location, dates, price_ranges)
-             VALUES (?, ?, ?, ?, ?)`, [
+            `INSERT INTO Event(name, description, url, location, dates, price_ranges)
+             VALUES (?, ?, ?, ?, ?, ?)`, [
                 event.name,
                 nullable(event.description),
+                nullable(event.url),
                 event.location,
                 nullable(JSON.stringify(event.dates)),
                 nullable(JSON.stringify(event.priceRanges))
@@ -1147,6 +1153,7 @@ export class EventMonkeyDataSource extends DataSource {
      *     undefined | {
      *         name: string,
      *         description: string,
+     *         url: string,
      *         location: string,
      *         dates: { startDateTime: Date, [endDateTime]: Date },
      *         priceRanges: { currency: string, min: number, max: number }[],
@@ -1154,7 +1161,7 @@ export class EventMonkeyDataSource extends DataSource {
      */
     async getEventDetails(eventId) {
         const result = await Database.query(
-            `SELECT name, description, location, dates, price_ranges
+            `SELECT name, description, url, location, dates, price_ranges
              FROM Event
              WHERE event_id = ?`,
             eventId
@@ -1166,6 +1173,7 @@ export class EventMonkeyDataSource extends DataSource {
 
         const name = result[0]['name'];
         const description = result[0]['description'];
+        const url = result[0]['url'];
         const location = result[0]['location'];
         const dates = JSON.parse(result[0]['dates']);
         let priceRanges = [];
@@ -1180,6 +1188,7 @@ export class EventMonkeyDataSource extends DataSource {
         return {
             name,
             description,
+            url,
             location,
             dates,
             priceRanges
@@ -1498,6 +1507,26 @@ export class EventMonkeyDataSource extends DataSource {
         }
         return imageMap;
     }
+
+    async getEventIdExcludingGenres(names) {
+        // creates a single string of genre names separated by whitespace, where
+        // each name is prefixed with the MariaDB NOT (-) symbol indicating that
+        // the word must not be matched within any genre
+        const excludeList = names.reduce((acc, name) => acc + ` -${name}`, '')
+                                 .trim();
+
+        const result = await Database.query(
+            `SELECT DISTINCT egl.event_id
+             FROM Event_Genre_List egl
+             INNER JOIN Genre genre
+                USING (genre_id)
+             WHERE MATCH(genre.name) AGAINST (? IN BOOLEAN MODE)`,
+            excludeList
+        )
+
+        return result.map(row => row['event_id']);
+    }
+
 }
 
 /**

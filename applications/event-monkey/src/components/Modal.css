@@ -1,12 +1,14 @@
-/* .modal-backdrop {
+/*
+.modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
-  } */
-  .modal {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
     padding: 20px;
     max-width: 480px;
     max-height: auto;
@@ -14,17 +16,24 @@
     margin-right: auto;
     background: beige;
     border-radius: 5px;
-    color:chocolate;
-  }
+    color: chocolate;
+}
+*/
 
-  .event-button-container {
+.modal-content {
+    border-radius: 0.5rem;
+    border: 0.125rem solid chocolate;
+    background: beige;
+    color: chocolate;
+}
+
+.event-button-container {
     padding-top: 10px;
-  }
- 
-  .event-button {
+}
+
+.event-button {
     color: white;
     background-color: #ffc107;
     border-color: #ffc107;
     cursor: pointer;
-  }
-  
+}
