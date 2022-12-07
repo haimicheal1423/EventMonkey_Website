@@ -21,11 +21,11 @@ import '../assets/css/event.css'
 import Button from 'react-bootstrap/Button';
 
 function SingleEvent() {
+    const navigate = useNavigate();
     const { eventId } = useParams();
     const [user, setUser] = useState(undefined);
     const [event, setEvent] = useState(undefined);
-    const [userEventList, setUserEventList] = useState([]);
-    const navigate = useNavigate();
+    const [userEventList, setUserEventList] = useState(undefined);
 
     useEffect(() => {
         Axios.get(`/events/${eventId}`)
@@ -145,11 +145,11 @@ function SingleEvent() {
 }
 
 function EventSearch() {
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [user, setUser] = useState(undefined);
     const [events, setEvents] = useState(undefined);
     const [userEventList, setUserEventList] = useState(undefined);
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (searchParams.get('source') || searchParams.get('limit')

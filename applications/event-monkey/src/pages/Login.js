@@ -9,6 +9,7 @@ import Axios from 'axios';
 import '../assets/css/login.css'
 
 function Login() {
+    const [token, setToken] = useState(undefined);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -19,21 +20,23 @@ function Login() {
             Axios.post(`/users/login`, { email, password })
                 .then(response => {
                     localStorage.setItem('user', JSON.stringify(response.data));
-                    localStorage.setItem('token',"Token-123");
-                    window.location.href = '/dashboard';
+                    setToken('Token-123');
                 }).catch(e => {
                     alert(JSON.stringify(e.response.data));
                 });
         } else {
             alert('Email/Password is required');
         }
-    }
+    };
 
     useEffect(() => {
-        if(localStorage.getItem('token')){
+        if (token){
+            localStorage.setItem('token', token);
             navigate('/dashboard');
+        } else {
+            localStorage.removeItem('token');
         }
-    }, [localStorage.getItem('token')])
+    }, [navigate, token]);
 
     return (
         <>
