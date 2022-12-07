@@ -1,4 +1,5 @@
-import { SOURCE_EVENT_MONKEY, EventList } from "./Event.js";
+import {
+    SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER, EventList } from "./Event.js";
 
 /**
  * The {@link Attendee} user type who can search and add Events to their
@@ -61,8 +62,6 @@ export class User {
         this.password = password;
         this.username = username;
         this.profileImage = profileImage;
-        this.eventList = eventList;
-        this.allowedSources = [SOURCE_EVENT_MONKEY]
     }
 
     /**
@@ -71,19 +70,19 @@ export class User {
      * @param {Event} event the event to add
      */
     addEvent(event) {
-        for (const source of this.allowedSources) {
-            if (source === event.source) {
-                this.eventList.push(event);
-                break;
-            }
-        }
-//        for (const sourceList of this.eventList) {
-//            console.log('Made it inside addEvent for loop');
-//            if (sourceList.source === event.source) {
-//                sourceList.eventIds.push(event.id);
+//        for (const source of this.allowedSources) {
+//            if (source === event.source) {
+//                this.eventList.push(event);
 //                break;
 //            }
 //        }
+        for (const sourceList of this.eventList) {
+//            console.log('Made it inside addEvent for loop');
+            if (sourceList.source === event.source) {
+                sourceList.eventIds.push(event.id);
+                break;
+            }
+        }
     }
 
     /**
@@ -93,15 +92,15 @@ export class User {
      * @param {Event} event the event to remove (matching by event id)
      */
     removeEvent(event) {
-        this.eventList = this.eventList
-            .filter(elem => elem.id !== event.id);
-//        for (const sourceList of this.eventList) {
-//            if (sourceList.source === event.source) {
-//                const index = sourceList.eventIds.indexOf(event.id);
-//                sourceList.eventIds.splice(index, 1);
-//                break;
-//            }
-//        }
+//        this.eventList = this.eventList
+//            .filter(elem => elem.id !== event.id);
+        for (const sourceList of this.eventList) {
+            if (sourceList.source === event.source) {
+                const index = sourceList.eventIds.indexOf(event.id);
+                sourceList.eventIds.splice(index, 1);
+                break;
+            }
+        }
     }
 }
 
@@ -128,6 +127,10 @@ export class Attendee extends User {
         super(userId, TYPE_ATTENDEE, email, password, username, profileImage,
               eventList);
         this.interests = interests;
+//        this.allowedSources = [SOURCE_EVENT_MONKEY, SOURCE_TICKET_MASTER];
+        this.eventList = [
+            new EventList(SOURCE_EVENT_MONKEY, []),
+            new EventList(SOURCE_TICKET_MASTER, [])];
     }
 }
 
@@ -149,6 +152,9 @@ export class Organizer extends User {
                 eventList = []) {
         super(userId, TYPE_ORGANIZER, email, password, username, profileImage,
               eventList);
+//        this.allowedSources = [SOURCE_EVENT_MONKEY];
+        this.eventList = [
+                    new EventList(SOURCE_EVENT_MONKEY, [])];
     }
 
     /**
