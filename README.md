@@ -37,6 +37,7 @@ Technologies
 - Node v17.0.1 
 - Bootstrap CSS
 - React
+- Jest (Javascript Testing)
 
 <h2>
 
@@ -46,16 +47,13 @@ Major Features
 
 <!-- replace space inside brackets with x in order to mark as checked/completed -->
   
-- [ ] Logging In
-- [ ] Signing Up
-- [ ] Basic Account Customization
-- [ ] Adding Events
-- [ ] Searching Events
-- [ ] Sorting Events
-- [ ] Favorites
-- [ ] Notifications
-- [ ] Calendar
-- [ ] Friends and Friends List
+- [x] Logging In
+- [x] Signing Up
+- [x] Basic Account Customization
+- [x] Adding Events
+- [x] Searching Events
+- [x] Favorites
+- [x] Friends/Followers
 
 <h2>
 
